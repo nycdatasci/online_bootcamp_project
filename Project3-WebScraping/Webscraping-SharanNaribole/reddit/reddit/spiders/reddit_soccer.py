@@ -12,7 +12,7 @@ from  reddit.items import RedditItem
 class RSoccerSpider(scrapy.Spider):
     name = "rsoccer"
 
-    start_urls = ['http://www.reddit.com/r/soccer/']
+    start_urls = ['https://www.reddit.com/r/soccer/']
     counter = 0
     Nexclude_pages = 10
     Nsubmission_interval = 150 #days
@@ -45,6 +45,7 @@ class RSoccerSpider(scrapy.Spider):
                     print("I BROKE THE CODE \n")
                     break
 
+                '''
                 item = RedditItem()
                 item['title'] = self.decompose(titles[i])
                 item['comments'] = comments[i]
@@ -54,12 +55,22 @@ class RSoccerSpider(scrapy.Spider):
                 print(timestamps[i], " \n")
                 
                 yield(item)
+                '''
+
+                yield {
+                    'title' : self.decompose(titles[i]),
+                    'comments': comments[i],
+                    'score': scores[i],
+                    'link': links[i],
+                    'time': timestamps[i],
+                    'page number': self.counter
+                    }
 
         if(self.terminate == False):
             next_page = response.css('.next-button a::attr(href)').extract_first()
 
             if next_page is not None:
-                yield scrapy.Request(response.urljoin(next_page), self.parse)
+                yield scrapy.Request(response.urljoin(next_page), callback = self.parse)
         
     def decompose(self,x):
         x = unicodedata.normalize('NFD',x).encode('ascii','ignore')
