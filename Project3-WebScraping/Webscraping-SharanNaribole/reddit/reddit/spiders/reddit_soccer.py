@@ -4,6 +4,7 @@ import pandas as pd
 import re
 import unicodedata
 from  reddit.items import RedditItem
+import time
 
 #The goal is to collect posts from r/soccer for last 150 days ago with words
 #(scores or goal) and (vs or against) in them
@@ -15,7 +16,7 @@ class RSoccerSpider(scrapy.Spider):
     start_urls = ['https://www.reddit.com/r/soccer/']
     counter = 0
     Nexclude_pages = 5
-    Nsubmission_interval = 150 #days
+    Nsubmission_interval = 100 #days
     current_time = dt.datetime.now()
     terminate = False #terminate when submission creation exceeds Nsubmission_interval
 
@@ -46,10 +47,9 @@ class RSoccerSpider(scrapy.Spider):
                 #Check if submission data exceeds the time difference upper limit
                 if self.exceed_time_diff(pd.to_datetime(timestamps[i])) == True:
                     self.terminate = True
-                    print("I BROKE THE CODE \n")
-                    break
+                    raise CloseSpider('Submission History Exceeded Limit')
 
-                #Item Creation    
+                #Item Creation
                 item = RedditItem()
                 item['title'] = self.decompose(titles[i])
                 item['comments'] = comments[i]
@@ -59,6 +59,9 @@ class RSoccerSpider(scrapy.Spider):
                 print(timestamps[i], " \n")
 
                 yield(item)
+
+        #Pauses for 10 seconds
+        #time.sleep(10)
 
         if(self.terminate == False):
             next_page = response.css('.next-button a::attr(href)').extract_first()

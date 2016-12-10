@@ -16,7 +16,7 @@ NEWSPIDER_MODULE = 'reddit.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'reddit (+http://www.yourdomain.com)'
+USER_AGENT = 'Sharan reddit'#reddit (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -33,7 +33,7 @@ DOWNLOAD_DELAY = 5
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-#COOKIES_ENABLED = False
+COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
