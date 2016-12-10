@@ -6,7 +6,7 @@ import unicodedata
 from  reddit.items import RedditItem
 
 #The goal is to collect posts from r/soccer for last 150 days ago with words
-#(scores or goal) and (vs or against) in them 
+#(scores or goal) and (vs or against) in them
 
 
 class RSoccerSpider(scrapy.Spider):
@@ -22,10 +22,10 @@ class RSoccerSpider(scrapy.Spider):
     def parse(self,response):
         self.logger.info("Visited %s",response.url)
         self.counter += 1
-        
+
         if(self.terminate == True):
             return 0
-        
+
         #Excluding recent posts in Nexclude_pages whose score might be still change in the near future
         if(self.counter > self.Nexclude_pages):
             #Extracting the titles
@@ -36,14 +36,20 @@ class RSoccerSpider(scrapy.Spider):
             comments = response.css('.comments::text').extract()
             scores = response.css('.score.likes::text').extract()
 
+            #Going through the submissions
             for i in range(len(titles)):
+
+                #Check if the keywords for goal submissions are present in current submission
                 if(self.check_goal(self.decompose(titles[i])) != True):
                     continue
 
+                #Check if submission data exceeds the time difference upper limit
                 if self.exceed_time_diff(pd.to_datetime(timestamps[i])) == True:
                     self.terminate = True
                     print("I BROKE THE CODE \n")
                     break
+
+                #Item Creation    
                 item = RedditItem()
                 item['title'] = self.decompose(titles[i])
                 item['comments'] = comments[i]
@@ -51,7 +57,7 @@ class RSoccerSpider(scrapy.Spider):
                 item['link'] = links[i]
                 item['time'] = timestamps[i]
                 print(timestamps[i], " \n")
-                
+
                 yield(item)
 
         if(self.terminate == False):
@@ -60,7 +66,7 @@ class RSoccerSpider(scrapy.Spider):
             if next_page is not None:
                 yield scrapy.Request(response.urljoin(next_page), callback = self.parse)
 
-    #Compress special characters to English components    
+    #Compress special characters to English components
     def decompose(self,x):
         x = unicodedata.normalize('NFD',x).encode('ascii','ignore')
         return x.decode("utf-8")
@@ -98,7 +104,3 @@ class RSoccerSpider(scrapy.Spider):
             res = True
 
         return res
-    
-                                
-        
-        
