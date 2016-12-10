@@ -14,7 +14,7 @@ class RSoccerSpider(scrapy.Spider):
 
     start_urls = ['https://www.reddit.com/r/soccer/']
     counter = 0
-    Nexclude_pages = 10
+    Nexclude_pages = 5
     Nsubmission_interval = 150 #days
     current_time = dt.datetime.now()
     terminate = False #terminate when submission creation exceeds Nsubmission_interval
@@ -44,8 +44,6 @@ class RSoccerSpider(scrapy.Spider):
                     self.terminate = True
                     print("I BROKE THE CODE \n")
                     break
-
-                '''
                 item = RedditItem()
                 item['title'] = self.decompose(titles[i])
                 item['comments'] = comments[i]
@@ -55,16 +53,6 @@ class RSoccerSpider(scrapy.Spider):
                 print(timestamps[i], " \n")
                 
                 yield(item)
-                '''
-
-                yield {
-                    'title' : self.decompose(titles[i]),
-                    'comments': comments[i],
-                    'score': scores[i],
-                    'link': links[i],
-                    'time': timestamps[i],
-                    'page number': self.counter
-                    }
 
         if(self.terminate == False):
             next_page = response.css('.next-button a::attr(href)').extract_first()
