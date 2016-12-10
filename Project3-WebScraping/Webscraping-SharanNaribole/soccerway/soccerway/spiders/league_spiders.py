@@ -21,8 +21,8 @@ class LeagueSpider(scrapy.Spider):
         for href in response.css('#page_competitions_1_block_competitions_popular_1-results li a::attr(href)').extract():
             yield scrapy.Request(response.urljoin(href),callback=self.parse_league)
             i += 1
-            #if(i > 5):
-                #break
+            if(i > self.NLeagues): 
+                break
 
     def parse_league(self, response):
         self.logger.info("Visited %s", response.url)
@@ -42,11 +42,11 @@ class LeagueSpider(scrapy.Spider):
                 request = scrapy.Request(next_page,callback = self.parse_player)
                 request.meta['item'] = item
                 yield(request)
-            '''
+            
             i += 1
-            if(i > 5):
+            if(i > self.NPlayers):
                 break
-            '''
+            
           
     def parse_player(self, response):
         self.logger.info("Visited %s", response.url)
