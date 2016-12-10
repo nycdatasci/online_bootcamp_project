@@ -10,11 +10,12 @@ class LeagueSpider(scrapy.Spider):
     name = "soccerway"
 
     NLeagues = 5 #number of leagues
-    NPlayers = 15 #per league
+    NPlayers = 15 #no. of top scorers per league
 
     start_urls = [
         'http://us.soccerway.com/competitions/']
 
+    #Default parser function that scrapes the top 5 popular leagues from the Competitions page
     def parse(self, response):
         self.logger.info("Visited %s", response.url)
         i = 1 
@@ -24,6 +25,7 @@ class LeagueSpider(scrapy.Spider):
             if(i > self.NLeagues): 
                 break
 
+    #Scraping the top scorers from each selected league
     def parse_league(self, response):
         self.logger.info("Visited %s", response.url)
         i = 1
@@ -47,7 +49,7 @@ class LeagueSpider(scrapy.Spider):
             if(i > self.NPlayers):
                 break
             
-          
+     #Scraping the player information     
     def parse_player(self, response):
         self.logger.info("Visited %s", response.url)
         item = response.meta['item']

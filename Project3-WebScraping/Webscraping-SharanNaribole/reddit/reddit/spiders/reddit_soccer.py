@@ -59,11 +59,13 @@ class RSoccerSpider(scrapy.Spider):
 
             if next_page is not None:
                 yield scrapy.Request(response.urljoin(next_page), callback = self.parse)
-        
+
+    #Compress special characters to English components    
     def decompose(self,x):
         x = unicodedata.normalize('NFD',x).encode('ascii','ignore')
         return x.decode("utf-8")
 
+    #Matching a word in a sentence
     def word_locate(self,x,y):
         #x = keyword, y = sentence
         match = re.search(r'\b({0})\b'.format(x), y)
@@ -72,6 +74,7 @@ class RSoccerSpider(scrapy.Spider):
             res = True
         return res
 
+    #Testing presence of keywords in reddit submission title
     def check_goal(self,title):
         check = False
         keywords =['goal','scores','vs','against']
@@ -82,6 +85,7 @@ class RSoccerSpider(scrapy.Spider):
 
         return check
 
+    # Checking if time difference between current time and the submission creation exceeds defined upper bound
     def exceed_time_diff(self,submission_time):
         delta = pd.to_timedelta(self.current_time - submission_time)
         match = re.search('\d+',str(delta))
