@@ -1,2 +1,9 @@
-Reddit soccer subreddit /r/soccer is an enormous community of soccer fans with a subscriber fanbase well over 500,000! In this subreddit, users post videos of goals in near real-time and discuss live matches happening all over the world. 
-Each subscriber has an option to select a flair representing their favorite 
+#/r/soccer Team Crest Scraping and Analysis
+
+Reddit soccer subreddit /r/soccer is an enormous community of soccer fans with a subscriber fanbase well over 500,000! In this subreddit, users discuss players, clubs, matches and goal videos posted in near real-time. The anonymity of Reddit provides a powerful tool for users to express their opinions about the clubs they support and also the clubs they don't like. This unique feature prevents the bulding of echo chambers in the discussions with any user free to comment in any of the submissions.
+
+/r/soccer also provides each user the option to select a "flair" which is the team crest of the club the user supports. A miniature crest logo is displayed beside the username in their post submissions and comments in the forum. This gives other users context and insight into the user's thinking and adds another interesting dimension to the conversations that take place.
+
+In this project, my objective is to analyze the fan distribution across the forum. For this purpose, I collect the user-flair mapping for the top 200 comments in the top 500 posts in the past one week. With football games occurring on a weekly basis, this data represents a typical activity in the forum. 
+
+For the evaluation, I analyze the Fan diversity through the metrics unique team crests per submission and percentage share of the biggest fan representation per submission.On one extreme, goal videos tend to have a high diversity in discussion as the quality of goal can transcend a fan's support for a club. In contrast,  match threads which are posts that are intended for discussions of a particular, ongoing match tend to have lower diversity. This is because there is a significant percentage of the comments from fans of the two clubs taking part in the match.  
