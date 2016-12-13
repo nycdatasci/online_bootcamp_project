@@ -5,7 +5,7 @@ import pandas as pd
 class FlairSpider(scrapy.Spider):
     name = "flairs"
     Ncomments_upper = 300 #Collect flairs for top xx comments
-    Ncomments_lower = 200 #Only submissions with xx comments will be analyzed
+    Ncomments_lower = 100 #Only submissions with xx comments will be analyzed
     submission_count = 0
 
     allowed_domains = ["reddit.com"]
@@ -41,7 +41,7 @@ class FlairSpider(scrapy.Spider):
         self.logger.info("Visited %s", response.url)
         item = response.meta['item']
 
-        item['title'] = response.css('.outbound::text').extract_first()
+        item['title'] = response.css('.title::text').extract()[1]
         item['score'] = response.css('.likes::text').extract_first()
         item['flair_map'] = {}
 
@@ -49,9 +49,9 @@ class FlairSpider(scrapy.Spider):
             redditor = tagline.css('a::text').extract()
             if len(redditor)==3:
                 redditor = redditor[1]
-                #if(redditor not in list(item['flair_map'].keys())):
-                flair = tagline.css('.flair::text').extract_first()
-                if flair:
-                    item['flair_map'][redditor] = flair
+                if(redditor not in list(item['flair_map'].keys())):
+                    flair = tagline.css('.flair::text').extract_first()
+                    if flair:
+                        item['flair_map'][redditor] = flair
 
         yield(item)
