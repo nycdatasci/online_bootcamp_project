@@ -4,12 +4,12 @@ import pandas as pd
 
 class FlairSpider(scrapy.Spider):
     name = "flairs"
-    Ncomments_upper = 300 #Collect flairs for top xx comments
+    Ncomments_upper = 500 #Collect flairs for top xx comments
     Ncomments_lower = 100 #Only submissions with xx comments will be analyzed
     submission_count = 0
 
     allowed_domains = ["reddit.com"]
-    start_urls = ['https://www.reddit.com/r/soccer/top/?t=week'] #top submissions in the past week
+    start_urls = ['https://www.reddit.com/r/soccer/top/?t=month'] #top submissions in the past week
 
     def parse(self,response):
         self.logger.info("Visited %s",response.url)
