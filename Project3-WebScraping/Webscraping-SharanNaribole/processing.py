@@ -31,7 +31,8 @@ def main():
                     'diversity': np.zeros(len(reddit_df.index))}
     #reddit_df = pd.concat([reddit_df, pd.DataFrame(metrics_data,index=reddit_df.index)],axis=1)
     submission_metrics_df = pd.DataFrame(metrics_data,index=reddit_df.index)
-    submission_metrics_df['score'] = list(map(lambda x: score_conv(x), list(reddit_df['score'])))
+    submission_metrics_df['score'] = [score_conv(x) for x in list(reddit_df['score'])]
+    submission_metrics_df['comments'] = [float(x) for x in list(reddit_df['comments'])]
 
     clubs_df = pd.DataFrame() #Variable to store the DataFrame of percentage share of clubs for different submissions
 
