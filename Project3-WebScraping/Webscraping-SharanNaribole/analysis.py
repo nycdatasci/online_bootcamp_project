@@ -2,10 +2,10 @@ import numpy as np
 import pandas as pd
 import re
 import matplotlib.pyplot as plt
-#import seaborn as sns
-#sns.set_style("whitegrid")
+import seaborn as sns
+sns.set_style("whitegrid")
 
-plt.style.use('ggplot')
+#plt.style.use('ggplot')
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = 'Ubuntu'
 #plt.rcParams['font.monospace'] = 'Ubuntu Mono'
@@ -58,7 +58,7 @@ def main():
     plt.ylim((0,80.0))
     #plt.savefig('results/scatter_submission.eps', format='eps', dpi=1000)
     #plt.show()
-    '''
+
     #Plot 2: :Scatter Plot b/w Diversity and Comments with Point Size and Color function of Submission Score
     low_scale = int(0*len(submission_metrics_df))
     up_scale = int(1.0*len(submission_metrics_df))
@@ -80,9 +80,12 @@ def main():
     top_clubs = list(clubs_df.apply(lambda x:np.mean(x), axis=1).sort_values(ascending=False)[:6].index)
     clubs_df = clubs_df.transpose()
     plt.figure()
-    sns.violinplot(x=clubs_df[top_clubs])
+    sns.boxplot(x=clubs_df[top_clubs])
     #clubs_df.boxplot(top_clubs)
-    plt.ylim((-10,80.0))
+    plt.ylim((0,25.0))
+    plt.suptitle("Flair distribution in /r/soccer")
+    plt.ylabel("Flair percentage share per submission")
+    plt.xlabel("Flairs")
     plt.show()
     '''
     #---------------------------------------------------------------------------
@@ -95,7 +98,6 @@ def main():
     rest2_df = submission_metrics_df.groupby(lambda x: check_goal(x)).get_group(0)
     rest_df = rest1_df.merge(rest2_df,how='inner',on='title')
 
-    '''
     #Plot 1: Box Plot of Diversity
     plt.boxplot([goals_df['diversity'],match_thread_df['diversity'],rest_df['diversity_x']])
     plt.xticks([1,2,3],['Goals','Match Threads','Rest'])
