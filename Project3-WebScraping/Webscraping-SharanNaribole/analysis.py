@@ -3,18 +3,18 @@ import pandas as pd
 import re
 import matplotlib.pyplot as plt
 import seaborn as sns
-sns.set_style("whitegrid")
+#sns.set_style("whitegrid")
 
-#plt.style.use('ggplot')
+plt.style.use('seaborn-poster')
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = 'Ubuntu'
 #plt.rcParams['font.monospace'] = 'Ubuntu Mono'
-plt.rcParams['font.size'] = 20
-plt.rcParams['axes.labelsize'] = 20
+plt.rcParams['font.size'] = 24
+plt.rcParams['axes.labelsize'] = 24
 plt.rcParams['axes.labelweight'] = 'bold'
-plt.rcParams['xtick.labelsize'] = 20
-plt.rcParams['ytick.labelsize'] = 20
-plt.rcParams['legend.fontsize'] = 20
+plt.rcParams['xtick.labelsize'] = 24
+plt.rcParams['ytick.labelsize'] = 24
+plt.rcParams['legend.fontsize'] = 24
 plt.rcParams['figure.titlesize'] = 24
 
 def word_locate(x,y):
@@ -41,11 +41,10 @@ def main():
     submission_metrics_df = pd.read_csv("submission_metrics.csv",index_col = 0)
     submission_metrics_df.sort_values('score',ascending=True, inplace=True)
 
-    '''
+
     #---------------------------------------------------------------------------
     ## Submissions Analysis
     #---------------------------------------------------------------------------
-
     #Plot 1: :Scatter Plot b/w Diversity and Top Share with Point Size and Color function of Submission Score
     low_scale = int(0*len(submission_metrics_df))
     up_scale = int(1.0*len(submission_metrics_df))
@@ -72,7 +71,6 @@ def main():
     #plt.savefig('results/scatter_submission.eps', format='eps', dpi=1000)
     plt.show()
 
-    '''
     #---------------------------------------------------------------------------
     ## Clubs Analysis for TOP 6 Clubs with the highest average flair share percentage
     #---------------------------------------------------------------------------
@@ -87,10 +85,19 @@ def main():
     plt.ylabel("Flair percentage share per submission")
     plt.xlabel("Flairs")
     plt.show()
-    '''
+
     #---------------------------------------------------------------------------
     ## Comparing Metrics for Submissions:
     #---------------------------------------------------------------------------
+
+    boxprops = dict(linestyle='-', linewidth=5, color='darkgoldenrod')
+    flierprops = dict(marker='o', markerfacecolor='green', markersize=12,
+                  linestyle='none')
+    medianprops = dict(linestyle='-', linewidth=5, color='firebrick')
+    meanpointprops = dict(marker='D', markeredgecolor='black',
+                      markerfacecolor='firebrick')
+    meanlineprops = dict(linestyle='--', linewidth=5, color='purple')
+
     submission_metrics_df['title'] = submission_metrics_df.index
     match_thread_df = submission_metrics_df.groupby(lambda x: word_locate('Match Thread', x)).get_group(1)
     rest1_df = submission_metrics_df.groupby(lambda x: word_locate('Match Thread', x)).get_group(0)
@@ -99,7 +106,8 @@ def main():
     rest_df = rest1_df.merge(rest2_df,how='inner',on='title')
 
     #Plot 1: Box Plot of Diversity
-    plt.boxplot([goals_df['diversity'],match_thread_df['diversity'],rest_df['diversity_x']])
+    plt.boxplot([goals_df['diversity'],match_thread_df['diversity'],rest_df['diversity_x']], \
+    boxprops=boxprops,flierprops=flierprops,medianprops=medianprops,meanprops= meanlineprops)
     plt.xticks([1,2,3],['Goals','Match Threads','Rest'])
     plt.title("Flair Diversity Analysis for /r/soccer top posts")
     plt.xlabel("Submission Type")
@@ -107,16 +115,18 @@ def main():
     plt.show()
 
     #Plot 2: Box Plot of Submission Score
-    plt.boxplot([goals_df['score'],match_thread_df['score'],rest_df['score_x']])
+    plt.boxplot([goals_df['score'],match_thread_df['score'],rest_df['score_x']], \
+    boxprops=boxprops,flierprops=flierprops,medianprops=medianprops,meanprops= meanlineprops)
     plt.xticks([1,2,3],['Goals','Match Threads','Rest'])
     plt.title("Submission Score Analysis for /r/soccer top posts")
     plt.xlabel("Submission Type")
     plt.ylabel("Submission Score")
-    plt.ylim((0,4250))
+    plt.ylim((0,5000))
     plt.show()
 
     #Plot 3: Box Plot of Top Share
-    plt.boxplot([goals_df['top_share'],match_thread_df['top_share'],rest_df['top_share_x']])
+    plt.boxplot([goals_df['top_share'],match_thread_df['top_share'],rest_df['top_share_x']], \
+    boxprops=boxprops,flierprops=flierprops,medianprops=medianprops,meanprops= meanlineprops)
     plt.xticks([1,2,3],['Goals','Match Threads','Rest'])
     plt.title("Top Flair Share Analysis for /r/soccer top posts")
     plt.xlabel("Submission Type")
@@ -125,14 +135,14 @@ def main():
     plt.show()
 
     #Plot 4: Box Plot of Comments
-    plt.boxplot([goals_df['comments'],match_thread_df['comments'],rest_df['comments_x']])
+    plt.boxplot([goals_df['comments'],match_thread_df['comments'],rest_df['comments_x']], \
+    boxprops=boxprops,flierprops=flierprops,medianprops=medianprops,meanprops= meanlineprops)
     plt.xticks([1,2,3],['Goals','Match Threads','Rest'])
     plt.title("Comments Analysis for /r/soccer top posts")
     plt.xlabel("Submission Type")
     plt.ylabel("Number of Comments")
     plt.ylim((0,2000))
     plt.show()
-    '''
 
 # This is the standard boilerplate that calls the main() function.
 if __name__ == '__main__':
