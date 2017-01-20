@@ -40,7 +40,6 @@ graph2 <- ggplot(table1, aes(x = hh_inc, y = le_raceadj)) + geom_point(aes(color
         plot.subtitle = element_text(hjust = 0.5))
 
 graph2
-
 savegraph(graph2)
 
 # Read in Online Table 3 (State-Level Life Expectancy by Household Income Quartile and Gender)
@@ -48,19 +47,35 @@ download.file("https://healthinequality.org/dl/health_ineq_online_table_3.csv", 
 
 table3 <- read.csv("healthinequality3.csv")
 
+#Set region for each state based on Census Bureau regions
+table3 <- mutate(table3, region = ifelse(stateabbrv %in% c("CT","ME","MA","NH","RI","VT","NJ","NY","PA"),"Northeast",
+                                        ifelse(stateabbrv %in% c("ND","MN","SD","NE","IA","KS","MO","WI","MI","IL","IN","OH"), "Midwest",
+                                             ifelse(stateabbrv %in% c("AZ","CO","ID","MT","WY","NV","UT","NM","WA","OR","CA","HI","AK"), "West","South"))))
+
 #install.packages("ggrepel")
 library(ggrepel)
 
-graph3 <- ggplot(table3, aes(x = le_raceadj_q1_F, y = le_raceadj_q4_F)) + 
-  #geom_segment(aes(xend = le_raceadj_q1_F, yend = le_raceadj_q1_F)) +
-  geom_point() +
+#Isolate one state to annotate on graph
+example.state.f <- filter(table3, stateabbrv == 'HI')
+example.state.disparity.f <- round(example.state.f$le_raceadj_q4_F - example.state.f$le_raceadj_q1_F, digits = 1)
+example.state.annotation.f <- "For each state, height above\ndiagonal line equals disparity\nin years of life expectancy\nbetween women of high and\nlow household incomes."
+example.state.annotation.f <- paste0(example.state.annotation.f,"\n\nFor ",example.state.f$statename," this is ",as.character(example.state.disparity.f)," years.")
+ 
+graph3 <- ggplot(table3, aes(x = le_raceadj_q1_F, y = le_raceadj_q4_F, color = region)) + 
+  geom_point(size=1.75) +
+  scale_color_manual(name = "Region", breaks = c("Northeast","South","Midwest","West"), values = c("blue","red","yellow","green")) +
+  geom_segment(data = example.state.f, color = "black", aes(xend = le_raceadj_q1_F, yend = le_raceadj_q1_F), linetype = 5, size = 0.25) +
+  geom_label(data = example.state.f, 
+             size = 3,
+             aes(label = example.state.annotation.f),
+             nudge_x = 0.8, nudge_y = -1.5, color = "black") +
   labs(x = "Life Expectancy (Race-Adjusted) for Quartile 1 Household Income", y = "Life Expectancy (Race-Adjusted) for Quartile 4 Household Income",
        title = "State-Level Female Life Expectancy by Household Income Quartile") +
-  coord_cartesian(xlim = c(80,90), ylim = c(80,90)) +
+  coord_cartesian(xlim = c(80,86), ylim = c(80,90)) +
   geom_abline(intercept = 0, slope = 1) +
-  geom_label_repel(aes(label = stateabbrv), size = 3.5, hjust = 0, nudge_x = 0.05, segment.color = "#333333", segment.alpha = 0.5, 
+  geom_label_repel(aes(label = stateabbrv), size = 3, nudge_x = 0.05, color = "black", segment.color = "#333333", segment.alpha = 0.5, 
        segment.size = 0.3, arrow = arrow(length = unit(0.01, 'npc')), point.padding = unit(1, 'lines'), force = 0.25) +
-  scale_x_continuous(limits = c(80,90),breaks = seq(80,90,1)) +
+  scale_x_continuous(limits = c(80,86),breaks = seq(80,86,1)) +
   scale_y_continuous(limits = c(80,90),breaks = seq(80,90,1)) +
   theme(plot.title = element_text(hjust = 0.5))
 
@@ -68,14 +83,24 @@ graph3
 
 savegraph(graph3)
 
-graph4 <- ggplot(table3, aes(x = le_raceadj_q1_M, y = le_raceadj_q4_M)) + geom_point() +
+example.state.m <- filter(table3, stateabbrv == 'IN')
+example.state.disparity.m <- round(example.state.m$le_raceadj_q4_M - example.state.m$le_raceadj_q1_M, digits = 1)
+example.state.annotation.m <- "For each state, height above\ndiagonal line equals disparity\nin years of life expectancy\nbetween men of high and\nlow household incomes."
+example.state.annotation.m <- paste0(example.state.annotation.f,"\n\nFor ",example.state.f$statename," this is ",as.character(example.state.disparity.f)," years.")
+
+graph4 <- ggplot(table3, aes(x = le_raceadj_q1_M, y = le_raceadj_q4_M)) + 
+  geom_point() +
+  geom_segment(data = example.state.m, aes(xend = le_raceadj_q1_M, yend = le_raceadj_q1_M), linetype = 5, size = 0.25) +
+  geom_label(data = example.state.m, 
+             aes(label = example.state.annotation.m),
+             nudge_x = 1, nudge_y = -4.5) +  
   labs(x = "Life Expectancy (Race-Adjusted) for Quartile 1 Household Income", y = "Life Expectancy (Race-Adjusted) for Quartile 4 Household Income",
        title = "State-Level Male Life Expectancy by Household Income Quartile") +
-  coord_cartesian(xlim = c(74,87), ylim = c(74,87)) +
+  coord_cartesian(xlim = c(74,81), ylim = c(74,87)) +
   geom_abline(intercept = 0, slope = 1) +
   geom_label_repel(aes(label = stateabbrv), size = 3.5, hjust = 0, nudge_x = 0.05, segment.color = "#333333", segment.alpha = 0.5, 
       segment.size = 0.3, arrow = arrow(length = unit(0.01, 'npc')), point.padding = unit(1, 'lines'), force = 0.25) +
-  scale_x_continuous(limits = c(74,88),breaks = seq(74,88,1)) +
+  scale_x_continuous(limits = c(74,81),breaks = seq(74,81,1)) +
   scale_y_continuous(limits = c(74,88),breaks = seq(74,88,1)) +
   theme(plot.title = element_text(hjust = 0.5))
 
@@ -175,4 +200,4 @@ graph7 <- ggplot(table2.4series, aes(x = year)) + geom_line(aes(y = le_raceadj.7
 graph7
 
 savegraph(graph7)
-
+s
