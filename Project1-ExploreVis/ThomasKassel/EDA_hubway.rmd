@@ -1,0 +1,85 @@
+---
+title: 'Exploratory Data Analysis: Hubway Trips'
+author: 'Thomas Kassel 1-19-17 NYCDSA'
+output:
+  html_document: default
+  html_notebook: default
+---
+
+
+## Introduction
+
+Boston's bikeshare program, [Hubway](https://www.thehubway.com/), has quickly become a convenient, affordable and fun way to navigate the city. Publicly owned by municipalities in Greater Boston and operated by national bike organization Motivate, Hubway's increasing popularity is consistent with national trends of greater attention to sustainable transport in metro areas.
+
+Environmental, monetary and convenience benefits aside, bikeshare programs have embraced the influx of big data collected by their bike/station technology, using the rich datasets collected for their own insights as well as posting many of them to the public for any aspiring data scientist to enjoy.
+
+## Data
+
+**Hubway** - the [Hubway Trip History](http://hubwaydatachallenge.org/trip-history-data/) dataset contains information on over 1M bike trips spanning from the program's inception in 2011 to mid-2013. Due to long processing times, this dataset was subsetted to only include the summer of 2012 (Jun-Sept), which was still inclusive of ~300,000 entries. Information about the variables collected (trip duration, start/end station, rider information, etc) can be found at the site link above.
+
+**Zipcodes** - since Hubway includes registered zipcodes for each rider in the trips dataset mentioned above, a comprehensive table of regional zipcodes and their corresponding neighborhood/towns was compiled using the following public sources: [Mass.gov](www.mass.gov/eohhs/docs/dcf/boston-office-by-zipcode.xls), [Cambridge.gov](http://www2.cambridgema.gov/CityOfCambridge_Content/documents/), R package [zipcode](https://cran.r-project.org/web/packages/zipcode/zipcode.pdf). 
+
+**Weather** - public daily weather data for Greater Boston was accessed and tabularized from [Weather Underground](https://www.wunderground.com/).
+
+## Analysis
+
+```{r source_files, message=FALSE, warning=FALSE, include=FALSE, cache=TRUE}
+#source main scripts, loading and formatting of input data
+library(ggplot2)
+source('ggplot_theme.R')
+source('hubway_analysis.R')
+```
+
+#### 1) Exploration of General Ridership Patterns
+
+Basic variables provided in the Trip History dataset include the timestamp (minute-level granularity) of departure and arrival for each Hubway trip taken. This allows for analysis of ridership activity from the perspective of our normal temporal routines - commuting, socializing, weekend excursions, etc.
+
+Density plots help to visualize hourly ridership throughout the course of an average weekday or weekend. Here we see an obvious "M" shape on the weekday density curve, very likely due to commuting activity (roughly including weekday hours from 7-9AM and 4-7PM). Further analysis reveals that these commuting rides accounted for **33% of total trips (including weekends) during the summer of 2012**. Average weekend profiles exhibit an opposite daily profile with peak ridership occurring in the afternoons. A small, but noticeable amount of weekend rides occur from 12AM-3AM catering to more 'adventurous' biker-bar-goers.
+
+```{r hourly_profile_histogram, echo=FALSE, message=FALSE, warning=FALSE}
+hourly_hist <- ggplot(data=trips,aes(x=Hour)) + geom_density(adjust=1.6,fill='steelblue3',alpha=0.4) + 
+               ggtitle("Hourly Ridership Patterns") + xlab("Time of Day") + ylab('% of Rides') +
+               scale_y_continuous(label=percent) + scale_x_continuous(breaks=seq(0,24,4),labels=hour.labs) +
+               facet_grid(day_type~.) + light_theme()
+
+print(hourly_hist)
+```
+
+We can further solidify weekday-vs-weekend behavior using density plots as a function of total trips and average trip duration. In the *right-hand panel* we observe a noticeable difference in the distributions of daily rides - on a given weekday, there are 500-750 more rides than a given weekend. In the *left-hand panel* we see that the distribution of weekend trips has a mean trip duration of approximately **10 minutes** longer than that of weekday trips, with an average trip time of ~25 mins. Hubway rides max out at 30 minutes, so weekend riders tend to make the most of their riding time. Together, these two observations suggest that Hubway lends itself well to both higher-frequency and faster weekday schedules (commuting) and slower-paced weekend routines (recreational rides and sightseeing).
+
+```{r trips_duration_histogram, echo=FALSE, message=FALSE, warning=FALSE}
+#density plot - daily number of trips factored by weekday/weekend
+numtrips_hist <- ggplot(data=trips.daytype,aes(x=total_trips)) + geom_density(aes(colour=day_type,fill=day_type),alpha=0.1) +
+                 theme(axis.title.y = element_blank(),axis.text.y = element_blank(),axis.ticks.y = element_blank()) +     scale_fill_discrete(guide=FALSE) +
+                 scale_colour_discrete(name='Day Type',breaks=c("Weekday","Weekend"),labels=c("Weekday","Weekend")) +
+                 scale_x_continuous(labels=comma) + xlab("Avg Daily Trips") + light_theme()
+#density plot - average trip duration factored by weekday/weekend
+durtrips_hist <- ggplot(data=trips.daytype,aes(x=avg_duration)) + geom_density(aes(colour=day_type,fill=day_type),alpha=0.1) +
+                 xlab("Avg Trip Duration (Mins)") + scale_y_continuous(name='Density',label=percent) + 
+                 scale_fill_discrete(guide=FALSE) + scale_colour_discrete(guide=FALSE) + light_theme()
+#combine both density plots
+combined_hist <- grid.arrange(durtrips_hist,numtrips_hist,ncol=2,top='Frequency and Duration of Hubway Trips')
+```
+
+#### 2) Exploration of Rider Demographics
+
+The inclusion of rider information (which is gathered at registration for annual membership) provides interesting potential for analysis of Hubway's demographics. Namely, for each ride in the Trip History dataset, the rider's zipcode, age and gender is also included. Using the compiled zipcode table previously described, rider zipcodes were matched with boston neighborhoods or surrounding suburbs. The plot below shows the top ten demographic cohorts (i.e. groups of gender-age-neighborhood combinations), by total rides in summer 2012. It is worth noting:
+
+There were no female cohorts in the top ten ridership groups for either Greater Boston or the Suburbs; all cohorts depicted below are male.
+
+Because of the low number of riders from the suburbs, the y-axis for suburban cohorts has been scaled up; however on absolute terms, these rides constitute a significantly lower proportion than Greater Boston residents.
+
+```{r demographics_histogram, echo=FALSE, message=FALSE, warning=FALSE}
+demographics_bar <- ggplot(data=demographics,aes(x=neighborhood,y=rides,fill=age)) + geom_bar(stat='identity',colour='gray40',alpha=0.8) +
+                    facet_wrap(~region,scales = 'free') + light_theme() + ggtitle("Hubway Ridership Demographics") +
+                    scale_y_continuous(label=comma) +
+                    scale_fill_brewer(name='Age',breaks=c("18 to 29","30 to 39","40+"),labels=c("18 to 29","30 to 39","40+"),palette=1) + xlab("Neighborhood or Town") + ylab("Total # of Rides") + theme(axis.text.x = element_text(angle=45,hjust=1))
+
+print(demographics_bar)
+```
+
+Males, of all ages, from the South End and Back Bay neighborhoods play a very significant role in Hubway's membership base - in combination they made up **17% of all registered Hubway rides during the summer of 2012**. Trips are also quite popular among male millenials in other densely populated parts of Boston.
+
+Although substantially smaller by trip volume, Hubway appears to have maintained a loyal member base from the suburbs. This segment is dominated by middle-aged males from nearby Boston towns, making heavy use of Hubway stations located at MBTA hubs (commuter rail or ferry), most notably North Station, South Station and Rowes Wharf (not shown on graph).
+
+
