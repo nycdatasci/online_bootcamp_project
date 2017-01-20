@@ -59,7 +59,7 @@ library(ggrepel)
 example.state.f <- filter(table3, stateabbrv == 'HI')
 example.state.disparity.f <- round(example.state.f$le_raceadj_q4_F - example.state.f$le_raceadj_q1_F, digits = 1)
 example.state.annotation.f <- "For each state, height above\ndiagonal line equals disparity\nin years of life expectancy\nbetween women of high and\nlow household incomes."
-example.state.annotation.f <- paste0(example.state.annotation.f,"\n\nFor ",example.state.f$statename," this is ",as.character(example.state.disparity.f)," years.")
+example.state.annotation.f <- paste0(example.state.annotation.f,"\n\nFor ",example.state.f$statename,", this is ",as.character(example.state.disparity.f)," years.")
  
 graph3 <- ggplot(table3, aes(x = le_raceadj_q1_F, y = le_raceadj_q4_F, color = region)) + 
   geom_point(size=1.75) +
@@ -86,19 +86,21 @@ savegraph(graph3)
 example.state.m <- filter(table3, stateabbrv == 'IN')
 example.state.disparity.m <- round(example.state.m$le_raceadj_q4_M - example.state.m$le_raceadj_q1_M, digits = 1)
 example.state.annotation.m <- "For each state, height above\ndiagonal line equals disparity\nin years of life expectancy\nbetween men of high and\nlow household incomes."
-example.state.annotation.m <- paste0(example.state.annotation.f,"\n\nFor ",example.state.f$statename," this is ",as.character(example.state.disparity.f)," years.")
+example.state.annotation.m <- paste0(example.state.annotation.m,"\n\nFor ",example.state.m$statename,", this is ",as.character(example.state.disparity.m)," years.")
 
-graph4 <- ggplot(table3, aes(x = le_raceadj_q1_M, y = le_raceadj_q4_M)) + 
-  geom_point() +
-  geom_segment(data = example.state.m, aes(xend = le_raceadj_q1_M, yend = le_raceadj_q1_M), linetype = 5, size = 0.25) +
+graph4 <- ggplot(table3, aes(x = le_raceadj_q1_M, y = le_raceadj_q4_M, color = region)) + 
+  geom_point(size=1.75) +
+  scale_color_manual(name = "Region", breaks = c("Northeast","South","Midwest","West"), values = c("blue","red","yellow","green")) +
+  geom_segment(data = example.state.m, color = "black", aes(xend = le_raceadj_q1_M, yend = le_raceadj_q1_M), linetype = 5, size = 0.25) +
   geom_label(data = example.state.m, 
+             size = 3,
              aes(label = example.state.annotation.m),
-             nudge_x = 1, nudge_y = -4.5) +  
+             nudge_x = 1, nudge_y = -4.5, color = "black") +  
   labs(x = "Life Expectancy (Race-Adjusted) for Quartile 1 Household Income", y = "Life Expectancy (Race-Adjusted) for Quartile 4 Household Income",
        title = "State-Level Male Life Expectancy by Household Income Quartile") +
   coord_cartesian(xlim = c(74,81), ylim = c(74,87)) +
   geom_abline(intercept = 0, slope = 1) +
-  geom_label_repel(aes(label = stateabbrv), size = 3.5, hjust = 0, nudge_x = 0.05, segment.color = "#333333", segment.alpha = 0.5, 
+  geom_label_repel(aes(label = stateabbrv), size = 3, nudge_x = 0.05, color = "black",segment.color = "#333333", segment.alpha = 0.5, 
       segment.size = 0.3, arrow = arrow(length = unit(0.01, 'npc')), point.padding = unit(1, 'lines'), force = 0.25) +
   scale_x_continuous(limits = c(74,81),breaks = seq(74,81,1)) +
   scale_y_continuous(limits = c(74,88),breaks = seq(74,88,1)) +
@@ -124,7 +126,7 @@ states <- mutate(states,state.capitalized = toupper(region))
 
 table3.no.DC <- filter(table3,stateabbrv != "DC")
 
-legend_title <- "Added Years"
+legend_title <- "Years"
 
 row.names(table3.no.DC) <- tolower(table3.no.DC$statename)
 table3.no.DC <- mutate(table3.no.DC,state = tolower(statename))
@@ -139,8 +141,8 @@ graph5 <- ggplot(table3.no.DC, aes(map_id = state)) +
   theme(legend.position = "bottom", 
         panel.background = element_blank(),
         plot.title = element_text(hjust = 0.5)) + 
-  labs(title = "Added Years of Female Life Expectancy (Race-Adjusted)\nFor Quartile 4 over Quartile 1 Household Income") +
-  scale_fill_gradient(name = legend_title, low = "yellow", high = "red")
+  labs(title = "Lost Years of Female Life Expectancy (Race-Adjusted)\nFor Quartile 1 Vs. Quartile 4 Household Income") +
+  scale_fill_gradient(name = legend_title, low = "blue", high = "red")
 
 graph5 + fifty_states_inset_boxes() 
 
@@ -156,8 +158,8 @@ graph6 <- ggplot(table3.no.DC, aes(map_id = state)) +
   theme(legend.position = "bottom", 
         panel.background = element_blank(),
         plot.title = element_text(hjust = 0.5)) + 
-  labs(title = "Added Years of Male Life Expectancy (Race-Adjusted)\nFor Quartile 4 over Quartile 1 Household Income") +
-  scale_fill_gradient(name = legend_title, low = "yellow", high = "red")
+  labs(title = "Lost Years of Male Life Expectancy (Race-Adjusted)\nFor Quartile 1 Vs. Quartile 4 Household Income") +
+  scale_fill_gradient(name = legend_title, low = "blue", high = "red")
 
 graph6 + fifty_states_inset_boxes() 
 
@@ -178,7 +180,46 @@ table2.reduced.m.75percentile <- filter(table2.reduced, pctile == 75 & gnd == "M
 table2.4series <- inner_join(table2.reduced.f.25percentile, table2.reduced.f.75percentile, by="year") %>%
   inner_join(., table2.reduced.m.25percentile, by = "year") %>% inner_join(., table2.reduced.m.75percentile, by = "year")
 
+#Graph female life expectancy gap over time
+graph7f <- ggplot(table2.4series, aes(x = year)) + geom_line(aes(y = le_raceadj.75per.f, color = "Female, 75th")) +
+  geom_line(aes(y = le_raceadj.25per.f, color = "Female, 25th")) +
+  scale_color_manual(name="Gender and Household Income Percentile",
+                     breaks = c("Female, 75th", "Female, 25th"),
+                     values = c("Female, 75th" = "#8B0000", "Female, 25th" = "#FFB6C1")) +
+  geom_ribbon(aes(ymin=le_raceadj.25per.f, ymax=le_raceadj.75per.f, x=year, fill = "Female"), alpha = 0.2) +
+  scale_fill_manual(name = "Life Expectancy Gap",values = c("#D490AF")) +
+  scale_x_continuous(name = "Year",limits = c(2000,2015),breaks = seq(2000,2014,2)) +
+  scale_y_continuous(name = "Life Expectancy\n(Race-Adjusted)",limits = c(77,90),breaks = seq(77,90,2)) +
+  labs(title = "Female Life Expectancy Estimates by Income Percentile",
+       subtitle = "By Year from 2001 to 2014") +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
 
+graph7f
+
+savegraph(graph7f)
+
+#Graph male life expectancy gap over time
+graph7m <- ggplot(table2.4series, aes(x = year)) + geom_line(aes(y = le_raceadj.75per.m, color = "Male, 75th")) +
+  geom_line(aes(y = le_raceadj.25per.m, color = "Male, 25th")) +
+  scale_color_manual(name="Gender and Household Income Percentile",
+                     breaks = c("Male, 75th", "Male, 25th"),
+                     values = c("Male, 75th" = "#0000A0", "Male, 25th" = "#00FFFF")) +
+  geom_ribbon(aes(ymin=le_raceadj.25per.m, ymax=le_raceadj.75per.m, x=year, fill = "Male"), alpha = 0.2) +
+  scale_fill_manual(name = "Life Expectancy Gap",values = c("#9390D4")) +
+  scale_x_continuous(name = "Year",limits = c(2000,2015),breaks = seq(2000,2014,2)) +
+  scale_y_continuous(name = "Life Expectancy\n(Race-Adjusted)",limits = c(77,90),breaks = seq(77,90,2)) +
+  labs(title = "Male Life Expectancy Estimates by Income Percentile",
+       subtitle = "By Year from 2001 to 2014") +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+graph7m
+
+savegraph(graph7m)
+
+
+#Graph male and female life expectancy gaps together over time
 graph7 <- ggplot(table2.4series, aes(x = year)) + geom_line(aes(y = le_raceadj.75per.f, color = "Female, 75th")) +
   geom_line(aes(y = le_raceadj.25per.f, color = "Female, 25th")) + 
   geom_line(aes(y = le_raceadj.75per.m, color = "Male, 75th")) +
@@ -192,7 +233,7 @@ graph7 <- ggplot(table2.4series, aes(x = year)) + geom_line(aes(y = le_raceadj.7
   scale_fill_manual(name = "Life Expectancy Gap",values = c("#D490AF","#9390D4")) +
   scale_x_continuous(name = "Year",limits = c(2000,2015),breaks = seq(2000,2014,2)) +
   scale_y_continuous(name = "Life Expectancy\n(Race-Adjusted)",limits = c(77,90),breaks = seq(77,90,2)) +
-  labs(title = "U.S. Life Expectancy Estimates by Gender and Income Percentile",
+  labs(title = "Life Expectancy Estimates by Gender and Income Percentile",
        subtitle = "By Year from 2001 to 2014") +
   theme(plot.title = element_text(hjust = 0.5),
         plot.subtitle = element_text(hjust = 0.5))
@@ -200,4 +241,3 @@ graph7 <- ggplot(table2.4series, aes(x = year)) + geom_line(aes(y = le_raceadj.7
 graph7
 
 savegraph(graph7)
-s
