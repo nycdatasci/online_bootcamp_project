@@ -7,6 +7,4 @@ with particular attention to differences according to income, geography, and gen
 Acquires data provided by the Health Inequality Project, which is found at:
 https://healthinequality.org/data/
 
-
-
-
+Refer to packages.txt for a list of required R packages.
