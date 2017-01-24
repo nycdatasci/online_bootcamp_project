@@ -33,8 +33,8 @@ declared_date = as.Date('2015-06-16')
 won_president = as.Date('2016-11-08')
 
 
-# ==== Explorations ====== 
-# 1. Tweeting frequency
+# ==== 1. Explore Tweeting Frequency ====== 
+# 1.1 Tweeting frequency
 
 tweets_by_month <- data %>% group_by(by_month) %>% summarise(count=n())
 ggplot(tweets_by_month)+
@@ -53,7 +53,7 @@ Conclusion: Trump is an avid Twitter/social media user much long before he annou
 Not sure what happened in Jan 2015 without looking at the content of the Tweets more closely. 
 '''
 
-# 1.1 Tweeting frequency during the campaign and after he won the presidency
+# 1.2 Tweeting frequency during the campaign and after he won the presidency
 tweets_by_day <- data %>% 
     filter(as.Date(by_date, format='%Y-%b-%d') >= declared_date) %>%
     group_by(by_date, by_month) %>% 
@@ -71,7 +71,7 @@ conclusion: he tweeted more when he announced candidacy,
     he tweeted much less after winning the presidency
 '''
 
-# 1.2 Retweeting frequency
+# 1.3 Retweeting frequency
 tweets_by_month_rt <- data %>% 
     group_by(by_month, is_retweet) %>% 
     summarise(count=n()) %>%
@@ -92,13 +92,13 @@ or Trump just did not retweet before 2016...
 More likely the data does not count for retweets before 2016.
 This means is_retweet is not a metric to be used for any analysis before 2016.
 '''
-# ===== preliminary exploration ends =======
+# ===== Frequency exploration ends ends =======
 
 
 
-# ==== To answer the question: what kind of tweets got more favs and retweets ======
+# ==== 2. What kind of tweets got more favs and retweets ======
 
-# 1. How many favs and rts did Trump got overtime?
+# 2.1 How many favs and rts did Trump got overtime?
 
 reactions_by_month <- data %>% group_by(by_month) %>% 
     summarise(favs = sum(favorite_count), rts=sum(retweet_count), count=n())
@@ -108,9 +108,9 @@ ggplot(reactions_by_month)+
     geom_line(aes(x=as.Date(by_month, format='%Y-%b-%d'), y=favs/count),color='red')+
     geom_line(aes(x=as.Date(by_month, format='%Y-%b-%d'), y=rts/count),color='steelblue')+
     theme_minimal()+
-    ylab('Number of favs & rts per tweet')+
+    ylab('Avgerage # of favs & RTs per tweet')+
     xlab('Month from 2009.5 to 2017.1')+
-    ggtitle("Number of favs & rts per tweet per month @realDonaldTrump got")
+    ggtitle("Average # of favs & RTs per tweet Trump got every month")
 
 '''
 Conclusion: Three peaks occurred in March, July and November of 2016.
@@ -125,11 +125,17 @@ reactions_by_day <- data %>%
 ggplot(reactions_by_day)+
   geom_line(aes(x=as.Date(by_date, format='%Y-%b-%d'), y=favs/tweets),color='red')+
   theme_bw()+
+  ggtitle('Monthly amount of favs')+
+  xlab('Days in months')+
+  ylab('Average daily favs per tweet')+
   facet_wrap(~by_month_d,scales='free_x')
 
 ggplot(reactions_by_day)+
   geom_line(aes(x=as.Date(by_date, format='%Y-%b-%d'), y=rts/tweets),color='steelblue')+
   theme_bw()+
+  ggtitle('Monthly amount of RTs')+
+  xlab('Days in months')+
+  ylab('Average daily RTs per tweet')+
   facet_wrap(~by_month_d,scales='free_x')
 
 # 2.3 what kind of tweets got the most attention
@@ -140,7 +146,7 @@ time_of_day <- data %>% filter(as.Date(by_date, format='%Y-%b-%d') >= declared_d
 ggplot(time_of_day) +
   geom_line(aes(x=as.numeric(by_hour)-4,y=favs/count), color='brown')+
   geom_point(aes(x=as.numeric(by_hour)-4,y=favs/count), color='red')+
-  ggtitle('Number of favs per tweet each hour, eastern, DTS excluded')+
+  ggtitle('Number of favs per tweet each hour, ET, no DTS')+
   xlab('Hour, 0:00 - 23:59')+
   ylab('Favs per tweet')+
   theme_minimal()
@@ -148,7 +154,7 @@ ggplot(time_of_day) +
 ggplot(time_of_day) +
   geom_line(aes(x=as.numeric(by_hour)-4,y=rts/count), color='steelblue')+
   geom_point(aes(x=as.numeric(by_hour)-4,y=rts/count), color='royalblue')+
-  ggtitle('Number of RTs per tweet each hour, eastern, DTS excluded')+
+  ggtitle('Number of RTs per tweet each hour, ET, no DTS')+
   xlab('Hour, 0:00 - 23:59')+
   ylab('RTs per tweet')+
   theme_minimal()
@@ -164,21 +170,23 @@ qtiles_f = quantile(nchars$favorite_count, c(0.1,0.9))
 qtiles_rt = quantile(nchars$retweet_count, c(0.1,0.9))
 ggplot(subset(nchars, favorite_count < qtiles_f[2] & favorite_count > qtiles_f[1]), 
        aes(x=nchar,y=favorite_count))+
-  geom_point()+
+  geom_point(size=0.5,alpha=0.5)+
+  theme_minimal()+
   geom_smooth()+
-  ggtitle('coorelation between number of characters in a tweet and the number of Favs')
+  ggtitle('# of characters in a tweet ~ the # of Favs')
 
 ggplot(subset(nchars, retweet_count < qtiles_rt[2] & retweet_count > qtiles_rt[1]), 
        aes(x=nchar,y=retweet_count))+
-  geom_point()+
+  geom_point(size=0.5,alpha=0.5)+
+  theme_minimal()+
   geom_smooth()+
-  ggtitle('coorelation between number of characters in a tweet and the number of RTs')
+  ggtitle('# of characters in a tweet ~ the # of RTs')
 
 ''' 
 There is not a clear relationship between the number of characters and the number of favs or RTs
 '''
 
-# 2.3.4 Which words appeared most frequently in tweets with more favs and rts?
+# 2.3.3 Which words appeared most frequently in tweets with more favs and rts?
 dataP <- data %>% filter(as.Date(by_date, format='%Y-%b-%d') >= declared_date) %>%
   select(favorite_count, retweet_count, text)
 
@@ -235,7 +243,7 @@ ggplot(tb_more_favs, aes(x=log(f_index,10), y=log(freq)))+
     xlab('The likelihood of being faved when a word appears in tweets')+
     ylab('Word frequency')+
     ggtitle('Which words got more favs during the campaign')+
-    coord_fixed(ratio=0.1)
+    coord_fixed(ratio=0.08)
 
 ggplot(tb_more_rts, aes(x=log(rt_index,10), y=log(freq)))+
     geom_text(aes(label=Var1),color='steelblue')+
@@ -243,7 +251,7 @@ ggplot(tb_more_rts, aes(x=log(rt_index,10), y=log(freq)))+
     xlab('The likelihood of being retweeted when a word appears in tweets')+
     ylab('Word frequency')+
     ggtitle('Which words got more RTs during the campaign')+
-    coord_fixed(ratio=0.1)
+    coord_fixed(ratio=0.08)
 
 ggplot(, aes(y=log(freq),label=Var1))+
     geom_text(data=tb_more_rts,color='steelblue', aes(x=log(rt_index,10)))+
@@ -252,10 +260,10 @@ ggplot(, aes(y=log(freq),label=Var1))+
     xlab('The likelihood of being retweeted when a word appears in tweets')+
     ylab('Word frequency')+
     ggtitle('RTs and Favs compared')+
-    coord_fixed(ratio=0.1)
+    coord_fixed(ratio=0.08)
 
 
-# a comparison between RTs and FAVs
+# 2.3.4 a comparison between RTs and FAVs
 f_and_t <- merge(tb_more_favs, tb_more_rts) %>%
     mutate(diff = f_index-rt_index) %>%
     arrange(diff)
@@ -274,6 +282,4 @@ Conclusion: Hillary Clinton is the term to trigger
 Retweets have a more diverse group of words, states including Ohio, Carolina, Florida
 are among his favorites for tweeting and getting RTs. 
 
-Without POS, lemmatization, ngrams and other techniques, it is not a solid conclusion
-but only serves as preliminary researches...
 '''
