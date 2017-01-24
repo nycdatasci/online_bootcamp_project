@@ -48,10 +48,6 @@ ggplot(tweets_by_month)+
     xlab('Month from 2009.5 to 2017.1')+
     ggtitle("Number of tweets per month by @realDonaldTrump")
 
-'''
-Conclusion: Trump is an avid Twitter/social media user much long before he announced candidacy;
-Not sure what happened in Jan 2015 without looking at the content of the Tweets more closely. 
-'''
 
 # 1.2 Tweeting frequency during the campaign and after he won the presidency
 tweets_by_day <- data %>% 
@@ -65,11 +61,6 @@ ggplot(tweets_by_day)+
     theme_bw()+
     facet_wrap(~by_month_d, scales='free_x')
 
-'''
-conclusion: he tweeted more when he announced candidacy, 
-    during the first several primary debates and during the presidential debates;
-    he tweeted much less after winning the presidency
-'''
 
 # 1.3 Retweeting frequency
 tweets_by_month_rt <- data %>% 
@@ -86,13 +77,9 @@ ggplot(tweets_by_month_rt)+
     xlab('Month from 2009.5 to 2017.1')+
     ggtitle("Percent of Retweets by @realDonaldTrump")
 
-'''
-Conclusion: Either data had missing values, 
-or Trump just did not retweet before 2016... 
-More likely the data does not count for retweets before 2016.
-This means is_retweet is not a metric to be used for any analysis before 2016.
-'''
-# ===== Frequency exploration ends ends =======
+
+
+
 
 
 
@@ -112,9 +99,6 @@ ggplot(reactions_by_month)+
     xlab('Month from 2009.5 to 2017.1')+
     ggtitle("Average # of favs & RTs per tweet Trump got every month")
 
-'''
-Conclusion: Three peaks occurred in March, July and November of 2016.
-'''
 # 2.2 Favs and rts during the campaign and after he won the presidency
 reactions_by_day <- data %>% 
   filter(as.Date(by_date, format='%Y-%b-%d') >= declared_date) %>%
@@ -159,10 +143,7 @@ ggplot(time_of_day) +
   ylab('RTs per tweet')+
   theme_minimal()
 
-''' 
-This did not tell much.. People sleep during night hours. 
-The best time to maximize favs is early morning, late afternoon and sometime before midnight.
-'''
+
 # 2.3.2 Coorelate to the number of characters in a tweet?
 nchars <- data %>% filter(as.Date(by_date, format='%Y-%b-%d') >= declared_date) %>%
   mutate(nchar = nchar(text))
@@ -182,9 +163,6 @@ ggplot(subset(nchars, retweet_count < qtiles_rt[2] & retweet_count > qtiles_rt[1
   geom_smooth()+
   ggtitle('# of characters in a tweet ~ the # of RTs')
 
-''' 
-There is not a clear relationship between the number of characters and the number of favs or RTs
-'''
 
 # 2.3.3 Which words appeared most frequently in tweets with more favs and rts?
 dataP <- data %>% filter(as.Date(by_date, format='%Y-%b-%d') >= declared_date) %>%
@@ -233,7 +211,7 @@ tb_analysis <- short_tb %>%
     filter(freq > quantile(short_tb$freq)[4]) %>%
     filter(!Var1 %in% stop_words)
 
-# filter out words that are more likely to be faved/rted and have more than 100 appearance
+  # filter out words that are more likely to be faved/rted and have more than 100 appearance
 tb_more_favs <- tb_analysis %>% filter(f_index>1) %>% filter(freq > 100)
 tb_more_rts <- tb_analysis %>% filter(rt_index>1) %>% filter(freq > 100)
 
@@ -263,7 +241,7 @@ ggplot(, aes(y=log(freq),label=Var1))+
     coord_fixed(ratio=0.08)
 
 
-# 2.3.4 a comparison between RTs and FAVs
+# 2.4 A comparison between RTs and FAVs
 f_and_t <- merge(tb_more_favs, tb_more_rts) %>%
     mutate(diff = f_index-rt_index) %>%
     arrange(diff)
@@ -276,10 +254,4 @@ ggplot(f_and_t)+
     xlab('Words used in tweets')+
     ggtitle('More favs or more retweets?')
 
-'''
-Conclusion: Hillary Clinton is the term to trigger 
- retweets and favs... Crooked Media could be another two words
-Retweets have a more diverse group of words, states including Ohio, Carolina, Florida
-are among his favorites for tweeting and getting RTs. 
 
-'''

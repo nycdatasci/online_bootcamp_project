@@ -2,7 +2,7 @@
 
 ======
 
-
+*@zhoyoyo, Jan 23, 2017*
 
 ## Background and data
 
@@ -51,8 +51,8 @@ People started favoring his tweets and retweeting after he announced candidacy i
 
 A closer look at the favs and RTs during the campaign shows a similar uptick during November 2016 -- right after he won presidency.
 
-![Favs2](images/p5.png =300x)
-![Favs3](images/p6.png =300x)
+![Favs2](images/p5.png)
+![Favs3](images/p6.png)
 
 ##### 2.3 what kind of tweets got more favs and RTs? 
 
@@ -60,18 +60,18 @@ A closer look at the favs and RTs during the campaign shows a similar uptick dur
 
 Assuming Trump tweeted most of his tweets on the east coast (New York and Florida mostly), and not counting for the Day Time Saving during the winter, the biggest thing we see is that people sleep during night hours. The best time to maximize favorites and RTs is early morning, late afternoon and sometime before midnight.
 
-![Favs4](images/p7.png =500x)
-![Favs5](images/p8.png =500x)
+![Favs4](images/p7.png)
+![Favs5](images/p8.png)
 
 **2.3.2 Coorelation to the number of characters in a tweet?**
 
 Take a look at tweets whose counts of favs fall between 10% and 90% of the favorite counts of all tweets:
 
-![Favs6](images/p9.png =500x)
+![Favs6](images/p9.png)
 
 Take a look at tweets whose counts of RTs fall between 10% and 90% of the RT counts of all tweets:
 
-![Favs7](images/p10.png =500x)
+![Favs7](images/p10.png)
 
 While these two graphs show that most of Trump's tweets have a length close to the max 140 character limit, it doesn't show a clear correlation between number of characters in a tweet and people's reaction to tweets.
 
@@ -89,8 +89,8 @@ Then I got 88 words with high frequency and higher-than-average favs, and 83 wor
 
 Here are two plots with log scales for both x and y axes:
 
-![Favs8](images/p11.png =700x)
-![Favs9](images/p12.png =700x)
+![Favs8](images/p11.png)
+![Favs9](images/p12.png)
 
 We see some similar trends for RTs and favs. In general, Hillary Clinton, Crooked Media, Obama are high-frequency terms to trigger high retweets and favs. 
 
