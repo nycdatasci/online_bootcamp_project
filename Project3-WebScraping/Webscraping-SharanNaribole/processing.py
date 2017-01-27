@@ -27,14 +27,17 @@ def score_conv(score):
 def main():
     reddit_df = pd.read_csv("flairs/reddit_data.csv") #DataFrame
     reddit_df.set_index('title',inplace=True)
+
     metrics_data = {'top_share': np.zeros(len(reddit_df.index)),
                     'diversity': np.zeros(len(reddit_df.index))}
     #reddit_df = pd.concat([reddit_df, pd.DataFrame(metrics_data,index=reddit_df.index)],axis=1)
     submission_metrics_df = pd.DataFrame(metrics_data,index=reddit_df.index)
+
     submission_metrics_df['score'] = [score_conv(x) for x in list(reddit_df['score'])]
     submission_metrics_df['comments'] = [float(x) for x in list(reddit_df['comments'])]
 
     clubs_df = pd.DataFrame() #Variable to store the DataFrame of percentage share of clubs for different submissions
+
 
     for index,row in reddit_df.iterrows():
         flair_stats = compute_flair_stats(row["flair_map"])
