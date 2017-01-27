@@ -1,9 +1,9 @@
 ---
 title: "H1-B Visa Petitions for Data Science Positions in 2015"
 author: "Sharan Naribole"
-output: 
-  html_notebook: default
+output:
   pdf_document: default
+  html_notebook: default
 ---
 
 Contributed by Sharan Naribole. He is currently undertaking the part-time online bootcamp organized by NYC Data Science Academy (Dec 2016- April 2017). This blog is based on his bootcamp project - R Exploratory Data Analysis
@@ -87,18 +87,34 @@ h1b_df = h1b_df %>% mutate(data_analyst = ifelse(regexpr('data analyst', tolower
 h1b_df = h1b_df %>% mutate(data_engineer = ifelse(regexpr('data engineer', tolower(JOB_TITLE)) != -1, 1, 0))
 
 h1b_df = h1b_df %>% mutate(machine_learning = ifelse(regexpr('machine learning', tolower(JOB_TITLE)) != -1, 1, 0))
+
+h1b_df = h1b_df %>% mutate(job_class = ifelse(lead == 1, 2, ifelse(manager == 1, 3, 1)))
 ```
 
 Last part of the data transformation is retaining only the useful columns.
 
 ```{r}
-h1b_df = h1b_df %>%  select(EMPLOYER_NAME, JOB_TITLE, SOC_NAME, PREVAILING_WAGE, WORKSITE_CITY, WORKSITE_STATE)
+h1b_df = h1b_df %>%  select(EMPLOYER_NAME, JOB_TITLE, SOC_NAME, PREVAILING_WAGE, WORKSITE_CITY, WORKSITE_STATE, JOB_CLASS = job_class, data_scientist, data_engineer, machine_learning, data_analyst)
 ```
-<h2> Exploratory Data Analysis>
+<h2> Exploratory Data Analysis </h2>
 Next, I analyze the prevailing wages for Data Scientist positions.
 
 <h3> Seniority Analysis </h3>
 
+```{r}
+h1b_df = h1b_df %>% mutate(JOB_CLASS = as.factor(JOB_CLASS))
+seniority = h1b_df %>% filter(data_scientist == 1) %>% group_by(JOB_CLASS) 
 
+ggplot(data = seniority,aes(x = JOB_CLASS,y=PREVAILING_WAGE)) + geom_violin(aes(fill=JOB_CLASS)) + scale_fill_discrete(labels = c("Data Scientist", "Lead/ Senior Data Scientist", "Manager/Director Data Scientist"))
+```
 
+```{r}
+soc_names = h1b_df %>% filter(data_scientist == 1) %>% group_by(SOC_NAME) %>% summarise(WAGE = mean(PREVAILING_WAGE)) %>% arrange(desc(WAGE))
+
+soc_names
+```
+
+```{r}
+ggplot(data = soc_names[1:5,],aes(x = SOC_NAME,y=WAGE)) + geom_bar(stat="identity",aes(fill=SOC_NAME)) + theme(legend.position = "bottom")
+```
 
