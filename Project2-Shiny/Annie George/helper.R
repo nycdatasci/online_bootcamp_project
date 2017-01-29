@@ -36,7 +36,16 @@ file <- function(type){
     mutate(YYYY=substr(YYYYMM,1,4))%>%
     group_by(YYYY, Description, Unit) %>%
     summarise(Value=sum(as.numeric(Value)))
-   }
+}
+
+translate_year <- function(input, max, min){
+  switch(input,
+         "All years" = c(min:max), 
+         "3 years" = c((max-2):max),
+         "5 years" = c((max-4):max), 
+         "10 years" = c((max-9):max)
+     )
+}
 
 
 

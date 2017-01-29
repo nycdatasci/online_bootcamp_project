@@ -1,0 +1,50 @@
+Price of Energy App
+The intent of this project is to find if there is a relation in the price of Electricity, natural gas and LPG based on conumption, population or gdp of any state to understand the varying cost in these energy outputs in different states. It is understandable that distributon of fuel is one of the major factors affecting price of fuel and electricity. However, electrci power is used excessively in the states counted under the industrial belt irrespective of the population. Understanding this  
+
+
+Price of Energy App
+The intent of this project is to find if there has been an increase in popularity of Green Power. This app will track the production and consumption of green power and other fuel sources each year and over the years which can be used to understand if the production is enough to keep up with the consumption. It will also compare the prod The app also tracks the generation of electricity for each end-user sector and the generation of transportation fuel using green power and other fuel sources. The histogram of the ratio of production and consumption of fuel can be used to determine if the trend for green power  usage is likely to continue. 
+
+
+This app provides the following graphs for comparison which can be used to conclude if the green power production can keep up with the consumption. The data also utilizes graphs to understand if the electric sector can continue to generate power using the production of fuel types and consumption of the same in a year.
+
+The dataset is acquired from http://www.eia.gov/dnav
+
+
+Production vs Cosumption Green and Other in facet for every year scatter plot + Line with label on graph
+Coal
+Natural Gas
+Crude oil - Petroleu Cons
+Nuclear Electric 
+fossil fuel
+Renewable
+	hydr
+	solar
+	geo
+	win
+	bio mass
+These graphs help to understand the production and consumption trends over the years. This can be used to understand if the production of green power has increased over the years
+
+Another method of visualing the trend is by using the tab on the page to view the production and 
+consumption of renewable and non renewable sources over the years. This is a static page
+
+Line Graphs for consumption 
+Consumption of renewable and non renewable for generation of electricity for residential / Commercial / Industrial / Government end sectors and Transportation fuel
+Sum non renewable source to produce each
+Sum renewable sources to produce each
+
+This 
+
+Graph I
+Production Vs Consumption of each fuel in each year
+Coal Production vs Coal + Fossil Fuel Consumption
+Natural Gas Production = Fossil Fuel Consuption
+Hydro Production = Hydro Consumption
+
+
+Graph1
+Coal  = Fossil F + coal + biomass - Consumption
+Natural Gas = Fossil Fuel
+Production of coal
+in bar graph 
+remove states not a producer

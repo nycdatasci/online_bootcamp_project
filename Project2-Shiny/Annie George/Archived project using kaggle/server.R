@@ -1,0 +1,128 @@
+
+
+library(shiny)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(maps)
+library(mapdata)
+
+#break the energy file using the first 136 columns
+energy <- read.csv("Energy Census and Economic Data US 2010-2014.csv",
+                   stringsAsFactors = FALSE, header = TRUE)
+df <- energy[,1:136]
+#create a wide data splitting all the columns with year on into year and key
+df <- gather(df, key= "key", value = "value", -StateCodes, - Division, -Region, -Coast, -Great.Lakes)
+df <- separate(df,key, into=c("fuel", "year"), sep = -5)
+
+#function to translate fuel from input
+fuel_simple <- function(fuel){
+  switch(fuel,
+         "Electric" = "Elec",
+         "Natural Gas" = "NatGas",
+         "Fossil Fuel" = "FossFuel",
+         "Geothermal" = "Geo",
+         "LPG" = "LPG",
+         "Coal" = "Coal",
+         "Hydro" = "Hydro"
+  )
+}
+
+#US state shape file
+#state <-readShapeSpatial("cb_2015_us_state_500k.shp")
+#convert names to abbreviation
+#state.abb[match(state$NAME,state.name)]
+
+shinyServer(function(input, output) {
+  
+  #Plot for fuel type consumption
+  output$barplotC <- renderPlot({
+      df <-force(df)
+      fuel_C <- paste0(fuel_simple(input$fuel), 'C')
+      df1 <- df %>%
+        filter(year== input$year & fuel == fuel_C & !is.na(value) & (StateCodes != 'US'))%>%
+        arrange(desc(value))
+      
+    # draw the bar graph based on fuel type
+    c <- ggplot(data=df1, aes(x=reorder(df1$StateCodes, df1$value), y=df1$value, 
+                              fill=df1$StateCodes)) +
+         geom_bar(stat="identity") + coord_flip() +
+         ylab("Consumption in BTU") +
+         xlab("States") +
+         theme(legend.position = "none") + 
+          ggtitle(paste0("Consumption of fuel for the year ", input$year))
+    print(c)
+  })
+  
+  #Plot for fuel type production - How to remove those not available and improve tick marks
+  output$barplotP <- renderPlot({
+    df <-force(df)
+    fuel_P <- paste0(fuel_simple(input$fuel), 'P')
+    df1 <- df %>%
+      filter(year== input$year & fuel == fuel_P & !is.na(value) & (StateCodes != 'US'))%>%
+      arrange(desc(value))
+    
+    # draw the bar graph based on fuel type
+    p <- ggplot(data=df1, aes(x=reorder(df1$StateCodes, df1$value), y=df1$value, 
+                              fill=df1$StateCodes))+
+      geom_bar(stat="identity") + 
+      coord_flip(ylim = c(0,0.75e+6))+
+      ylab("Production in BTU") +
+      xlab("States") +
+      theme(legend.position = "none")  +
+      ggtitle(paste0("Production of fuel for the year ", input$year))
+    print(p)
+  })
+#plot map - Future plot - to give insigh on map where fuel production occurs  
+#  output$mapplotP <- renderPlot({
+   
+#    out <- map(state)
+#    print(out)
+#  }) 
+  
+  #Plot for price comparison of different fuel based on state and overall US fuel price (histogram)
+  # Price of US may be future
+  output$priceplot <- renderPlot({
+    df <-force(df)
+    df1 <- df %>%
+      filter((fuel == "ElecPrice" | fuel == "NatGasPrice" | fuel == "LPGPrice" ) & (StateCodes == input$state))
+     
+    
+    # draw the bar graph based on fuel type
+    price <- ggplot(data=df1, aes(x=df1$year, y=df1$value, color=df1$fuel, 
+                                  group=df1$fuel, label=df1$value)) +
+      geom_line() + 
+      ylab("Price") +
+      xlab("Year") +
+      theme_bw()+
+      scale_color_discrete("Fuel Type", labels = c("Electric", "LPG", "Natural Gas")) +
+      ggtitle(paste0("Price Distrubtion of Fuel in ", input$state, " State")) +
+      theme(legend.position="bottom")
+     
+    print(price)
+  })
+  
+  output$pricehist <- renderPlot({
+    df <-force(df)
+    df1 <- df %>%
+      filter((fuel == "ElecPrice" | fuel == "NatGasPrice" | fuel == "LPGPrice" ) &
+               year == "2014")
+ #     group_by(year)
+  #    summarise(Total_elec = sum(value(fuel=="ElecPrice")), 
+  #              Total_natgas = sum(value(fuel=="NatGasPrice")),
+   #             Total_lpg = sum(value(fuel=="LPGPrice"))
+                
+    
+    
+    # draw the bar graph based on fuel type
+    price <- ggplot(data=df1, aes(x=df1$value, fill=df1$fuel, 
+                                  group=df1$fuel, label=df1$fuel)) +
+      geom_histogram(binwidth = 5) + 
+      xlab("Price") +
+      theme_bw()+
+      scale_color_discrete("Fuel Type", labels = c("Electric", "LPG", "Natural Gas")) +
+      ggtitle(paste0("Price Distrubtion of Fuel in US in 2014")) 
+    
+    print(price)
+  })
+})
