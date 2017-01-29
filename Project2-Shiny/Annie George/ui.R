@@ -38,8 +38,8 @@ shinyUI(fluidPage(theme=shinytheme("slate"),
    
       mainPanel(
          tabsetPanel(
-            tabPanel("Production/Consumption Ratio plot", plotOutput("prod_cons_plot"), height=500), 
-            tabPanel("End User Sector consumption", plotOutput("sector_cons"))
+            tabPanel("Production/Consumption Ratio plot", plotOutput("prod_cons_plot", height=500)), 
+            tabPanel("End User Sector consumption", plotOutput("sector_cons", height=500))
       
             ) #tabset
                 #     plotOutput("stateplot")
