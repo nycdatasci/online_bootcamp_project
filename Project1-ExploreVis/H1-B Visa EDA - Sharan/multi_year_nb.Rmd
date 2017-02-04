@@ -1,0 +1,384 @@
+---
+title: "H1-B Visa Petitions for Data Science Positions in 2015"
+author: "Sharan Naribole"
+output:
+  html_notebook: default
+  fig_height: 11
+    fig_width: 15
+  html_document: default
+  pdf_document: default
+---
+
+Contributed by Sharan Naribole. He is currently undertaking the part-time online bootcamp organized by NYC Data Science Academy (Dec 2016- April 2017). This blog is based on his bootcamp project - R Exploratory Data Analysis
+
+<h2> Abstract </h2>
+
+The H-1B is an employment-based, non-immigrant visa category for temporary foreign workers in the United States. Every year, the US immigration department accepts over 200,000 petitions and selects 85,000 applications through a random process. The application data is available for public access to perform in-depth longitudinal research and analysis. This data provides key insights into the prevailing wages for job titles being sponsored by US employers under H1-B visa category. In particular, I utilize the 2011-2015 H-1B petition disclosure data to analyze the Salary distribution across different industries, states  and seniority levels for Data Science positions. 
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(zipcode)
+library(readxl)
+library(ggthemes)
+library(RColorBrewer)
+```
+
+<h2> H-1B Visa Data Introduction </h2>
+The H-1B is an employment-based, non-immigrant visa category for temporary foreign workers in the United States. For a foreign national to apply for H1-B visa, an US employer must offer a job and petition for H-1B visa with the US immigration department. This is the most common visa status applied for and held by international students once they complete college/ higher education (Masters, PhD) and work in a full-time position.
+
+The Office of Foreign Labor Certification (OFLC) generates program data that is useful information about the immigration programs including the H1-B visa. The disclosure data updated annually is available at https://www.foreignlaborcert.doleta.gov/performancedata.cfm
+
+This is a huge dataset over 2.5 million rows of H-1B petitions.
+
+<h2> Data Cleaning and Transformation </h2>
+
+```{r}
+## Function to transform wage to annual scale
+pw_unit_to_yearly = function(prevailing_wage, pw_unit_of_pay) {
+  return(ifelse(pw_unit_of_pay == "Year", prevailing_wage, ifelse(pw_unit_of_pay == "Hour", 2080*prevailing_wage, ifelse(pw_unit_of_pay== "Week", 52*prevailing_wage, ifelse(pw_unit_of_pay == "Month", 12*prevailing_wage, 26*prevailing_wage)))))
+}
+```
+
+The main data transformation of raw data of a given year:
+1. Mutating Year
+2. Column matching
+3. Filtering rows with H1-B visa and Full Time Employment
+4. Converting Prevailing Wage to Year Scale
+5. Filtering columns relevant to data analysis
+
+```{r}
+data_transform = function(raw_data_path,h1b_df, year) {
+  
+  new_df = read_excel(raw_data_path)
+  
+  # Adding Year column to dataframe
+  print("Mutating year ..")
+  new_df = new_df %>% mutate(YEAR = as.character(year))
+  
+  # Changing column names of data before 2015 to match with 2015 column names
+  print("Column matching ..")
+  if(year != 2015){
+    
+    new_df = new_df %>% select(-LCA_CASE_EMPLOYER_POSTAL_CODE)
+    new_df = new_df %>% rename(CASE_NUMBER = LCA_CASE_NUMBER, 
+                               CASE_STATUS = STATUS,
+                               EMPLOYER_NAME = LCA_CASE_EMPLOYER_NAME,
+                               SOC_NAME = LCA_CASE_SOC_NAME,
+                               JOB_TITLE = LCA_CASE_JOB_TITLE,
+                               FULL_TIME_POSITION = FULL_TIME_POS,
+                               PREVAILING_WAGE = PW_1,
+                               PW_UNIT_OF_PAY = PW_UNIT_1,
+                               WORKSITE_CITY = LCA_CASE_WORKLOC1_CITY,
+                               WORKSITE_STATE = LCA_CASE_WORKLOC1_STATE)
+  }
+  
+  ## Filtering rows with H1-B visa and Full Time Employment
+  print("Filtering H1-B visas with Full-time employment ..")
+  new_df = new_df %>% filter(VISA_CLASS == "H-1B" & FULL_TIME_POSITION == 'Y')
+  
+  ## Removing rows with PW_UNIT_OF_PAY not mentioned, will come back to this later
+  new_df = new_df %>% filter(!is.na(PW_UNIT_OF_PAY)) 
+      
+  ## Converting to numeric form text           
+  new_df = new_df %>% mutate(PREVAILING_WAGE = as.numeric(PREVAILING_WAGE)) 
+  
+  # Converting wage to year scale
+  print("Converting Prevailing wage to Year scale")
+  new_df = new_df %>% mutate(PREVAILING_WAGE =  pw_unit_to_yearly(PREVAILING_WAGE, PW_UNIT_OF_PAY)) 
+  
+  ## Retaining only the relevant columns for the data analysis
+  print("Filtering relevant columns ..")
+  new_df = new_df %>% select(CASE_NUMBER, 
+                             CASE_STATUS,
+                             EMPLOYER_NAME,
+                             SOC_NAME,
+                             JOB_TITLE,
+                             PREVAILING_WAGE,
+                             WORKSITE_CITY,
+                             WORKSITE_STATE,
+                             YEAR)
+
+  # Merging data with already transformed data
+  print("Merging data ..")
+  new_df = rbind(h1b_df, new_df)
+  
+  print(paste("Transformed and merged", year, "H-1B data"))
+  
+  return(new_df)
+}
+```
+
+Next, I call the above function for the multiple sources of data.
+
+```{r}
+#Empty data frame
+h1b_df = data.frame()
+
+for(year in seq(2015,2011)) {
+  path = paste0("data/",year,"_raw_data.xlsx")
+  h1b_df = data_transform(path, h1b_df, year)
+}
+
+```
+
+There was some error in the Employer's Address column in older data but I won't be using that column for my analysis. Anyways, it is filtered out in my data
+
+Last transformation step is to classify Jobs based on the Titles and the Seniority of the Job. This is because seniority results in a higher wage. For example, a Senior/ Lead Data Scientist is expected to earn more than a regular Data Scientist. I will use the JOB_TITLE column to extract this information.
+
+JOB_CLASS:
+1. Data Scientist
+2. Data Engineer
+3. Machine Learning
+4. Other
+
+JOB_LEVEL:
+1. Basic: if there are no titles
+2. Lead: if Senior/ Sr./ Lead are included in JOB_TITLE column
+2. Manager: if Manager/ Director/ Principal/ Mgr in the JOB_TITLE column
+
+```{r}
+## Mutating JOB_LEVEL using regular expressions
+
+# Defaulting to basic
+h1b_df = h1b_df %>% mutate(JOB_LEVEL = 'BASIC')
+
+# MANAGER
+h1b_df = h1b_df %>% mutate(JOB_LEVEL = ifelse((regexpr('manager', tolower(JOB_TITLE)) != -1 | regexpr('director', tolower(JOB_TITLE)) != -1 | regexpr('mgr', tolower(JOB_TITLE)) != -1 | regexpr('principal', tolower(JOB_TITLE)) != -1), 'MANAGER', JOB_LEVEL))
+
+# SENIOR
+h1b_df = h1b_df %>% mutate(JOB_LEVEL = ifelse(JOB_LEVEL != 'MANAGER' & (regexpr('lead', tolower(JOB_TITLE)) != -1 | regexpr('senior', tolower(JOB_TITLE)) != -1 | regexpr('sr.', tolower(JOB_TITLE)) != -1), 'SENIOR',JOB_LEVEL))
+
+## Mutating JOB_CLASS using regular expressions
+h1b_df = h1b_df %>% mutate(JOB_CLASS = 'OTHER')
+
+# DATA SCIENTIST
+h1b_df = h1b_df %>% mutate(JOB_CLASS = ifelse(regexpr('data scientist', tolower(JOB_TITLE)) != -1, 'DATA SCIENTIST', JOB_CLASS))
+
+# DATA ANALYST
+h1b_df = h1b_df %>% mutate(JOB_CLASS = ifelse(regexpr('data analyst', tolower(JOB_TITLE)) != -1, 'DATA ANALYST', JOB_CLASS))
+
+# DATA ENGINEER
+h1b_df = h1b_df %>% mutate(JOB_CLASS = ifelse(regexpr('data engineer', tolower(JOB_TITLE)) != -1, 'DATA ENGINEER', JOB_CLASS))
+
+# MACHINE LEARNING
+h1b_df = h1b_df %>% mutate(JOB_CLASS = ifelse(regexpr('machine learning', tolower(JOB_TITLE)) != -1, 'MACHINE LEARNING', JOB_CLASS))
+```
+
+<h2> Exploratory Data Analysis </h2>
+
+My first plot will be on no. of applications applied and certified in 2015. Top 10 companies.
+
+```{r}
+
+#Making a copy of the final transformed data for backup
+
+h1b_df %>% select(CASE_STATUS) %>% sapply(function(x) unique(x))
+```
+
+<h3> All Company Analysis </h3>
+
+```{r}
+# Finding companies with the most no. of applications in the last years
+high_companies <- h1b_df %>%
+                  group_by(EMPLOYER_NAME) %>% 
+                  summarise(applied = n()) %>% 
+                  arrange(desc(applied))
+
+high_companies[1:10,1]
+```
+
+```{r}
+company_df = h1b_df %>% 
+            filter(EMPLOYER_NAME %in% high_companies$EMPLOYER_NAME[1:5]) %>% 
+            mutate(certified = ifelse(CASE_STATUS == "CERTIFIED",1,0)) %>%
+            group_by(EMPLOYER_NAME, YEAR) %>%
+            summarise(APPLIED = n(), CERTIFIED = sum(certified))
+  
+head(company_df)  
+```
+
+```{r}
+g <- ggplot(company_df, aes(x=EMPLOYER_NAME, y = CERTIFIED)) 
+g + geom_bar(stat = "identity", aes(fill = YEAR), position = "stack") + coord_flip() + theme_economist() + scale_fill_excel()
+
+g <- ggplot(company_df, aes(x=EMPLOYER_NAME, y = APPLIED)) 
+g + geom_bar(stat = "identity", aes(fill = YEAR), position = "stack") + coord_flip() + theme_economist() + scale_fill_excel()
+```
+
+<h3> DATA SCIENCE JOB ANALYSIS </h3>
+
+Now, let's look at how Data Scientist related Jobs have changed over the last 5 years!
+
+```{r}
+datascience_df = h1b_df %>%
+                 filter(JOB_CLASS != "OTHER" & JOB_CLASS != "DATA ANALYST") %>%
+                 mutate(certified = ifelse(CASE_STATUS == "CERTIFIED",1,0)) %>%
+                 group_by(JOB_CLASS, YEAR) %>%
+                 summarise(APPLIED = n(), CERTIFIED = sum(certified))
+
+g <- ggplot(datascience_df, aes(x=YEAR, y = CERTIFIED)) 
+g + geom_bar(stat = "identity", aes(fill = JOB_CLASS), position = "dodge")  + theme_wsj() + scale_fill_wsj()
+
+g <- ggplot(datascience_df, aes(x=YEAR, y = APPLIED)) 
+g + geom_bar(stat = "identity", aes(fill = JOB_CLASS), position = "dodge") + theme_wsj() + scale_fill_wsj()
+```
+
+```{r}
+datascience_df = h1b_df %>%
+                 filter(JOB_CLASS != "OTHER" & JOB_CLASS != "DATA ANALYST") %>%
+                 group_by(JOB_CLASS, YEAR)
+#datascience_df <- datascience_df %>% filter(JOB_CLASS != "MACHINE LEARNING")
+
+g <- ggplot(datascience_df, aes(x=YEAR, y = PREVAILING_WAGE)) 
+g <- g + geom_boxplot(aes(fill = JOB_CLASS))  
+g + theme_fivethirtyeight() + scale_fill_fivethirtyeight()+ coord_cartesian(ylim = c(50000,150000))
+```
+
+<h3> SENIORITY ANALYSIS </h3>
+
+Next, let's analyze the seniority among the different Data Scientist Positions
+
+```{r}
+datascience_df = h1b_df %>%
+                 filter(JOB_CLASS != "OTHER" & JOB_CLASS != "DATA ANALYST" & YEAR == '2015') %>%
+                 group_by(JOB_LEVEL, YEAR)
+#datascience_df <- datascience_df %>% filter(JOB_CLASS != "MACHINE LEARNING")
+
+g <- ggplot(datascience_df, aes(x=JOB_LEVEL, y = PREVAILING_WAGE)) 
+g <- g + geom_boxplot(aes(fill = JOB_CLASS))  
+g + theme_fivethirtyeight() + scale_fill_fivethirtyeight()+ coord_cartesian(ylim = c(50000,200000))
+
+```
+
+```{r}
+ds_state_df <- h1b_df %>%
+                 filter(JOB_CLASS != "OTHER" & JOB_CLASS != "DATA ANALYST" & YEAR == '2015' & JOB_LEVEL == 'BASIC') %>%
+                 group_by(WORKSITE_STATE) %>%
+                 summarise(WAGE = mean(PREVAILING_WAGE), N_JOBS = n()) %>%
+                 mutate(WAGE_SCALED = 0.001*WAGE) %>%
+                 arrange(desc(WAGE))
+
+
+dimm = dim(ds_state_df)[1]
+
+g <- ggplot(ds_state_df, aes(x=reorder(WORKSITE_STATE,WAGE), y = WAGE)) 
+g <- g + geom_bar(stat="identity", aes(fill= WORKSITE_STATE))
+g <- g  + scale_colour_discrete() + coord_flip() + guides(fill=FALSE)
+g
+```
+
+As you observe there is a big variation across the states! Next, we will explore mapping the Wage metric onto a geographical map. First, we need to convert our abbreviated State code to full State names in lower case in order to use the fiftystater package.
+
+```{r}
+ #'x' is the column of a data.frame that holds 2 digit state codes
+stateFromLower <-function(x) {
+   #read 52 state codes into local variable [includes DC (Washington D.C. and PR (Puerto Rico)]
+  st.codes<-data.frame(
+                      state=as.factor(c("AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
+                                         "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD", "ME",
+                                         "MI", "MN", "MO", "MS",  "MT", "NC", "ND", "NE", "NH", "NJ", "NM",
+                                         "NV", "NY", "OH", "OK", "OR", "PA", "PR", "RI", "SC", "SD", "TN",
+                                         "TX", "UT", "VA", "VT", "WA", "WI", "WV", "WY")),
+                      full=as.factor(c("alaska","alabama","arkansas","arizona","california","colorado",
+                                       "connecticut","district of columbia","delaware","florida","georgia",
+                                       "hawaii","iowa","idaho","illinois","indiana","kansas","kentucky",
+                                       "louisiana","massachusetts","maryland","maine","michigan","minnesota",
+                                       "missouri","mississippi","montana","north carolina","north dakota",
+                                       "nebraska","new hampshire","new jersey","new mexico","nevada",
+                                       "new york","ohio","oklahoma","oregon","pennsylvania","puerto rico",
+                                       "rhode island","south carolina","south dakota","tennessee","texas",
+                                       "utah","virginia","vermont","washington","wisconsin",
+                                       "west virginia","wyoming"))
+                       )
+     #create an nx1 data.frame of state codes from source column
+  st.x<-data.frame(state=x)
+     #match source codes with codes from 'st.codes' local variable and use to return the full state name
+  refac.x<-st.codes$full[match(st.x$state,st.codes$state)]
+     #return the full state names in the same order in which they appeared in the original source
+  return(refac.x)
+ 
+}
+
+ds_state_df$WORKSITE_STATE_FULL <- stateFromLower(ds_state_df$WORKSITE_STATE)
+```
+
+
+```{r}
+library(fiftystater)
+library(colorplaner)
+
+p <- ggplot(ds_state_df, aes(map_id = WORKSITE_STATE_FULL)) + 
+  # map points to the fifty_states shape data
+  geom_map(aes(fill = WAGE_SCALED), map = fifty_states) + 
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+  scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom", 
+        panel.background = element_rect(fill="grey"))
+
+p + theme(legend.position = "right") + scale_colour_brewer(palette = "OrRd")
+```
+
+
+```{r}
+p <- ggplot(ds_state_df, aes(map_id = WORKSITE_STATE_FULL)) + 
+  # map points to the fifty_states shape data
+  geom_map(aes(fill = N_JOBS), map = fifty_states) + 
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+  scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom", 
+        panel.background = element_rect(fill="grey"))
+
+p + theme(legend.position = "right")
+```
+
+```{r}
+library(ggmap)
+
+ds_city_df <- h1b_df %>%
+                 filter(JOB_CLASS != "OTHER" & JOB_CLASS != "DATA ANALYST" & YEAR == '2015' & JOB_LEVEL == 'BASIC') %>%
+                 group_by(WORKSITE_CITY) %>%
+                 summarise(WAGE = mean(PREVAILING_WAGE), N_JOBS = n()) %>%
+                 mutate(WAGE_SCALED = 0.001*WAGE) %>%
+                 arrange(desc(WAGE))
+```
+
+Adding Geocode location this dataframe.
+
+```{r}
+cities_list = ds_city_df %>% select(WORKSITE_CITY) %>% sapply(function(x) unique(x))
+cities_list = cbind(geocode(as.character(cities_list)),cities_list)
+```
+
+```{r}
+ds_city_df = full_join(ds_city_df,cities_list,by="WORKSITE_CITY")
+
+head(ds_city_df)
+```
+
+```{r}
+USA = map_data(map="usa")
+
+g <- ggplot(USA, aes(x=long, y=lat)) + 
+     geom_polygon() +
+     geom_point(data=ds_city_df, aes(x=lon, y=lat, alpha=WAGE, size = WAGE), color="yellow") + 
+     coord_map(xlim = c(-130,-65),ylim=c(23,50))
+g
+```
+
+
+```{r}
+g <- ggplot(USA, aes(x=long, y=lat)) + 
+     geom_polygon() +
+     geom_point(data=ds_city_df, aes(x=lon, y=lat, size=N_JOBS, alpha=N_JOBS),color = "yellow") + 
+     coord_map(xlim = c(-130,-65),ylim=c(23,50))
+g
+```
+
+
