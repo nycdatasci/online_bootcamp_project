@@ -13,7 +13,7 @@ Contributed by Sharan Naribole. He is currently undertaking the part-time online
 
 The H-1B is an employment-based, non-immigrant visa category for temporary foreign workers in the United States. Every year, the US immigration department accepts over 200,000 petitions and selects 85,000 applications through a random process. The application data is available for public access to perform in-depth longitudinal research and analysis. This data provides key insights into the prevailing wages for job titles being sponsored by US employers under H1-B visa category. In particular, I utilize the 2011-2015 H-1B petition disclosure data to analyze the Salary distribution across different industries, states  and seniority levels for Data Science positions. 
 
-```{r}
+```{r,results="hide",warning=FALSE, error=FALSE, message=FALSE}
 library(dplyr)
 library(ggplot2)
 library(readxl)
@@ -37,6 +37,13 @@ pw_unit_to_yearly = function(prevailing_wage, pw_unit_of_pay) {
 }
 ```
 
+```{r}
+split_city = function(city) {
+  return(strsplit(city,split=",")[1])
+}
+```
+
+
 The main data transformation of raw data of a given year:
 1. Mutating Year
 2. Column matching
@@ -49,52 +56,60 @@ data_transform = function(raw_data_path,h1b_df, year) {
   
   new_df = read_excel(raw_data_path)
   
-  # Adding Year column to dataframe
-  print("Mutating year ..")
-  new_df = new_df %>% mutate(YEAR = as.character(year))
-  
   # Changing column names of data before 2015 to match with 2015 column names
   print("Column matching ..")
   if(year != 2015){
     
-    new_df = new_df %>% select(-LCA_CASE_EMPLOYER_POSTAL_CODE)
-    new_df = new_df %>% rename(CASE_NUMBER = LCA_CASE_NUMBER, 
-                               CASE_STATUS = STATUS,
-                               EMPLOYER_NAME = LCA_CASE_EMPLOYER_NAME,
-                               SOC_NAME = LCA_CASE_SOC_NAME,
-                               JOB_TITLE = LCA_CASE_JOB_TITLE,
-                               FULL_TIME_POSITION = FULL_TIME_POS,
-                               PREVAILING_WAGE = PW_1,
-                               PW_UNIT_OF_PAY = PW_UNIT_1,
-                               WORKSITE_CITY = LCA_CASE_WORKLOC1_CITY,
-                               WORKSITE_STATE = LCA_CASE_WORKLOC1_STATE)
+    new_df = new_df %>% 
+             select(-LCA_CASE_EMPLOYER_POSTAL_CODE)
+    new_df = new_df %>% 
+             rename(CASE_NUMBER = LCA_CASE_NUMBER, 
+                    CASE_STATUS = STATUS,
+                    EMPLOYER_NAME = LCA_CASE_EMPLOYER_NAME,
+                    SOC_NAME = LCA_CASE_SOC_NAME,
+                    JOB_TITLE = LCA_CASE_JOB_TITLE,
+                    FULL_TIME_POSITION = FULL_TIME_POS,
+                    PREVAILING_WAGE = PW_1,
+                    PW_UNIT_OF_PAY = PW_UNIT_1,
+                    WORKSITE_CITY = LCA_CASE_WORKLOC1_CITY,
+                    WORKSITE_STATE = LCA_CASE_WORKLOC1_STATE)
   }
+  
+  # Adding Year column to dataframe and removing state from City column if exists
+  print("Mutating year ..")
+  new_df = new_df %>% 
+           mutate(YEAR = as.character(year))
   
   ## Filtering rows with H1-B visa and Full Time Employment
   print("Filtering H1-B visas with Full-time employment ..")
-  new_df = new_df %>% filter(VISA_CLASS == "H-1B" & FULL_TIME_POSITION == 'Y')
+  new_df = new_df %>% 
+           filter(VISA_CLASS == "H-1B" & FULL_TIME_POSITION == 'Y')
   
   ## Removing rows with PW_UNIT_OF_PAY not mentioned, will come back to this later
-  new_df = new_df %>% filter(!is.na(PW_UNIT_OF_PAY)) 
+  new_df = new_df %>% 
+           filter(!is.na(PW_UNIT_OF_PAY)) 
       
   ## Converting to numeric form text           
-  new_df = new_df %>% mutate(PREVAILING_WAGE = as.numeric(PREVAILING_WAGE)) 
+  new_df = new_df %>% 
+           mutate(PREVAILING_WAGE = as.numeric(PREVAILING_WAGE)) 
   
   # Converting wage to year scale
   print("Converting Prevailing wage to Year scale")
-  new_df = new_df %>% mutate(PREVAILING_WAGE =  pw_unit_to_yearly(PREVAILING_WAGE, PW_UNIT_OF_PAY)) 
+  new_df = new_df %>% 
+           mutate(PREVAILING_WAGE =  pw_unit_to_yearly(PREVAILING_WAGE, PW_UNIT_OF_PAY)) 
   
   ## Retaining only the relevant columns for the data analysis
   print("Filtering relevant columns ..")
-  new_df = new_df %>% select(CASE_NUMBER, 
-                             CASE_STATUS,
-                             EMPLOYER_NAME,
-                             SOC_NAME,
-                             JOB_TITLE,
-                             PREVAILING_WAGE,
-                             WORKSITE_CITY,
-                             WORKSITE_STATE,
-                             YEAR)
+  new_df = new_df %>% 
+           select(CASE_NUMBER, 
+                  CASE_STATUS,
+                  EMPLOYER_NAME,
+                  SOC_NAME,
+                  JOB_TITLE,
+                  PREVAILING_WAGE,
+                  WORKSITE_CITY,
+                  WORKSITE_STATE,
+                  YEAR)
 
   # Merging data with already transformed data
   print("Merging data ..")
@@ -108,7 +123,7 @@ data_transform = function(raw_data_path,h1b_df, year) {
 
 Next, I call the above function for the multiple sources of data.
 
-```{r,results="hide", echo=FALSE,warning=FALSE, error=FALSE, message=FALSE}
+```{r,warning=FALSE, error=FALSE, message=FALSE}
 #Empty data frame
 h1b_df = data.frame()
 
@@ -118,6 +133,20 @@ for(year in seq(2015,2011)) {
 }
 
 ```
+
+The useful columns for our data analysis include:
+
+1)<b>EMPLOYER_NAME</b>: Name of employer submitting the H1-B application.
+
+2)<b>JOB_TITLE</b>: Title of the job using which we can filter the Data Science positions and the Seniority Level
+
+3)<b>SOC_NAME</b>: The broad area/industry associated with a job as classified by the Standard Occupational (SOC) System. This gives us insight into the fields in which Data Scientist positions are being offered.
+
+4)<b>PREVAILING_WAGE</b>: The prevailing wage for a job position is defined as the average wage paid to similarly employed workers in the requested occupation in the area of intended employment. The prevailing wage is based on the employer’s minimum requirements for the position. ( Source: https://www.usavisanow.com/h-1b-visa/h1b-visa-resources/prevailing-wage/). This column will be our key metric in the data analysis.
+
+5)<b>WORKSITE_CITY, WORKSITE_STATE</b>: The foreign worker’s intended area of employment. We will explore the relationship between prevailing wage for Data Scientist position across different locations.
+
+I focus on the annual prevailing wage for full-time positions. Consequently, the rows confirming full_time positions are filtered.
 
 There was some error in the Employer's Address column in older data but I won't be using that column for my analysis. Anyways, it is filtered out in my data
 
@@ -141,25 +170,32 @@ JOB_LEVEL:
 h1b_df = h1b_df %>% mutate(JOB_LEVEL = 'BASIC')
 
 # MANAGER
-h1b_df = h1b_df %>% mutate(JOB_LEVEL = ifelse((regexpr('manager', tolower(JOB_TITLE)) != -1 | regexpr('director', tolower(JOB_TITLE)) != -1 | regexpr('mgr', tolower(JOB_TITLE)) != -1 | regexpr('principal', tolower(JOB_TITLE)) != -1), 'MANAGER', JOB_LEVEL))
+h1b_df = h1b_df %>% 
+         mutate(JOB_LEVEL = ifelse((regexpr('manager', tolower(JOB_TITLE)) != -1 | regexpr('director', tolower(JOB_TITLE)) != -1 | regexpr('mgr', tolower(JOB_TITLE)) != -1 | regexpr('principal', tolower(JOB_TITLE)) != -1), 'MANAGER', JOB_LEVEL))
 
 # SENIOR
-h1b_df = h1b_df %>% mutate(JOB_LEVEL = ifelse(JOB_LEVEL != 'MANAGER' & (regexpr('lead', tolower(JOB_TITLE)) != -1 | regexpr('senior', tolower(JOB_TITLE)) != -1 | regexpr('sr.', tolower(JOB_TITLE)) != -1), 'SENIOR',JOB_LEVEL))
+h1b_df = h1b_df %>% 
+         mutate(JOB_LEVEL = ifelse(JOB_LEVEL != 'MANAGER' & (regexpr('lead', tolower(JOB_TITLE)) != -1 | regexpr('senior', tolower(JOB_TITLE)) != -1 | regexpr('sr.', tolower(JOB_TITLE)) != -1), 'SENIOR',JOB_LEVEL))
 
 ## Mutating JOB_CLASS using regular expressions
-h1b_df = h1b_df %>% mutate(JOB_CLASS = 'OTHER')
+h1b_df = h1b_df %>% 
+         mutate(JOB_CLASS = 'OTHER')
 
 # DATA SCIENTIST
-h1b_df = h1b_df %>% mutate(JOB_CLASS = ifelse(regexpr('data scientist', tolower(JOB_TITLE)) != -1, 'DATA SCIENTIST', JOB_CLASS))
+h1b_df = h1b_df %>% 
+         mutate(JOB_CLASS = ifelse(regexpr('data scientist', tolower(JOB_TITLE)) != -1, 'DATA SCIENTIST', JOB_CLASS))
 
 # DATA ANALYST
-h1b_df = h1b_df %>% mutate(JOB_CLASS = ifelse(regexpr('data analyst', tolower(JOB_TITLE)) != -1, 'DATA ANALYST', JOB_CLASS))
+h1b_df = h1b_df %>% 
+         mutate(JOB_CLASS = ifelse(regexpr('data analyst', tolower(JOB_TITLE)) != -1, 'DATA ANALYST', JOB_CLASS))
 
 # DATA ENGINEER
-h1b_df = h1b_df %>% mutate(JOB_CLASS = ifelse(regexpr('data engineer', tolower(JOB_TITLE)) != -1, 'DATA ENGINEER', JOB_CLASS))
+h1b_df = h1b_df %>% 
+         mutate(JOB_CLASS = ifelse(regexpr('data engineer', tolower(JOB_TITLE)) != -1, 'DATA ENGINEER', JOB_CLASS))
 
 # MACHINE LEARNING
-h1b_df = h1b_df %>% mutate(JOB_CLASS = ifelse(regexpr('machine learning', tolower(JOB_TITLE)) != -1, 'MACHINE LEARNING', JOB_CLASS))
+h1b_df = h1b_df %>% 
+         mutate(JOB_CLASS = ifelse(regexpr('machine learning', tolower(JOB_TITLE)) != -1, 'MACHINE LEARNING', JOB_CLASS))
 ```
 
 <h2> Exploratory Data Analysis </h2>
@@ -250,11 +286,11 @@ g + theme_fivethirtyeight() + scale_fill_fivethirtyeight()+ coord_cartesian(ylim
 
 ```{r}
 ds_state_df <- h1b_df %>%
-                 filter(JOB_CLASS != "OTHER" & JOB_CLASS != "DATA ANALYST" & YEAR == '2015' & JOB_LEVEL == 'BASIC') %>%
-                 group_by(WORKSITE_STATE) %>%
-                 summarise(WAGE = mean(PREVAILING_WAGE), N_JOBS = n()) %>%
-                 mutate(WAGE_SCALED = 0.001*WAGE) %>%
-                 arrange(desc(WAGE))
+               filter(JOB_CLASS != "OTHER" & JOB_CLASS != "DATA ANALYST" & YEAR == '2015' & JOB_LEVEL == 'BASIC') %>%
+               group_by(WORKSITE_STATE) %>%
+               summarise(WAGE = mean(PREVAILING_WAGE), N_JOBS = n()) %>%
+               mutate(WAGE_SCALED = 0.001*WAGE) %>%
+               arrange(desc(WAGE))
 
 
 dimm = dim(ds_state_df)[1]
@@ -335,12 +371,14 @@ p <- ggplot(ds_state_df, aes(map_id = WORKSITE_STATE_FULL)) +
 p + theme(legend.position = "right")
 ```
 
-```{r}
+```{r,warning=FALSE, error=FALSE, message=FALSE}
 library(ggmap)
+
+h1b_df$WORKSITE_STATE_FULL <- stateFromLower(h1b_df$WORKSITE_STATE)
 
 ds_city_df <- h1b_df %>%
                  filter(JOB_CLASS != "OTHER" & JOB_CLASS != "DATA ANALYST" & YEAR == '2015' & JOB_LEVEL == 'BASIC') %>%
-                 group_by(WORKSITE_CITY) %>%
+                 group_by(WORKSITE_CITY, WORKSITE_STATE_FULL) %>%
                  summarise(WAGE = mean(PREVAILING_WAGE), N_JOBS = n()) %>%
                  mutate(WAGE_SCALED = 0.001*WAGE) %>%
                  arrange(desc(WAGE))
@@ -348,12 +386,12 @@ ds_city_df <- h1b_df %>%
 
 Adding Geocode location this dataframe.
 
-```{r}
+```{r,warning=FALSE, error=FALSE, message=FALSE}
 cities_list = ds_city_df %>% select(WORKSITE_CITY) %>% sapply(function(x) unique(x))
 cities_list = cbind(geocode(as.character(cities_list)),cities_list)
 ```
 
-```{r}
+```{r,warning=FALSE, error=FALSE, message=FALSE}
 ds_city_df = full_join(ds_city_df,cities_list,by="WORKSITE_CITY")
 
 head(ds_city_df)
@@ -376,6 +414,52 @@ g <- ggplot(USA, aes(x=long, y=lat)) +
      geom_point(data=ds_city_df, aes(x=lon, y=lat, size=N_JOBS, alpha=N_JOBS),color = "yellow") + 
      coord_map(xlim = c(-130,-65),ylim=c(23,50))
 g
+```
+We can zoom into the California data as it has the most number of Data Science jobs and among the highest salaries.
+
+```{r}
+
+CA <- map_data("state",region="california")
+cali_df = ds_city_df %>% 
+          filter(WORKSITE_STATE_FULL == "california") %>%
+          arrange(desc(N_JOBS))
+
+head(cali_df)
+```
+
+```{r}
+library(ggrepel)
+
+g <- ggplot(CA, aes(x=long, y=lat)) + 
+     geom_polygon() + 
+     geom_point(data=cali_df, aes(x=lon, y=lat, size=N_JOBS, alpha=N_JOBS),color = "yellow") + 
+     coord_map(xlim = c(-125,-112.5),ylim=c(32.5,42.5))
+
+g
+```
+
+```{r}
+cali_top_df = cali_df %>% filter(WAGE_SCALED > 90)
+
+#g <- ggplot(CA, aes(x=long, y=lat)) + 
+#     geom_polygon()  
+g <- ggplot(data=cali_top_df, aes(x=lon, y=lat)) + geom_point(aes(size=N_JOBS,alpha = N_JOBS), color="red") + 
+     coord_cartesian(xlim = c(-122.5,-121),ylim=c(37,38)) + 
+     geom_label_repel(aes(label = WORKSITE_CITY), size = 3, nudge_x = 0.05, color = "black",segment.color = "#333333", segment.alpha = 0.5, segment.size = 0.3, arrow = arrow(length = unit(0.01, 'npc')), point.padding = unit(1, 'lines'), force = 0.25)
+
+g
+```
+
+<h3> Cost of Living Analysis </h3>
+
+```{r, error=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+coli_data = read.csv("data/coli_data.csv")
+
+coli_data <- coli_data %>% 
+             dplyr::select(WORKSITE_CITY = city, COLI = coli)
+
+ds_city_df <- left_join(ds_city_df,coli_data, by = "WORKSITE_CITY")
 ```
 
 
