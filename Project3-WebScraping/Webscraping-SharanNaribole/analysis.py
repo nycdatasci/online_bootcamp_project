@@ -3,17 +3,17 @@ import pandas as pd
 import re
 import matplotlib.pyplot as plt
 import seaborn as sns
-#sns.set_style("whitegrid")
+sns.set_style("whitegrid")
 
-plt.style.use('seaborn-poster')
+#plt.style.use('seaborn-poster')
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = 'Ubuntu'
 #plt.rcParams['font.monospace'] = 'Ubuntu Mono'
 plt.rcParams['font.size'] = 24
 plt.rcParams['axes.labelsize'] = 24
 plt.rcParams['axes.labelweight'] = 'bold'
-plt.rcParams['xtick.labelsize'] = 24
-plt.rcParams['ytick.labelsize'] = 24
+plt.rcParams['xtick.labelsize'] = 20
+plt.rcParams['ytick.labelsize'] = 20
 plt.rcParams['legend.fontsize'] = 24
 plt.rcParams['figure.titlesize'] = 24
 
@@ -69,13 +69,13 @@ def main():
     plt.ylabel("Number of Comments")
     plt.ylim((0,3000.0))
     #plt.savefig('results/scatter_submission.eps', format='eps', dpi=1000)
-    plt.show()
+    #plt.show()
 
     #---------------------------------------------------------------------------
     ## Clubs Analysis for TOP 6 Clubs with the highest average flair share percentage
     #---------------------------------------------------------------------------
     print(clubs_df.apply(lambda x:np.mean(x), axis=1).sort_values(ascending=False)[:25])
-    top_clubs = list(clubs_df.apply(lambda x:np.mean(x), axis=1).sort_values(ascending=False)[:6].index)
+    top_clubs = list(clubs_df.apply(lambda x:np.mean(x), axis=1).sort_values(ascending=False)[:8].index)
     clubs_df = clubs_df.transpose()
     plt.figure()
     sns.boxplot(x=clubs_df[top_clubs])
@@ -85,7 +85,7 @@ def main():
     plt.ylabel("Flair percentage share per submission")
     plt.xlabel("Flairs")
     plt.show()
-
+'''
     #---------------------------------------------------------------------------
     ## Comparing Metrics for Submissions:
     #---------------------------------------------------------------------------
@@ -143,7 +143,7 @@ def main():
     plt.ylabel("Number of Comments")
     plt.ylim((0,2000))
     plt.show()
-
+'''
 # This is the standard boilerplate that calls the main() function.
 if __name__ == '__main__':
   main()

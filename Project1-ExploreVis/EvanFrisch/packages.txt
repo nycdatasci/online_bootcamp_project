@@ -1,0 +1,8 @@
+# Use the following statements to install packages required by health_inequality.R, if not already installed.
+
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("ggrepel")
+install.packages("mapproj")
+install.packages("maps")
+install.packages("fiftystater")

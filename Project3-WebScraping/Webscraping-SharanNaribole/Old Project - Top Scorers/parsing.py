@@ -34,11 +34,11 @@ def word_locate(x,y):
 def day_delta(x,y):
     delta = pd.to_timedelta(y-x)
     match = re.search('\d+',str(delta))
-    return int(match.group()) 
+    return int(match.group())
 
 def week_delta(x,y):
     return day_delta(x,y)//7 #7 indicates number of days in a weeks
- 
+
 
 # Define a main() function that prints a little greeting.
 def main():
@@ -87,7 +87,7 @@ def main():
     hotstars_df.columns = ['comments','score']
     hotstars_df.fillna(0,inplace=True)
     print(hotstars_df)
-    
+
     ##Hot Stars Comparison
     #Submission Score
     hotstars_df['score'].unstack(level=0).plot(kind='area',stacked=True)
@@ -101,11 +101,11 @@ def main():
     plt.title("Hot Stars comparison on /r/soccer")
     plt.ylabel('Submission Comments - Weekly Mean')
     plt.show()
-    
+
     #Global Stats
     #The goal is to get weekly numbers on all /r/soccer goal stats: Box plots
 
-    '''
+
     #Boxplot
     fig, ax_new = plt.subplots(sharey=False)
     fig.suptitle("")
@@ -117,7 +117,7 @@ def main():
     plt.ylabel('Reddit Submission Score')
     plt.yticks(np.arange(0,1001,100))
     #plt.show()
-    
+
     #Histogram
     plt.figure()
     plt.hist(list(reddit_df['score']),bins = 500)
@@ -126,8 +126,8 @@ def main():
     plt.xlabel('Reddit Submission Score')
     #plt.show()
     plt.show()
-    '''
-    
+
+
     ##Grouping Players into Leagues
     #Aggregating Player Submission Scores into One frame
     soccerway_df.reset_index(inplace=True)
@@ -159,10 +159,10 @@ def main():
     plt.title("League comparison on /r/soccer")
     plt.ylabel('Submission Comments - Weekly Mean')
     plt.show()
-    
 
-    
-    
+
+
+
 # This is the standard boilerplate that calls the main() function.
 if __name__ == '__main__':
   main()
