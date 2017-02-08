@@ -1,0 +1,1 @@
+Exploratory analysis of the **National Health and Nutrition Examination Survey (NHANES)**, administered by the CDC. A subset of the most recent data results from 2013-2014 including demographic and socioeconomic information, nutrition, exercise and health outcomes for ~10,000 survey participants is made available for interaction within a shiny application.

@@ -13,11 +13,20 @@ sidebar <- dashboardSidebar(sidebarMenu(
 ##### Body #####
 body <- dashboardBody(tabItems(
     tabItem(tabName = 'demographics',
-            box(title = 'NHANES Overview',solidHeader = TRUE,width = 12,
-                HTML(NHANES.html))),
+            fluidRow(
+              box(title = 'NHANES Overview',solidHeader = TRUE,width = 12,HTML(NHANES.html))
+            ),
+            fluidRow(
+              box(title = 'Explore Survey Demographics',width = 3,
+                  radioButtons('demographics.x','View counts of:',choices = c('Age','Education','Income')),
+                  checkboxGroupInput('demographics.factor','Grouped by:',choices = c('Gender','Ethnicity'))),
+              box(solidHeader = TRUE,width = 9,plotlyOutput('demographicPlot'))
+            ),
     tabItem(tabName = 'exercise'),
     tabItem(tabName = 'nutrition')
-  ))
+    )
+  )
+)
   
 
 ##### Construct UI for final layout #####
