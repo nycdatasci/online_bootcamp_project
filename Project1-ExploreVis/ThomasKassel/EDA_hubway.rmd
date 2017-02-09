@@ -11,7 +11,7 @@ output:
 
 Boston's bikeshare program, [Hubway](https://www.thehubway.com/), has quickly become a convenient, affordable and fun way to navigate the city. Publicly owned by municipalities in Greater Boston and operated by national bike organization Motivate, Hubway's increasing popularity is consistent with national trends of greater attention to sustainable transport in metro areas.
 
-Environmental, monetary and convenience benefits aside, bikeshare programs have embraced the influx of big data collected by their bike/station technology, using the rich datasets collected for their own insights as well as posting many of them to the public for any aspiring data scientist to enjoy.
+Environmental, monetary and convenience benefits aside, bikeshare programs have embraced the influx of big data collected by their bike/station technology, using the rich datasets for their own business insights as well as posting many of them to the public for any aspiring data scientist to enjoy.
 
 ## Data
 
@@ -25,7 +25,6 @@ Environmental, monetary and convenience benefits aside, bikeshare programs have 
 
 ```{r source_files, message=FALSE, warning=FALSE, include=FALSE, cache=TRUE}
 #source main scripts, loading and formatting of input data
-library(ggplot2)
 source('ggplot_theme.R')
 source('hubway_analysis.R')
 ```
@@ -36,7 +35,7 @@ Basic variables provided in the Trip History dataset include the timestamp (minu
 
 Density plots help to visualize hourly ridership throughout the course of an average weekday or weekend. Here we see an obvious "M" shape on the weekday density curve, very likely due to commuting activity (roughly including weekday hours from 7-9AM and 4-7PM). Further analysis reveals that these commuting rides accounted for **33% of total trips (including weekends) during the summer of 2012**. Average weekend profiles exhibit an opposite daily profile with peak ridership occurring in the afternoons. A small, but noticeable amount of weekend rides occur from 12AM-3AM catering to more 'adventurous' biker-bar-goers.
 
-```{r hourly_profile_histogram, echo=FALSE, message=FALSE, warning=FALSE}
+```{r hourly_profile_histogram, echo=FALSE, message=FALSE, warning=FALSE,cache=TRUE}
 hourly_hist <- ggplot(data=trips,aes(x=Hour)) + geom_density(adjust=1.6,fill='steelblue3',alpha=0.4) + 
                ggtitle("Hourly Ridership Patterns") + xlab("Time of Day") + ylab('% of Rides') +
                scale_y_continuous(label=percent) + scale_x_continuous(breaks=seq(0,24,4),labels=hour.labs) +
@@ -47,7 +46,7 @@ print(hourly_hist)
 
 We can further solidify weekday-vs-weekend behavior using density plots as a function of total trips and average trip duration. In the *right-hand panel* we observe a noticeable difference in the distributions of daily rides - on a given weekday, there are 500-750 more rides than a given weekend. In the *left-hand panel* we see that the distribution of weekend trips has a mean trip duration of approximately **10 minutes** longer than that of weekday trips, with an average trip time of ~25 mins. Hubway rides max out at 30 minutes, so weekend riders tend to make the most of their riding time. Together, these two observations suggest that Hubway lends itself well to both higher-frequency and faster weekday schedules (commuting) and slower-paced weekend routines (recreational rides and sightseeing).
 
-```{r trips_duration_histogram, echo=FALSE, message=FALSE, warning=FALSE}
+```{r trips_duration_histogram, echo=FALSE, message=FALSE, warning=FALSE,cache=TRUE}
 #density plot - daily number of trips factored by weekday/weekend
 numtrips_hist <- ggplot(data=trips.daytype,aes(x=total_trips)) + geom_density(aes(colour=day_type,fill=day_type),alpha=0.1) +
                  theme(axis.title.y = element_blank(),axis.text.y = element_blank(),axis.ticks.y = element_blank()) +     scale_fill_discrete(guide=FALSE) +
@@ -69,7 +68,7 @@ There were no female cohorts in the top ten ridership groups for either Greater 
 
 Because of the low number of riders from the suburbs, the y-axis for suburban cohorts has been scaled up; however on absolute terms, these rides constitute a significantly lower proportion than Greater Boston residents.
 
-```{r demographics_histogram, echo=FALSE, message=FALSE, warning=FALSE}
+```{r demographics_histogram, echo=FALSE, message=FALSE, warning=FALSE,cache=TRUE}
 demographics_bar <- ggplot(data=demographics,aes(x=neighborhood,y=rides,fill=age)) + geom_bar(stat='identity',colour='gray40',alpha=0.8) +
                     facet_wrap(~region,scales = 'free') + light_theme() + ggtitle("Hubway Ridership Demographics") +
                     scale_y_continuous(label=comma) +
@@ -80,6 +79,10 @@ print(demographics_bar)
 
 Males, of all ages, from the South End and Back Bay neighborhoods play a very significant role in Hubway's membership base - in combination they made up **17% of all registered Hubway rides during the summer of 2012**. Trips are also quite popular among male millenials in other densely populated parts of Boston.
 
-Although substantially smaller by trip volume, Hubway appears to have maintained a loyal member base from the suburbs. This segment is dominated by middle-aged males from nearby Boston towns, making heavy use of Hubway stations located at MBTA hubs (commuter rail or ferry), most notably North Station, South Station and Rowes Wharf (not shown on graph).
+Although substantially smaller by trip volume, Hubway appears to have maintained a loyal member base from the suburbs. This segment is dominated by middle-aged males from nearby Boston towns, making heavy use of Hubway stations located at MBTA hubs (commuter rail or ferry), most notably North Station, South Station and Rowes Wharf Ferry Landing (not shown on graph).
 
+## Conclusions & Next Steps
 
+Hubway has solidified its place as a viable transportation option in Greater Boston, as evidenced by incorporation of bike trips into our daily routines and high adoption among particular demographic groups. 
+
+Integration of external datasets could provide further insights into the drivers for increased ridership. To examine the impact of short-term, localized events, use of publicly available subway data could attempt to draw correlations between daily MBTA maintenance/recorded downtime and increased Hubway rides. Schedules of large city-wide events encouraging travel and sight-seeing (Red Sox games, Boston Marathon, 4th of July Fireworks) could also point to ridership spikes. With an eye to longer-term Hubway growth, study of urban planning initiatives (public spaces, increased transit coverage, etc) and commercial/residential development of new neighborhoods could indicate good candidates for new bike stations.
