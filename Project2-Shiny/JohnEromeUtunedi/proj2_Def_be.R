@@ -58,13 +58,15 @@ ContinentFilterBar_Def.Plotly = function(data1 = Cont_Def_data, fil = "2006", he
     temp = arrange(filter(data1, Year == fil),desc(Defensive.Asylum))[1:height,]
     temp$Continent = factor(as.factor(temp$Continent), levels = as.factor(temp$Continent)[order(-temp$Defensive.Asylum)], ordered = TRUE)
     val = plot_ly() %>% add_trace(data = temp, x = ~Continent, y = ~Defensive.Asylum, type = "bar", color = ~Continent,
-                                  colors = 'Set2')
+                                  colors = 'Set2') %>%
+      layout(title = paste("Continents with largest amount of Defensive Asylum Status in", fil), xaxis =list(title = ""), yaxis = list(title = "Defensive Asylum"))
   }
   else {
     temp = arrange(filter(data1, Year == fil),Defensive.Asylum)[1:height,] 
     temp$Continent = factor(as.factor(temp$Continent), levels = as.factor(temp$Continent)[order(temp$Defensive.Asylum)], ordered = TRUE)
     val = plot_ly() %>% add_trace(data = temp, x = ~Continent, y = ~Defensive.Asylum, type = "bar", color = ~Continent,
-                                  colors = 'Set2')   
+                                  colors = 'Set2') %>%
+    layout(title = paste("Continents with least amount of Defensive Asylum Status in", fil), xaxis =list(title = ""), yaxis = list(title = "Defensive Asylum total"))
   }
   return(val)
 }
@@ -74,11 +76,13 @@ ContinentFilterTotal_Def.Plotly = function(data = Cont_Def_data, amt = 2, type =
   temp = temp[1:amt,]
   temp_list = as.list(temp$Continent)
   if(type == 1) {
-    plot_ly(data = filter(data, Continent %in% c(temp_list)), x = ~Year, y = ~Defensive.Asylum, type = 'bar', color = ~Continent, 
+    temp_plot = plot_ly(data = filter(data, Continent %in% c(temp_list)), x = ~Year, y = ~Defensive.Asylum, type = 'bar', color = ~Continent, 
             colors = 'Set2')
   } else {
-    plot_ly(data = filter(data, Continent %in% c(temp_list)), x = ~Year, y = ~Defensive.Asylum, color = ~Continent, 
+    temp_plot = plot_ly(data = filter(data, Continent %in% c(temp_list)), x = ~Year, y = ~Defensive.Asylum, color = ~Continent, 
             size = ~Defensive.Asylum, type = "scatter",mode = "markers", marker = list(sizemode = 'diameter', opacity = 0.75)) }
+  temp_plot %>% layout(title = paste("Breakdown of top", amt, "Continents containing people with Defensive Asylum Status from 2006-2015"),
+                       xaxis = list(title = ""), yaxis = list(title = "Defensive Asylum Total"), barmode = 'stack')
 }
 
 ContinentFilterSum_Def.Plotly = function(data = Cont_Def_data, amt = 2, type = 1) {
@@ -86,10 +90,12 @@ ContinentFilterSum_Def.Plotly = function(data = Cont_Def_data, amt = 2, type = 1
   temp = temp[1:amt,]
   temp$Continent = factor(as.factor(temp$Continent), levels = as.factor(temp$Continent)[order(-temp$sum)], ordered = TRUE)
   if(type == 1) {
-    plot_ly(data = temp, x = ~Continent, y = ~sum, type = 'bar', color = ~Continent, colors = 'Set2')
+    temp_plot = plot_ly(data = temp, x = ~Continent, y = ~sum, type = 'bar', color = I('blue'))
   } else {
-    plot_ly(data = temp, x = ~Continent, y = ~sum, color = ~Continent, 
+    temp_plot = plot_ly(data = temp, x = ~Continent, y = ~sum, color = ~Continent, 
             size = ~sum*10, type = "scatter",mode = "markers", marker = list(sizemode = 'diameter', opacity = 0.75)) }
+  temp_plot %>% layout(title = paste("Top", amt, "Continents containing people with","<br />","Defensive Asylum Status from 2006-2015"),
+                       xaxis = list(title = ""), yaxis = list(title = "Defensive Asylum Total"))
 }
 
 
@@ -97,11 +103,15 @@ CountryFilterBar_Def.Plotly = function(data = Country_Def_data, Year_val = 2006,
   if(arrange == 1) {
     temp = arrange(filter(data, Year == Year_val, Defensive.Asylum!=0), desc(Defensive.Asylum))[1:height,]
     temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(-temp$Defensive.Asylum)], ordered = TRUE)
-    plot_ly(data = temp, x = ~Country, y = ~Defensive.Asylum, color = ~Country, type = 'bar', colors = 'Set3') }
+    plot_ly(data = temp, x = ~Country, y = ~Defensive.Asylum, color = ~Country, type = 'bar', colors = 'Set3') %>% 
+      layout(title = paste("Countries with Largest amount of Defensive Asylum Status in", Year_val), xaxis =list(title = ""), yaxis = list(title = "Total Amount of Defensive Asylum")) 
+    }
   else {
     temp = arrange(filter(data, Year == Year_val, Defensive.Asylum!=0), Defensive.Asylum)[1:height,]
     temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(temp$Defensive.Asylum)], ordered = TRUE)
-    plot_ly(data = temp, x = ~Country, y = ~Defensive.Asylum, color = ~Country, type = 'bar', colors = "Set3")     
+    plot_ly(data = temp, x = ~Country, y = ~Defensive.Asylum, color = ~Country, type = 'bar', colors = "Set3") %>% 
+      layout(title = paste("Countries with least amount of Defensive Asylum Status in ", Year_val), xaxis =list(title = ""), yaxis = list(title = "Total Amount of Defensive Asylum")) 
+    
   }
 }
 
@@ -116,10 +126,14 @@ CountryFilterTotal_Def.Plotly = function(data = Country_Def_data, amt = 5, type 
   temp = temp[1:amt,]
   temp_list = as.list(temp$Country)
   if(type == 1) {
-    plot_ly(data = filter(data, Country %in% c(temp_list)), x = ~Year, y = ~Defensive.Asylum, type = 'bar', color = ~Country)
+    temp_plot = plot_ly(data = filter(data, Country %in% c(temp_list)), x = ~Year, y = ~Defensive.Asylum, type = 'bar', color = ~Country, 
+                        colors = 'Accent')
   } else {
-    plot_ly(data = filter(data, Country %in% c(temp_list)), x = ~Year, y = ~Defensive.Asylum, color = ~Country, 
-            size = ~Defensive.Asylum, type = "scatter",mode = "markers", marker = list(sizemode = 'diameter', opacity = 0.75)) }
+    temp_plot = plot_ly(data = filter(data, Country %in% c(temp_list)), x = ~Year, y = ~Defensive.Asylum, color = ~Country, colors = 'Accent', 
+            size = ~Defensive.Asylum, type = "scatter",mode = "markers", marker = list(sizemode = 'diameter', opacity = 0.75)) 
+  }
+  temp_plot %>% layout(title = paste("Breakdown of top", amt, "Countries containing people with Defensive Asylum Status from 2006-2015"),
+                       xaxis = list(title = ""), yaxis = list(title = "Defensive Asylum Total"), barmode = 'stack')
 }
 
 CountryFilterSum_Def.Plotly = function(data = Country_Def_data, amt = 5, type = 1) {
@@ -127,29 +141,35 @@ CountryFilterSum_Def.Plotly = function(data = Country_Def_data, amt = 5, type = 
   temp = temp[1:amt,]
   temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(-temp$sum)], ordered = TRUE)
   if(type == 1) {
-    plot_ly(data = temp, x = ~Country, y = ~sum, type = 'bar', color = ~Country, colors = 'Set3')
+    temp_plot = plot_ly(data = temp, x = ~Country, y = ~sum, type = 'bar', color = I("blue"))
   } else {
-    plot_ly(data = temp, x = ~Country, y = ~sum, color = ~Country, 
-            size = ~sum*10, type = "scatter",mode = "markers", marker = list(sizemode = 'diameter', opacity = 0.75)) }
+    temp_plot = plot_ly(data = temp, x = ~Country, y = ~sum, color = ~Country, 
+            size = ~sum*10, type = "scatter",mode = "markers", marker = list(sizemode = 'diameter', opacity = 0.75)) 
+  }
+  temp_plot %>% layout(title = paste("Top", amt, "Countries containing people with","<br />","Defensive Asylum status from 2006-2015"),
+                       xaxis = list(title = ""), yaxis = list(title = "Defensive Asylum Total"))
 }
 
 CountryFilterUsrInteract_Def.Plotly = function(data = Country_Def_data, var = "Nigeria") {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Defensive.Asylum))
   plot_ly() %>% add_trace(data = filter(data, Country %in% c(var)), x = ~Year, y = ~Defensive.Asylum, color = ~Country, type = 'scatter', 
-                          mode = 'lines', colors = "Set1") %>%
-    add_trace(data = temp, x = ~Year, y = ~sum, type = 'scatter', mode = 'lines', name = 'Total', color = I("black"))
-}
+                          mode = 'lines', colors = "Set1", line = list(width = 5)) %>%
+    add_trace(data = temp, x = ~Year, y = ~sum, type = 'scatter', mode = 'lines', name = 'Total', color = I("black"), line = list(width = 5,dash = 'dash')) %>%
+    layout(title = '', xaxis = list(title = ""), yaxis = list(title = "Defensive Asylum Total"))
+  }
 
 ContinentFilterUsrInteract_Def.Plotly = function(data = Cont_Def_data, var = "Africa") {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Defensive.Asylum))
   plot_ly() %>% add_trace(data = filter(data, Continent %in% c(var)), x = ~Year, y = ~Defensive.Asylum, color = ~Continent, type = 'scatter', 
-                          mode = 'lines', colors = "Set1") %>%
-    add_trace(data = temp, x = ~Year, y = ~sum, type = 'scatter', mode = 'lines', name = 'Total', color = I("black"))
+                          mode = 'lines', colors = "Set1", line = list(width = 5)) %>%
+    add_trace(data = temp, x = ~Year, y = ~sum, type = 'scatter', mode = 'lines', name = 'Total', color = I("black"), line = list(width = 5, dash = 'dash')) %>% 
+    layout(title = '', xaxis = list(title = ""), yaxis = list(title = "Defensive Asylum Total"))
 }
 
 Total_Def.Plotly = function(data = Cont_Def_data) {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Defensive.Asylum))
-  plot_ly() %>% add_trace(data =temp, x = ~Year, y = ~sum, type = 'bar', color = ~sum)
+  plot_ly() %>% add_trace(data =temp, x = ~Year, y = ~sum, type = 'bar', color = ~sum, colors = brewer.pal(9,'RdPu')) %>% 
+    layout(xaxis = list(title = ""), yaxis = list(title = "Defensive Asylum Total"))
 }
 ## 
 

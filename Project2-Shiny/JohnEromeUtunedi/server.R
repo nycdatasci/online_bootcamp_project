@@ -5,9 +5,10 @@ server = function(input, output) {
   dataInput1 = reactive({
     g2 = list(showcountries = T, countrycolor = toRGB("black"), showland = T, landcolor = toRGB("grey90"))
     plot_geo(locationmode = "country names") %>% add_trace(data = filter(Country_data,Year == input$sliderRef), 
-                                                           z = ~Refugee.Status, color = ~Refugee.Status, 
+                                                           z = ~Refugee.Status, color = ~Refugee.Status,  colors = brewer.pal(10,"RdYlGn"), reversescale = TRUE,
                                                            text = ~paste("Country: ", Country, "<br />Refugee Total: ", Refugee.Status),
-                                                           locations = ~Country) %>% layout(geo = g2) %>% colorbar(len = 0.75)
+                                                           locations = ~Country) %>% layout(geo = g2,title = '') %>% 
+      colorbar(len = 0.75, title = 'Refugee Total') 
     #CountryFilterMap(data3 = input$sliderRef)
   })
   output$plot1_ref = renderPlotly({
@@ -67,7 +68,7 @@ server = function(input, output) {
   })
   
   dataInput17 = reactive({
-    CountryFilterSum.Plotly(data = Country_data, amt = input$SliderRef6, type = input$radio_Ref2)
+    CountryFilterSum.Plotly(data = Country_data, amt = input$SliderRef6)
   })
   
   output$plot7_ref = renderPlotly({
@@ -75,7 +76,7 @@ server = function(input, output) {
   })
   
   dataInput18 = reactive({
-    ContinentFilterSum.Plotly(amt = input$SliderRef7, type = input$radio_Ref3)
+    ContinentFilterSum.Plotly(amt = input$SliderRef7)
   })
   output$plot8_ref = renderPlotly({
     dataInput18()
@@ -98,9 +99,10 @@ server = function(input, output) {
   dataInput6 = reactive({
     g2 = list(showcountries = T, countrycolor = toRGB("black"), showland = T, landcolor = toRGB("grey90"))
     plot_geo(locationmode = "country names") %>% add_trace(data = filter(Country_Def_data,Year == input$sliderRef_Def), 
-                                                           z = ~Defensive.Asylum, color = ~Defensive.Asylum, 
+                                                           z = ~Defensive.Asylum, color = ~Defensive.Asylum, colors = brewer.pal(10,"RdYlGn"), reversescale = TRUE,
                                                            text = ~paste("Country: ", Country, "<br />Defensive Asylum Total: ", Defensive.Asylum),
-                                                           locations = ~Country) %>% layout(geo = g2) %>% colorbar(len = 0.75)
+                                                           locations = ~Country) %>% layout(geo = g2, title = '') %>% 
+      colorbar(len = 0.75, title = 'Defensive Asylum Total')
     
     #CountryFilterMap.Def(data3 = input$sliderRef_Def)
   })
@@ -160,7 +162,7 @@ server = function(input, output) {
   })
   
   dataInput17_Def = reactive({
-    CountryFilterSum_Def.Plotly(amt = input$SliderRef6_Def, type = input$radio_Ref2_Def)
+    CountryFilterSum_Def.Plotly(amt = input$SliderRef6_Def)
   })
   
   output$plot7_ref_Def = renderPlotly({
@@ -168,7 +170,7 @@ server = function(input, output) {
   })
   
   dataInput18_Def = reactive({
-    ContinentFilterSum_Def.Plotly(amt = input$SliderRef7_Def, type = input$radio_Ref3_Def)
+    ContinentFilterSum_Def.Plotly(amt = input$SliderRef7_Def)
   })
   output$plot8_ref_Def = renderPlotly({
     dataInput18_Def()
@@ -192,9 +194,10 @@ server = function(input, output) {
   dataInput11 = reactive({
     g2 = list(showcountries = T, countrycolor = toRGB("black"), showland = T, landcolor = toRGB("grey90"))
     plot_geo(locationmode = "country names") %>% add_trace(data = filter(Country_Aff_data,Year == input$sliderRef_Aff), 
-                                                           z = ~Affirmative.Asylum, color = ~Affirmative.Asylum, 
+                                                           z = ~Affirmative.Asylum, color = ~Affirmative.Asylum, colors = brewer.pal(10,"RdYlGn"), reversescale = TRUE,
                                                            text = ~paste("Country: ", Country, "<br />Affirmartive Asylum Total: ", Affirmative.Asylum),
-                                                           locations = ~Country) %>% layout(geo = g2) %>% colorbar(len = 0.75)
+                                                           locations = ~Country) %>% layout(geo = g2, title = '') %>% 
+      colorbar(len = 0.75, title = 'Affirmative Asylum Total')
     
     #CountryFilterMap.Aff(data3 = input$sliderRef_Aff)
   })
@@ -254,7 +257,7 @@ server = function(input, output) {
   })
   
   dataInput17_Aff = reactive({
-    CountryFilterSum_Aff.Plotly(amt = input$SliderRef6_Aff, type = input$radio_Ref2_Aff)
+    CountryFilterSum_Aff.Plotly(amt = input$SliderRef6_Aff)
   })
   
   output$plot7_ref_Aff = renderPlotly({
@@ -262,7 +265,7 @@ server = function(input, output) {
   })
   
   dataInput18_Aff = reactive({
-    ContinentFilterSum_Aff.Plotly(amt = input$SliderRef7_Aff, type = input$radio_Ref3_Aff)
+    ContinentFilterSum_Aff.Plotly(amt = input$SliderRef7_Aff)
   })
   output$plot8_ref_Aff = renderPlotly({
     dataInput18_Aff()
