@@ -284,4 +284,13 @@ server = function(input, output) {
   output$plot10_ref_Aff = renderPlotly({
     dataInput20_Aff()
   })
+  
+  ##Sumamry page
+  dataSummary = reactive({
+    summaryplot.plotly()
+  })
+  output$plot_summ = renderPlotly({
+    dataSummary()
+  })
+  
 }

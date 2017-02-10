@@ -1,17 +1,23 @@
 #ui.R
 
-dashboardPage(
-  dashboardHeader(title = "Refugee Status in America"),
-  dashboardSidebar(sidebarMenu (
-        menuItem("Refugee Status", tabName = "Refugee"),
-        menuItem("Defensive Asylum", tabName = "Defensive"),
-        menuItem("Affirmative Asylum", tabName = "Affirmative"))
+dashboardPage(skin = 'red',
+  dashboardHeader(title = "Refugees and Asylees in America", titleWidth = 350),
+  dashboardSidebar(width = 350, sidebarMenu (
+        menuItem(h4("Refugee Status"), tabName = "Refugee", icon = icon('hand-left', lib = 'glyphicon')),
+        menuItem(h4("Defensive Asylum"), tabName = "Defensive", icon = icon('hand-left', lib = 'glyphicon')),
+        menuItem(h4("Affirmative Asylum"), tabName = "Affirmative", icon = icon('hand-left', lib = 'glyphicon')),
+        menuItem(h4("Summary Page"), tabName = "Summary", icon = icon('hand-left', lib = 'glyphicon'))
+        )
   ),
   dashboardBody(
     tabItems(
       tabItem(tabName = "Refugee",
               tabBox(title = "Refugee Status", id = "TBD", width = 12, selected = "Countries",
-                     tabPanel("Countries", 
+                     tabPanel("Countries", h4(paste("According to the US Citizenship website and Immigration Services a refugee\n",
+                                                    "is a person ouside his/her country who is unable or unwilling to",
+                                                    "return home because they fear serious harm. Note that refugees have the",
+                                                    "right to remain in the US indefinitely until the conditions at home",
+                                                    "improve.")),
                         fluidRow(box(collapsible = TRUE, title = h3("Year Selection: "), width = 12,
                                      sliderInput("sliderRef","", 2006, 2015, 2006), h3('World Map - Refugee Status', align = 'center'),
                                      plotlyOutput("plot1_ref", width = "100%", height = "700px"))
@@ -20,7 +26,7 @@ dashboardPage(
                                      sliderInput("sliderRef1", "", 2006, 2015, 2006), 
                                      radioButtons("radio_Ref",label = "",choices = list("Top locations of refugees"=1, "Least amount of Refugees"=2), selected = 1),
                                      sliderInput("SliderRef2","", 2, 10, 2),h4("# of Countries on bar plot")),
-                                 box(width = 8, plotlyOutput("plot2_ref", width = "100%"))
+                                 box(width = 8, plotlyOutput("plot2_ref", width = "85%"))
                                  ),
                         fluidRow(column(width = 4,box(collapsible = TRUE, title = "", width = NULL,
                                       plotlyOutput("plot7_ref", width = "100%"))),
@@ -69,6 +75,12 @@ dashboardPage(
       tabItem(tabName = "Defensive",
               tabBox(title = "Defensive Asylum", id = "TBD_Def", width = 12, selected = "Countries",
                      tabPanel("Countries", 
+                              h4(paste("According to the US Citizen and Immigration website, someone seeking defensive",
+                                       "asylum is a person who was apprehended in the US without proper legal documentation",
+                                       "and therefore use this status as a form of defense from removal from the US.",
+                                       "People in this category will have to present themselves in front of an immigration",
+                                       "court and prove that they are unable to return home due to persecution/severe",
+                                       "violence.")),
                               fluidRow(box(collapsible = TRUE, title = h3("Year Selection: "), width = 12,
                                            sliderInput("sliderRef_Def","", 2006, 2015, 2006), h3('World Map - Defensive Asylum', align = 'center'),
                                            plotlyOutput("plot1_ref_Def", width = "100%", height = "700px"))
@@ -77,7 +89,7 @@ dashboardPage(
                                            sliderInput("sliderRef1_Def", "", 2006, 2015, 2006), 
                                            radioButtons("radio_Ref_Def",label = "",choices = list("Countries with Largest Defensive Asylum Status"=1, "Countries with smallest Defensive Asylum Status"=2), selected = 1),
                                            sliderInput("SliderRef2_Def","", 2, 10, 2),h4("# of Countries on bar plot")),
-                                       box(width = 8, plotlyOutput("plot2_ref_Def", width = "100%"))
+                                       box(width = 8, plotlyOutput("plot2_ref_Def", width = "85%"))
                               ),
                               fluidRow(column(width = 4,box(collapsible = TRUE, title = "", width = NULL,
                                                             plotlyOutput("plot7_ref_Def", width = "100%"))),
@@ -126,6 +138,11 @@ dashboardPage(
       tabItem(tabName = "Affirmative",
               tabBox(title = "Affirmative Asylum", id = "TBD_Aff", width = 12, selected = "Countries",
                      tabPanel("Countries", 
+                              h4(paste("According to the US Citizen and Immigration website, to obtain asylum through",
+                                       "the affirmative asylum process, you must be physically present in the US.",
+                                       "These people are non US citizens currently residing in the US and unable",
+                                       "to return home due to persecution/severe violence. People in this category",
+                                       "must apply for asylum within one year of the date of their last arrival.")),
                               fluidRow(box(collapsible = TRUE, title = h3("Year Selection: "), width = 12,
                                            sliderInput("sliderRef_Aff","", 2006, 2015, 2006),h3("World Map - Affirmative Asylum", align = 'center'),
                                            plotlyOutput("plot1_ref_Aff", width = "100%", height = "700px"))
@@ -179,7 +196,15 @@ dashboardPage(
                                                         multiple = TRUE),h3("Comparison between Total Affirmative Asylum Status and Individual Continents", align = 'center'),
                                             plotlyOutput("plot5_ref_Aff")
                                )))
-              ))
+              )),
+      tabItem(tabName = "Summary",
+              fluidRow(box(collapsible = TRUE, title = "", width = 12,
+                           h3("Comparison between Refugee, Defensive Asylee and Affirmative Asylee in the US from 2006 - 2015", 
+                              align = 'center'),
+                           plotlyOutput("plot_summ", width = "100%", height = "500px"))),
+              fluidRow(box(collapsible = TRUE, title = "", 
+                           h2("State main points")))
+      )
     )
   )
 )

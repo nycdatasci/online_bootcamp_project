@@ -103,14 +103,15 @@ CountryFilterBar_Def.Plotly = function(data = Country_Def_data, Year_val = 2006,
   if(arrange == 1) {
     temp = arrange(filter(data, Year == Year_val, Defensive.Asylum!=0), desc(Defensive.Asylum))[1:height,]
     temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(-temp$Defensive.Asylum)], ordered = TRUE)
-    plot_ly(data = temp, x = ~Country, y = ~Defensive.Asylum, color = ~Country, type = 'bar', colors = 'Set3') %>% 
-      layout(title = paste("Countries with Largest amount of Defensive Asylum Status in", Year_val), xaxis =list(title = ""), yaxis = list(title = "Total Amount of Defensive Asylum")) 
-    }
+    plot_ly(data = temp, x = ~Defensive.Asylum, y = ~Country, type = 'bar', color = ~Country, colors = 'Set3',
+            text = ~paste('Country:',Country), hoverinfo = 'x+y') %>%  
+      layout(title = paste("Countries with Largest amount of Defensive Asylum Status in", Year_val), xaxis =list(title = "Total Amount of Defensive Asylum Status"), yaxis = list(title = "", tickangle = 70)) }
   else {
     temp = arrange(filter(data, Year == Year_val, Defensive.Asylum!=0), Defensive.Asylum)[1:height,]
     temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(temp$Defensive.Asylum)], ordered = TRUE)
-    plot_ly(data = temp, x = ~Country, y = ~Defensive.Asylum, color = ~Country, type = 'bar', colors = "Set3") %>% 
-      layout(title = paste("Countries with least amount of Defensive Asylum Status in ", Year_val), xaxis =list(title = ""), yaxis = list(title = "Total Amount of Defensive Asylum")) 
+    plot_ly(data = temp, x = ~Defensive.Asylum, y = ~Country, type = 'bar', color = ~Country, colors = 'Set3',
+            text = ~Country) %>% 
+      layout(title = paste("Countries with smallest amount of Defensive Asylym Status in", Year_val), xaxis =list(title = "Total Amount of Defensive Asylum Status"), yaxis = list(title = "", tickangle = 70))
     
   }
 }
@@ -168,7 +169,7 @@ ContinentFilterUsrInteract_Def.Plotly = function(data = Cont_Def_data, var = "Af
 
 Total_Def.Plotly = function(data = Cont_Def_data) {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Defensive.Asylum))
-  plot_ly() %>% add_trace(data =temp, x = ~Year, y = ~sum, type = 'bar', color = ~sum, colors = brewer.pal(9,'RdPu')) %>% 
+  plot_ly() %>% add_trace(data =temp, x = ~Year, y = ~sum, type = 'bar', name = "Total Defensive Asylum",color = ~sum, colors = brewer.pal(9,'RdPu')) %>% 
     layout(xaxis = list(title = ""), yaxis = list(title = "Defensive Asylum Total"))
 }
 ## 

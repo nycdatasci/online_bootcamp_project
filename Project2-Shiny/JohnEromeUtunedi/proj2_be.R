@@ -108,13 +108,15 @@ CountryFilterBar.Plotly = function(data = Country_data, Year_val = 2006, height 
   if(arrange == 1) {
   temp = arrange(filter(data, Year == Year_val, Refugee.Status!=0), desc(Refugee.Status))[1:height,]
   temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(-temp$Refugee.Status)], ordered = TRUE)
-  plot_ly(data = temp, x = ~Country, y = ~Refugee.Status, type = 'bar', color = ~Country, colors = 'Set3') %>%  
-    layout(title = paste("Largest Refugee Countries in", Year_val), xaxis =list(title = ""), yaxis = list(title = "Total Refugees")) }
+  plot_ly(data = temp, x = ~Refugee.Status, y = ~Country, type = 'bar', color = ~Country, colors = 'Set3',
+          text = ~paste('Country:',Country), hoverinfo = 'x+y') %>%  
+    layout(title = paste("Largest Refugee Countries in", Year_val), xaxis =list(title = "Total Refugees"), yaxis = list(title = "", tickangle = 70)) }
   else {
     temp = arrange(filter(data, Year == Year_val, Refugee.Status!=0), Refugee.Status)[1:height,]
     temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(temp$Refugee.Status)], ordered = TRUE)
-    plot_ly(data = temp, x = ~Country, y = ~Refugee.Status, type = 'bar', color = ~Country, colors = 'Set3') %>% 
-      layout(title = paste("Smallest Refugee Countries in", Year_val), xaxis =list(title = ""), yaxis = list(title = "Total Refugees"))
+    plot_ly(data = temp, x = ~Refugee.Status, y = ~Country, type = 'bar', color = ~Country, colors = 'Set3',
+            text = ~Country) %>% 
+      layout(title = paste("Smallest Refugee Countries in", Year_val), xaxis =list(title = "Total Refugees"), yaxis = list(title = "", tickangle = 70))
   }
 }
 
@@ -172,7 +174,9 @@ ContinentFilterUsrInteract.Plotly = function(data = Continent_data, var = "Afric
 
 Total.Plotly = function(data = Continent_data) {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Refugee.Status))
-  plot_ly() %>% add_trace(data =temp, x = ~Year, y = ~sum, type = 'bar', color = ~sum, colors = brewer.pal(9,'RdPu')) %>%
+  plot_ly() %>% add_trace(data =temp, x = ~Year, y = ~sum, name = "Total Refugees",type = 'bar', color = ~sum, colors = brewer.pal(9,'RdPu')) %>%
     layout(xaxis = list(title = ""), yaxis = list(title = "Refugee Total"))
 }
+
+
 ## 
