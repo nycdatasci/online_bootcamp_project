@@ -108,14 +108,15 @@ CountryFilterBar.Plotly = function(data = Country_data, Year_val = 2006, height 
   if(arrange == 1) {
   temp = arrange(filter(data, Year == Year_val, Refugee.Status!=0), desc(Refugee.Status))[1:height,]
   temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(-temp$Refugee.Status)], ordered = TRUE)
-  plot_ly(data = temp, x = ~Refugee.Status, y = ~Country, type = 'bar', color = ~Country, colors = 'Set3',
-          text = ~paste('Country:',Country), hoverinfo = 'x+y') %>%  
+  plot_ly(data = temp, x = ~Refugee.Status, y = ~Country, type = 'bar', color = ~Country, colors = 'BrBG',marker = list(reversescale = TRUE),
+          text = ~paste('Country:',Refugee.Status), hoverinfo = 'all') %>%  
     layout(title = paste("Largest Refugee Countries in", Year_val), xaxis =list(title = "Total Refugees"), yaxis = list(title = "", tickangle = 70)) }
   else {
     temp = arrange(filter(data, Year == Year_val, Refugee.Status!=0), Refugee.Status)[1:height,]
     temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(temp$Refugee.Status)], ordered = TRUE)
-    plot_ly(data = temp, x = ~Refugee.Status, y = ~Country, type = 'bar', color = ~Country, colors = 'Set3',
-            text = ~Country) %>% 
+    plot_ly(data = temp, x = ~Refugee.Status, y = ~Country, type = 'bar', color = ~Country, colors = 'BrBG',
+             marker = list(reversescale = TRUE),
+            text = ~paste('Country:',Country), hoverinfo = 'all') %>% 
       layout(title = paste("Smallest Refugee Countries in", Year_val), xaxis =list(title = "Total Refugees"), yaxis = list(title = "", tickangle = 70))
   }
 }

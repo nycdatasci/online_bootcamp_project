@@ -116,14 +116,14 @@ CountryFilterBar_Aff.Plotly = function(data = Country_Aff_data, Year_val = 2006,
   if(arrange == 1) {
     temp = arrange(filter(data, Year == Year_val, Affirmative.Asylum!=0), desc(Affirmative.Asylum))[1:height,]
     temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(-temp$Affirmative.Asylum)], ordered = TRUE)
-    plot_ly(data = temp, x = ~Affirmative.Asylum, y = ~Country, type = 'bar', color = ~Country, colors = 'Set3',
-            text = ~paste('Country:',Country), hoverinfo = 'x+y') %>%  
+    plot_ly(data = temp, x = ~Affirmative.Asylum, y = ~Country, type = 'bar', color = ~Country, colors = 'BrBG',
+            text = ~paste('Country:',Country), hoverinfo = 'all') %>%  
       layout(title = paste("Countries with Largest amount of Affirmative Asylum Status in", Year_val), xaxis =list(title = "Total Amount of Affirmative Asylum"), yaxis = list(title = "", tickangle = 70))    }
   else {
     temp = arrange(filter(data, Year == Year_val, Affirmative.Asylum!=0), Affirmative.Asylum)[1:height,]
     temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(temp$Affirmative.Asylum)], ordered = TRUE)
-    plot_ly(data = temp, x = ~Defensive.Asylum, y = ~Country, type = 'bar', color = ~Country, colors = 'Set3',
-            text = ~Country) %>% 
+    plot_ly(data = temp, x = ~Defensive.Asylum, y = ~Country, type = 'bar', color = ~Country, colors = 'BrBG',
+            hoverinfo = 'all') %>% 
       layout(title = paste("Countries with smallest amount of Affiramtive Asylym Status in", Year_val), xaxis =list(title = "Total Amount of Affiramtive Asylum Status"), yaxis = list(title = "", tickangle = 70))
   }
 }
