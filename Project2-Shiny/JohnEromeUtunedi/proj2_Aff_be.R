@@ -70,13 +70,17 @@ ContinentFilterBar_Aff.Plotly = function(data1 = Cont_Aff_data, fil = "2006", he
     temp = arrange(filter(data1, Year == fil),desc(Affirmative.Asylum))[1:height,]
     temp$Continent = factor(as.factor(temp$Continent), levels = as.factor(temp$Continent)[order(-temp$Affirmative.Asylum)], ordered = TRUE)
     val = plot_ly() %>% add_trace(data = temp, x = ~Continent, y = ~Affirmative.Asylum, type = "bar", color = ~Continent,
-                                  colors = 'Set2')
+                                  colors = 'Set2') %>% 
+      layout(title = paste("Continents with largest amount of Affirmative Asylum Status in", fil), xaxis =list(title = ""), yaxis = list(title = "Affirmative Asylum"))
+    
   }
   else {
     temp = arrange(filter(data1, Year == fil), Affirmative.Asylum)[1:height,] 
     temp$Continent = factor(as.factor(temp$Continent), levels = as.factor(temp$Continent)[order(temp$Affirmative.Asylum)], ordered = TRUE)
-    val = plot_ly() %>% add_trace(data = temp, x = ~Continent, y = ~Defensive.Asylum, type = "bar", color = ~Continent,
-                                  colors = 'Set2')   
+    val = plot_ly() %>% add_trace(data = temp, x = ~Continent, y = ~Affirmative.Asylum, type = "bar", color = ~Continent,
+                                  colors = 'Set2') %>%
+      layout(title = paste("Continents with least amount of Affirmative Asylum Status in", fil), xaxis =list(title = ""), yaxis = list(title = "Affirmative Asylum total"))
+    
   }
   return(val)
 }
@@ -86,11 +90,13 @@ ContinentFilterTotal_Aff.Plotly = function(data = Cont_Aff_data, amt = 2, type =
   temp = temp[1:amt,]
   temp_list = as.list(temp$Continent)
   if(type == 1) {
-    plot_ly(data = filter(data, Continent %in% c(temp_list)), x = ~Year, y = ~Affirmative.Asylum, type = 'bar', color = ~Continent, 
+    temp_plot = plot_ly(data = filter(data, Continent %in% c(temp_list)), x = ~Year, y = ~Affirmative.Asylum, type = 'bar', color = ~Continent, 
             colors = 'Set2')
   } else {
-    plot_ly(data = filter(data, Continent %in% c(temp_list)), x = ~Year, y = ~Affirmative.Asylum, color = ~Continent, 
+    temp_plot = plot_ly(data = filter(data, Continent %in% c(temp_list)), x = ~Year, y = ~Affirmative.Asylum, color = ~Continent, 
             size = ~Affirmative.Asylum, type = "scatter",mode = "markers", marker = list(sizemode = 'diameter', opacity = 0.75)) }
+  temp_plot %>% layout(title = paste("Breakdown of top", amt, "Continents containing people with Affiramtive Asylum Status from 2006-2015"),
+                       xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"), barmode = 'stack')
 }
 
 ContinentFilterSum_Aff.Plotly = function(data = Cont_Aff_data, amt = 2, type = 1) {
@@ -98,21 +104,27 @@ ContinentFilterSum_Aff.Plotly = function(data = Cont_Aff_data, amt = 2, type = 1
   temp = temp[1:amt,]
   temp$Continent = factor(as.factor(temp$Continent), levels = as.factor(temp$Continent)[order(-temp$sum)], ordered = TRUE)
   if(type == 1) {
-    plot_ly(data = temp, x = ~Continent, y = ~sum, type = 'bar', color = ~Continent, colors = 'Set2')
+    temp_plot = plot_ly(data = temp, x = ~Continent, y = ~sum, type = 'bar', color = I("blue"))
   } else {
-    plot_ly(data = temp, x = ~Continent, y = ~sum, color = ~Continent, 
+    temp_plot = plot_ly(data = temp, x = ~Continent, y = ~sum, color = ~Continent, 
             size = ~sum*10, type = "scatter",mode = "markers", marker = list(sizemode = 'diameter', opacity = 0.75)) }
+  temp_plot %>% layout(title = paste("Top", amt, "Continents containing people with","<br />","Affiramtive Asylum Status from 2006-2015"),
+                       xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"))
 }
 
 CountryFilterBar_Aff.Plotly = function(data = Country_Aff_data, Year_val = 2006, height = 10, arrange = 1) {
   if(arrange == 1) {
     temp = arrange(filter(data, Year == Year_val, Affirmative.Asylum!=0), desc(Affirmative.Asylum))[1:height,]
     temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(-temp$Affirmative.Asylum)], ordered = TRUE)
-    plot_ly(data = temp, x = ~Country, y = ~Affirmative.Asylum, color = ~Country, type = 'bar', colors = 'Set3') }
+    plot_ly(data = temp, x = ~Affirmative.Asylum, y = ~Country, type = 'bar', color = ~Country, colors = 'Set3',
+            text = ~paste('Country:',Country), hoverinfo = 'x+y') %>%  
+      layout(title = paste("Countries with Largest amount of Affirmative Asylum Status in", Year_val), xaxis =list(title = "Total Amount of Affirmative Asylum"), yaxis = list(title = "", tickangle = 70))    }
   else {
     temp = arrange(filter(data, Year == Year_val, Affirmative.Asylum!=0), Affirmative.Asylum)[1:height,]
     temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(temp$Affirmative.Asylum)], ordered = TRUE)
-    plot_ly(data = temp, x = ~Country, y = ~Affirmative.Asylum, color = ~Country, type = 'bar', colrs = "Set3")     
+    plot_ly(data = temp, x = ~Defensive.Asylum, y = ~Country, type = 'bar', color = ~Country, colors = 'Set3',
+            text = ~Country) %>% 
+      layout(title = paste("Countries with smallest amount of Affiramtive Asylym Status in", Year_val), xaxis =list(title = "Total Amount of Affiramtive Asylum Status"), yaxis = list(title = "", tickangle = 70))
   }
 }
 
@@ -127,10 +139,14 @@ CountryFilterTotal_Aff.Plotly = function(data = Country_Aff_data, amt = 5, type 
   temp = temp[1:amt,]
   temp_list = as.list(temp$Country)
   if(type == 1) {
-    plot_ly(data = filter(data, Country %in% c(temp_list)), x = ~Year, y = ~Affirmative.Asylum, type = 'bar', color = ~Country)
+    temp_plot = plot_ly(data = filter(data, Country %in% c(temp_list)), x = ~Year, y = ~Affirmative.Asylum, type = 'bar', color = ~Country,
+                        colors = 'Accent')
   } else {
-    plot_ly(data = filter(data, Country %in% c(temp_list)), x = ~Year, y = ~Affirmative.Asylum, color = ~Country, 
-            size = ~Affiramtive.Asylum, type = "scatter",mode = "markers", marker = list(sizemode = 'diameter', opacity = 0.75)) }
+    temp_plot = plot_ly(data = filter(data, Country %in% c(temp_list)), x = ~Year, y = ~Affirmative.Asylum, color = ~Country, colors = 'Accent',
+            size = ~Affirmative.Asylum, type = "scatter",mode = "markers", marker = list(sizemode = 'diameter', opacity = 0.75)) 
+  }
+  temp_plot %>% layout(title = paste("Breakdown of top", amt, "Countries containing people with Affirmative Asylum Status from 2006-2015"),
+                       xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"), barmode = 'stack')
 }
 
 CountryFilterSum_Aff.Plotly = function(data = Country_Aff_data, amt = 5, type = 1) {
@@ -138,29 +154,37 @@ CountryFilterSum_Aff.Plotly = function(data = Country_Aff_data, amt = 5, type = 
   temp = temp[1:amt,]
   temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(-temp$sum)], ordered = TRUE)
   if(type == 1) {
-    plot_ly(data = temp, x = ~Country, y = ~sum, type = 'bar', color = ~Country, colors = 'Set3')
+    temp_plot = plot_ly(data = temp, x = ~Country, y = ~sum, type = 'bar', color = I("blue"))
   } else {
-    plot_ly(data = temp, x = ~Country, y = ~sum, color = ~Country, 
-            size = ~sum*10, type = "scatter",mode = "markers", marker = list(sizemode = 'diameter', opacity = 0.75)) }
+    temp_plot = plot_ly(data = temp, x = ~Country, y = ~sum, color = ~Country, 
+            size = ~sum*10, type = "scatter",mode = "markers", marker = list(sizemode = 'diameter', opacity = 0.75)) 
+  }
+  temp_plot %>% layout(title = paste("Top", amt, "Countries containing people with Affirmative","<br />","Asylum status from 2006-2015"),
+                       xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"))
 }
 
 CountryFilterUsrInteract_Aff.Plotly = function(data = Country_Aff_data, var = "Nigeria") {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Affirmative.Asylum))
   plot_ly() %>% add_trace(data = filter(data, Country %in% c(var)), x = ~Year, y = ~Affirmative.Asylum, color = ~Country, type = 'scatter', 
-                          mode = 'lines', colors = "Set1") %>%
-    add_trace(data = temp, x = ~Year, y = ~sum, type = 'scatter', mode = 'lines', name = 'Total', color = I("black"))
+                          mode = 'lines', colors = "Set1", line = list(width = 5)) %>%
+    add_trace(data = temp, x = ~Year, y = ~sum, type = 'scatter', mode = 'lines', name = 'Total', color = I("black"),
+              line = list(width = 5, dash = 'dash')) %>% 
+    layout(title = '', xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"))
 }
 
 ContinentFilterUsrInteract_Aff.Plotly = function(data = Cont_Aff_data, var = "Africa") {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Affirmative.Asylum))
   plot_ly() %>% add_trace(data = filter(data, Continent %in% c(var)), x = ~Year, y = ~Affirmative.Asylum, color = ~Continent, type = 'scatter', 
-                          mode = 'lines', colors = "Set1") %>%
-    add_trace(data = temp, x = ~Year, y = ~sum, type = 'scatter', mode = 'lines', name = 'Total', color = I("black"))
+                          mode = 'lines', colors = "Set1", line = list(width = 5)) %>%
+    add_trace(data = temp, x = ~Year, y = ~sum, type = 'scatter', mode = 'lines', name = 'Total', color = I("black"), line = list(width = 5, dash = 'dash')) %>% 
+    layout(title = '', xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"))
 }
 
 Total_Aff.Plotly = function(data = Cont_Aff_data) {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Affirmative.Asylum))
-  plot_ly() %>% add_trace(data =temp, x = ~Year, y = ~sum, type = 'bar', color = ~sum)
+  plot_ly() %>% add_trace(data =temp, x = ~Year, y = ~sum, name = "Total Affirmative Asylum", type = 'bar', color = ~sum, colors = brewer.pal(9,'RdPu')) %>%
+    layout(xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"))
+  
 }
 ## 
 
