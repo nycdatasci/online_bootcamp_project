@@ -122,7 +122,7 @@ shinyServer(function(input, output) {
       plot_pc1 <- ggplot(df4, aes(x=Total_Netmeter_Energy_Sold, y=Total_Netmeter_Capacity)) +
         geom_point(aes(col=Year),size=3) +
         geom_smooth(alpha=1)   +
-        ylab("Net Meter Generation in 1000 MWh")   +
+        ylab("Net Meter Generation in MWh")   +
         xlab("Net Meter Retail Sales in Mwh") +
         ggtitle("Net Meter Electric Generation/Capacity and Energy sold back over the years") +
         scale_x_continuous(limits=c(0,700000),  labels = scales::comma)
