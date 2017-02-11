@@ -160,7 +160,7 @@ CountryFilterUsrInteract.Plotly = function(data = Country_data, var = "Nigeria")
   plot_ly() %>% add_trace(data = filter(data, Country %in% c(var)), x = ~Year, y = ~Refugee.Status, color = ~Country, type = 'scatter', 
           mode = 'lines', colors = "Set1", line = list(width = 5)) %>% 
     add_trace(data = temp, x = ~Year, y = ~sum, type = 'scatter', mode = 'lines', name = 'Total', color = I("black"),
-              line = list(width = 5, dash = 'dash')) %>%
+              line = list(width = 5, dash = 'dash'),showlegend = TRUE) %>%
     layout(title = '', xaxis = list(title = ""), yaxis = list(title = "Refugee Total"))
 }
 

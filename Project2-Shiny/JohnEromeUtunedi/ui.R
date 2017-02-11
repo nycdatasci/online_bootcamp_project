@@ -26,7 +26,7 @@ dashboardPage(skin = 'purple',
                                      sliderInput("sliderRef1", "", 2006, 2015, 2006), 
                                      radioButtons("radio_Ref",label = "",choices = list("Top locations of refugees"=1, "Least amount of Refugees"=2), selected = 1),
                                      sliderInput("SliderRef2","", 2, 10, 2),h4("# of Countries on bar plot")),
-                                 box(width = 8, plotlyOutput("plot2_ref", width = "85%"))
+                                 box(collapsible = TRUE, width = 8, plotlyOutput("plot2_ref", width = "85%"))
                                  ),
                         fluidRow(column(width = 4,box(collapsible = TRUE, title = "", width = NULL,
                                       plotlyOutput("plot7_ref", width = "100%"))),
@@ -48,7 +48,7 @@ dashboardPage(skin = 'purple',
                                      radioButtons("radio_Ref1", label = "", choices = list("Top Locations of Refugees (Continents)" = 1, "Least amount of Refugees (Continents)" = 2), 
                                                     selected = 1),
                                      sliderInput("SliderRef4","", 2, 6, 2), h4("# of Continents on bar plot")),
-                                   box(width = 8,
+                                   box(width = 8, collapsible = TRUE,
                                      plotlyOutput("plot4_ref")
                                    )),
                             fluidRow(
@@ -60,12 +60,12 @@ dashboardPage(skin = 'purple',
                                                     plotlyOutput("plot9_ref", width = "100%")))
                             ),
                         fluidRow(
-                          box(
+                          box(collapsible = TRUE,
                             width = 12,h3("Total Refugees Distribution from 2006-2015", align = 'center'),
                             plotlyOutput("plot10_ref", width = "100%")
                           )
                         ),
-                        fluidRow(box(width = 12,
+                        fluidRow(box(width = 12, collapsible = TRUE,
                                      h4("Select Continents:"),
                                      selectInput("selectContRef", label = "", choices = as.list(Continent_data[,"Continent"]),
                                                  multiple = TRUE),h3("Comparison between Refugee Total and Individual Continents"),
@@ -89,7 +89,7 @@ dashboardPage(skin = 'purple',
                                            sliderInput("sliderRef1_Def", "", 2006, 2015, 2006), 
                                            radioButtons("radio_Ref_Def",label = "",choices = list("Countries with Largest Defensive Asylum Status"=1, "Countries with smallest Defensive Asylum Status"=2), selected = 1),
                                            sliderInput("SliderRef2_Def","", 2, 10, 2),h4("# of Countries on bar plot")),
-                                       box(width = 8, plotlyOutput("plot2_ref_Def", width = "85%"))
+                                       box(collapsible = TRUE, width = 8, plotlyOutput("plot2_ref_Def", width = "85%"))
                               ),
                               fluidRow(column(width = 4,box(collapsible = TRUE, title = "", width = NULL,
                                                             plotlyOutput("plot7_ref_Def", width = "100%"))),
@@ -105,13 +105,13 @@ dashboardPage(skin = 'purple',
                                            plotlyOutput("plot3_ref_Def", width = "100%"))))
                      ,tabPanel(h4("Continents"), 
                                fluidRow(
-                                 box(width = 4,
+                                 box(width = 4, collapsible = TRUE,
                                      h3("Select Year:"),
                                      sliderInput("SliderRef3_Def", "", 2006, 2015, 2006),                                          
                                      radioButtons("radio_Ref1_Def", label = "", choices = list("Continents containing largest defensive asylum status" = 1, "Continents containing smallest defensive asylum status" = 2), 
                                                   selected = 1),
                                      sliderInput("SliderRef4_Def","", 2, 6, 2), h4("# of Continents on bar plot")),
-                                 box(width = 8,
+                                 box(width = 8, collapsible = TRUE,
                                      plotlyOutput("plot4_ref_Def")
                                  )),
                                fluidRow(
@@ -123,12 +123,12 @@ dashboardPage(skin = 'purple',
                                                        plotlyOutput("plot9_ref_Def", width = "100%")))
                                ),
                                fluidRow(
-                                 box(
+                                 box( collapsible = TRUE,
                                    width = 12,h3("Total Defensive Asylum Distribution from 2006-2015", align = 'center'),
                                    plotlyOutput("plot10_ref_Def", width = "100%")
                                  )
                                ),
-                               fluidRow(box(width = 12,
+                               fluidRow(box(width = 12, collapsible = TRUE,
                                             h4("Select Continents:"),h3("Comparison between Total Defensive Asylum Status and Individual Continents", align = 'center'),
                                             selectInput("selectContRef_Def", label = "", choices = as.list(Cont_Def_data[,"Continent"]),
                                                         multiple = TRUE),
@@ -151,7 +151,7 @@ dashboardPage(skin = 'purple',
                                            sliderInput("sliderRef1_Aff", "", 2006, 2015, 2006), 
                                            radioButtons("radio_Ref_Aff",label = "",choices = list("Countries with Largest Affirmative Asylum Status"=1, "Countries with smalled Affirmative Asylum Status"=2), selected = 1),
                                            sliderInput("SliderRef2_Aff","", 2, 10, 2),h4("# of Countries on bar plot")),
-                                       box(width = 8, plotlyOutput("plot2_ref_Aff", width = "100%"))
+                                       box(collapsible = TRUE, width = 8, plotlyOutput("plot2_ref_Aff", width = "100%"))
                               ),
                               fluidRow(column(width = 4,box(collapsible = TRUE, title = "", width = NULL,
                                                             plotlyOutput("plot7_ref_Aff", width = "100%"))),
@@ -167,13 +167,13 @@ dashboardPage(skin = 'purple',
                                            plotlyOutput("plot3_ref_Aff", width = "100%"))))
                      ,tabPanel(h4("Continents"), 
                                fluidRow(
-                                 box(width = 4,
+                                 box(width = 4, collapsible = TRUE,
                                      h4("Select Year:"),
                                      sliderInput("SliderRef3_Aff", "", 2006, 2015, 2006),                                          
                                      radioButtons("radio_Ref1_Aff", label = "", choices = list("Continents containing largest affirmative asylum status" = 1, "Continents containing smallest affirmative asylum status" = 2), 
                                                   selected = 1),
                                      sliderInput("SliderRef4_Aff","", 2, 6, 2)),
-                                 box(width = 8,
+                                 box(width = 8, collapsible = TRUE,
                                      plotlyOutput("plot4_ref_Aff")
                                  )),
                                fluidRow(
@@ -185,12 +185,12 @@ dashboardPage(skin = 'purple',
                                                        plotlyOutput("plot9_ref_Aff", width = "100%")))
                                ),
                                fluidRow(
-                                 box(
+                                 box( collapsible = TRUE,
                                    width = 12,h3("Total Affirmative Asylum Distribution from 2006-2015", align = 'center'),
                                    plotlyOutput("plot10_ref_Aff", width = "100%")
                                  )
                                ),
-                               fluidRow(box(width = 12,
+                               fluidRow(box(width = 12, collapsible = TRUE,
                                             h4("Select Continents:"),
                                             selectInput("selectContRef_Aff", label = "", choices = as.list(Cont_Aff_data[,"Continent"]),
                                                         multiple = TRUE),h3("Comparison between Total Affirmative Asylum Status and Individual Continents", align = 'center'),
