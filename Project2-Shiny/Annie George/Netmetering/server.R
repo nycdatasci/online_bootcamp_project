@@ -207,7 +207,7 @@ shinyServer(function(input, output) {
     df7_temp$State[8] <- "District of Columbia"
     df7_join <- left_join(long_lat, df7_temp,by="State")
  
-    factpal <- colorFactor("Green", domain = NULL) # create a pallet set 
+    factpal <- colorFactor("Blue", domain = NULL) # create a pallet set 
     
     sector_col <- input$sector
     leaflet(df7_join) %>% addTiles() %>%  
@@ -236,7 +236,7 @@ shinyServer(function(input, output) {
        theme_bw() +
         theme(axis.ticks=element_blank(), panel.grid=element_blank())+
         guides(fill=FALSE) +
-       ggtitle(paste0("Top 5 states using Net Meter in ", input$sector, " sector")) +
+       ggtitle(paste0("Top 5 states using Net Meter in ", input$sector, " sector in 2015")) +
        ylab(paste0(input$sector, " Customers"))
     plot_top
   })   

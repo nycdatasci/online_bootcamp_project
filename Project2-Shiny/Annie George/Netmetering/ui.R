@@ -78,9 +78,23 @@ shinyUI(fluidPage(theme=shinytheme("slate"),
       ), #tab
    
   tabPanel("Sales per Customer",
-        fluidRow( 
+       fluidRow( 
+             box(width = 6,
+                 p ("Map showing points within geographic extent of Nigeria, West Africa",
+                    style="position:absolute;
+                   bottom:470px;
+                   right:550px;
+                   float:right;
+                   padding:15px;
+                   border: 1px 
+                   solid black;
+                   background:#FED976;")
+                 )
+             ),  
+       fluidRow( 
           box(width = 6,
-                plotOutput("overall_sales_customer", height=400) 
+               plotOutput("overall_sales_customer", height=400) 
+               
            ), #box
          
           box(width = 6,
@@ -103,7 +117,16 @@ shinyUI(fluidPage(theme=shinytheme("slate"),
                        ), #sidebar
                mainPanel(
                 fluidRow(
-                  leafletOutput("leaflet_customer", height=300) 
+                  leafletOutput("leaflet_customer", height=300) ,
+                  p ("Map showing number of customer using net meter in United States. Click circles to view data",
+                     style="position:absolute;
+                     bottom:300px;
+                     right:550px. 
+                     float:bottom;
+                     padding:5px;
+                     border: 1px 
+                     solid black;
+                     background:grey")
                   ), #fluid
                 fluidRow(
                   p()
