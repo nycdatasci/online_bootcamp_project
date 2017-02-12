@@ -109,7 +109,7 @@ CountryFilterBar.Plotly = function(data = Country_data, Year_val = 2006, height 
   temp = arrange(filter(data, Year == Year_val, Refugee.Status!=0), desc(Refugee.Status))[1:height,]
   temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(-temp$Refugee.Status)], ordered = TRUE)
   plot_ly(data = temp, x = ~Refugee.Status, y = ~Country, type = 'bar', color = ~Country, colors = 'BrBG',marker = list(reversescale = TRUE),
-          text = ~paste('Country:',Refugee.Status), hoverinfo = 'all') %>%  
+          text = ~paste('Country:',Refugee.Status), hoverinfo = 'text') %>%  
     layout(title = paste("Largest Refugee Countries in", Year_val), xaxis =list(title = "Total Refugees"), yaxis = list(title = "", tickangle = 70)) }
   else {
     temp = arrange(filter(data, Year == Year_val, Refugee.Status!=0), Refugee.Status)[1:height,]
@@ -133,11 +133,13 @@ CountryFilterTotal.Plotly = function(data = Country_data, amt = 5, type = 1) {
   temp_list = as.list(temp$Country)
   temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(-temp$sum)], ordered = TRUE)
   if(type == 1) {
-  temp_plot = plot_ly(data = filter(data, Country %in% c(temp_list)), x = ~Year, y = ~Refugee.Status, type = 'bar', color = ~Country, 
+    temp_plot = plot_ly(data = filter(data, Country %in% c(temp_list)), x = ~Year, y = ~Refugee.Status, type = 'bar', color = ~Country, 
           colors = 'Accent')
   } else {
-  temp_plot = plot_ly(data = filter(data, Country %in% c(temp_list)), x = ~Year, y = ~Refugee.Status, color = ~Country, colors = "Accent",
-          size = ~Refugee.Status*10, type = "scatter",mode = "markers", marker = list(sizemode = 'diameter', opacity = 0.75)) }
+  temp_plot = plot_ly(data = filter(data, Country %in% c(temp_list)), x = ~Year, y = ~Refugee.Status, color = ~Country, 
+                      colors = "Accent",
+          size = ~Refugee.Status, type = "scatter",mode = "markers", marker = list(sizemode = 'diameter', opacity = 0.75)) 
+  }
   temp_plot %>% layout(title = paste("Breakdown of top", amt, "Countries containing people with Refugee Status from 2006-2015"),
                        xaxis = list(title = ""), yaxis = list(title = "Refugee Total"), barmode = 'stack')
 }
@@ -158,25 +160,28 @@ CountryFilterSum.Plotly = function(data = Country_data, amt = 5, type = 1) {
 CountryFilterUsrInteract.Plotly = function(data = Country_data, var = "Nigeria") {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Refugee.Status))
   plot_ly() %>% add_trace(data = filter(data, Country %in% c(var)), x = ~Year, y = ~Refugee.Status, color = ~Country, type = 'scatter', 
-          mode = 'lines', colors = "Set1", line = list(width = 5)) %>% 
+          mode = 'lines', colors = "Set1", line = list(width = 5, shape = 'spline')) %>% 
     add_trace(data = temp, x = ~Year, y = ~sum, type = 'scatter', mode = 'lines', name = 'Total', color = I("black"),
-              line = list(width = 5, dash = 'dash'),showlegend = TRUE) %>%
+              line = list(width = 5, dash = 'dash', shape = 'spline'),showlegend = TRUE) %>%
     layout(title = '', xaxis = list(title = ""), yaxis = list(title = "Refugee Total"))
 }
 
 ContinentFilterUsrInteract.Plotly = function(data = Continent_data, var = "Africa") {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Refugee.Status))
   plot_ly() %>% add_trace(data = filter(data, Continent %in% c(var)), x = ~Year, y = ~Refugee.Status, color = ~Continent, type = 'scatter', 
-                          mode = 'lines', colors = "Set1", line = list(width = 5)) %>%
+                          mode = 'lines', colors = "Set1", line = list(width = 5, shape = 'spline')) %>%
     add_trace(data = temp, x = ~Year, y = ~sum, type = 'scatter', mode = 'lines', name = 'Total', color = I("black"),
-              line = list(width = 5, dash = 'dash')) %>% 
+              line = list(width = 5, dash = 'dash', shape = 'spline')) %>% 
     layout(title = '', xaxis = list(title = ""), yaxis = list(title = "Refugee Total"))
 }
 
 Total.Plotly = function(data = Continent_data) {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Refugee.Status))
-  plot_ly() %>% add_trace(data =temp, x = ~Year, y = ~sum, name = "Total Refugees",type = 'bar', color = ~sum, colors = brewer.pal(9,'RdPu')) %>%
-    layout(xaxis = list(title = ""), yaxis = list(title = "Refugee Total"))
+  plot_ly() %>% add_trace(data =temp, x = ~Year, y = ~sum, name = "Total Refugees",type = 'bar', 
+                          color = ~sum,text = ~paste("Year:",Year,"<br />Total:",sum),hoverinfo = 'text',
+                          colors = brewer.pal(9,'Reds'), marker = list(colorbar = list(title = "Refugee Total"))) %>%
+    layout(xaxis = list(title = ""), yaxis = list(title = "Refugee Total"), paper_bgcolor = 'rgb(160,160,160)',
+           plot_bgcolor = 'rgb(160,160,160)')
 }
 
 

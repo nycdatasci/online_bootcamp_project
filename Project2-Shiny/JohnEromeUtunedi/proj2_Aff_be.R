@@ -166,24 +166,28 @@ CountryFilterSum_Aff.Plotly = function(data = Country_Aff_data, amt = 5, type = 
 CountryFilterUsrInteract_Aff.Plotly = function(data = Country_Aff_data, var = "Nigeria") {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Affirmative.Asylum))
   plot_ly() %>% add_trace(data = filter(data, Country %in% c(var)), x = ~Year, y = ~Affirmative.Asylum, color = ~Country, type = 'scatter', 
-                          mode = 'lines', colors = "Set1", line = list(width = 5)) %>%
+                          mode = 'lines', colors = "Set1", line = list(width = 5, shape = 'spline')) %>%
     add_trace(data = temp, x = ~Year, y = ~sum, type = 'scatter', mode = 'lines', name = 'Total', color = I("black"),
-              line = list(width = 5, dash = 'dash')) %>% 
+              line = list(width = 5, dash = 'dash', shape = 'spline')) %>% 
     layout(title = '', xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"))
 }
 
 ContinentFilterUsrInteract_Aff.Plotly = function(data = Cont_Aff_data, var = "Africa") {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Affirmative.Asylum))
   plot_ly() %>% add_trace(data = filter(data, Continent %in% c(var)), x = ~Year, y = ~Affirmative.Asylum, color = ~Continent, type = 'scatter', 
-                          mode = 'lines', colors = "Set1", line = list(width = 5)) %>%
-    add_trace(data = temp, x = ~Year, y = ~sum, type = 'scatter', mode = 'lines', name = 'Total', color = I("black"), line = list(width = 5, dash = 'dash')) %>% 
+                          mode = 'lines', colors = "Set1", line = list(width = 5, shape = 'spline')) %>%
+    add_trace(data = temp, x = ~Year, y = ~sum, type = 'scatter', mode = 'lines', name = 'Total', color = I("black"), 
+              line = list(width = 5, dash = 'dash', shape = 'spline')) %>% 
     layout(title = '', xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"))
 }
 
 Total_Aff.Plotly = function(data = Cont_Aff_data) {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Affirmative.Asylum))
-  plot_ly() %>% add_trace(data =temp, x = ~Year, y = ~sum, name = "Total Affirmative Asylum", type = 'bar', color = ~sum, colors = brewer.pal(9,'RdPu')) %>%
-    layout(xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"))
+  plot_ly() %>% add_trace(data =temp, x = ~Year, y = ~sum, name = "Total Affirmative Asylum", type = 'bar', color = ~sum, 
+                          text = ~paste("Year:",Year,"<br />Total:",sum),hoverinfo = 'text',
+                          colors = brewer.pal(9,'Reds'), marker = list(colorbar = list(title = "Affirmative Asylum Total"))) %>%
+    layout(xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"), paper_bgcolor = 'rgb(160,160,160)',
+           plot_bgcolor = 'rgb(160,160,160)')
   
 }
 ## 

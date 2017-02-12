@@ -26,12 +26,8 @@ server = function(input, output) {
     
     if(length(input$selectCountryRef) != 0) {
       CountryFilterUsrInteract.Plotly(var = input$selectCountryRef)
-      #temp = filter(Country_data, Country %in% c(input$selectCountryRef), Refugee.Status!=0)
-      #temp = ggplot(data = temp) + geom_line(aes(x = Year, y = Refugee.Status, color = Country)) +
-       # theme(legend.justification = c(0,0),legend.position = c(0,0))
     } else {
       CountryFilterUsrInteract.Plotly(var = "")
-      #temp = ggplot()
       }
   })
   output$plot3_ref = renderPlotly({
