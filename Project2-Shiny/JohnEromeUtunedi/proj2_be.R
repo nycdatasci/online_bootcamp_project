@@ -40,26 +40,13 @@ map.world = subset(map.world, region!="Antarctica")
 Country_data_match = merge(Country_data, map.world, by.x = "Country", by.y = "region")
 Country_data_match = arrange(Country_data_match, group, order)
 
-CountryFilterMap = function(data1 = Country_data_match, data2 = map.world, data3 = "2006") {
-  gg = ggplot(data = data2) + geom_polygon(aes(x = long, y = lat, group = group), color = "white") +
-    geom_polygon(data = filter(data1,Year == data3), aes(x = long, y = lat, group = group, fill = Refugee.Status, text = paste("Country: ", Country)), color =  "white") 
-  gg = gg + scale_fill_gradient(low = "blue", high = "red") + guides(alpha = FALSE) + coord_map()
-  #gg = ggplotly(gg)
-  return(gg)
-}
 
-CountryFilterBar = function(data1 = Country_data, fil = "2006", height = 5, arrange = 1) {
-  if(arrange == 1) {
-    gg= ggplot(data = arrange(filter(data1, Year == fil, Refugee.Status != 0),desc(Refugee.Status))[1:height,]) + 
-      geom_bar(aes(x = reorder(Country, -Refugee.Status), y = Refugee.Status, fill = Country), stat = 'identity')
-    }
-  else {
-    gg= ggplot(data = arrange(filter(data1, Year == fil, Refugee.Status!=0),Refugee.Status)[1:height,]) + 
-      geom_bar(aes(x = reorder(Country, Refugee.Status), y = Refugee.Status, fill = Country), stat = 'identity')    
-  }
-  return(gg)
-}
-
+# The purpose of this function is to plot
+# a bar chart indicating the top/least 2-6 Continents
+# from where refugees come from
+# based on the year selected by the user.
+# This function will also allow the bar plots 
+# to be shown in ascending or descending order
 ContinentFilterBar.Plotly = function(data1 = Continent_data, fil = "2006", height = 2, arrange = 1) {
   if(arrange == 1) {
     temp = arrange(filter(data1, Year == fil),desc(Refugee.Status))[1:height,]
@@ -76,6 +63,10 @@ ContinentFilterBar.Plotly = function(data1 = Continent_data, fil = "2006", heigh
   return(val)
 }
 
+# The purpose of this function is to view the Refugees from each continent
+# on a yearly basis. Used with shiny, the user will also be able to decide
+# if he want to view plot using a bar plot or a bubble plot and the top 2-6
+# continents from which refugees come from
 ContinentFilterTotal.Plotly = function(data = Continent_data, amt = 2, type = 1) {
   temp = data %>% group_by(Continent)  %>% summarise(sum = sum(Refugee.Status)) %>% arrange(desc(sum))
   temp = temp[1:amt,]
@@ -91,6 +82,10 @@ ContinentFilterTotal.Plotly = function(data = Continent_data, amt = 2, type = 1)
                        xaxis = list(title = ""), yaxis = list(title = "Refugee Total"), barmode = 'stack')
 }
 
+# The purpose of this function is to display the continents
+# with the most Refugees from 2006-2015 in descending order.
+# Used with shiny, the user will be able to select the
+# top 2-6 continets 
 ContinentFilterSum.Plotly = function(data = Continent_data, amt = 2, type = 1) {
   temp = data %>% group_by(Continent)  %>% summarise(sum = sum(Refugee.Status)) %>% arrange(desc(sum))
   temp = temp[1:amt,]
@@ -104,12 +99,18 @@ ContinentFilterSum.Plotly = function(data = Continent_data, amt = 2, type = 1) {
                        xaxis = list(title = ""), yaxis = list(title = "Refugee Total"))
 }
 
+# The purpose of this function is to plot
+# a bar chart indicating the top/least 2-10 Countries
+# from where refugees come from
+# based on the year selected by the user.
+# This function will also allow the bar plots 
+# to be shown in ascending or descending order
 CountryFilterBar.Plotly = function(data = Country_data, Year_val = 2006, height = 10, arrange = 1) {
   if(arrange == 1) {
   temp = arrange(filter(data, Year == Year_val, Refugee.Status!=0), desc(Refugee.Status))[1:height,]
   temp$Country = factor(as.factor(temp$Country), levels = as.factor(temp$Country)[order(-temp$Refugee.Status)], ordered = TRUE)
   plot_ly(data = temp, x = ~Refugee.Status, y = ~Country, type = 'bar', color = ~Country, colors = 'BrBG',marker = list(reversescale = TRUE),
-          text = ~paste('Country:',Refugee.Status), hoverinfo = 'text') %>%  
+          text = ~paste('Country:',Refugee.Status)) %>%  
     layout(title = paste("Largest Refugee Countries in", Year_val), xaxis =list(title = "Total Refugees"), yaxis = list(title = "", tickangle = 70)) }
   else {
     temp = arrange(filter(data, Year == Year_val, Refugee.Status!=0), Refugee.Status)[1:height,]
@@ -121,12 +122,10 @@ CountryFilterBar.Plotly = function(data = Country_data, Year_val = 2006, height 
   }
 }
 
-CountryFilterFill.Plotly = function(data = Country_data, Year_val = 2006, height = 10) {
-  temp = arrange(filter(data, Year == Year_val, Refugee.Status!=0), desc(Refugee.Status))[1:height,]
-  plot_ly(data = temp, x = ~Country, y = ~Refugee.Status, color = ~Country, size = ~Refugee.Status, type = "scatter",mode = "markers", 
-          marker = list(sizemode = 'diameter', opacity = 0.75))
-}
-
+# The purpose of this function is to view the Refugees from each country
+# on a yearly basis. Used with shiny, the user will also be able to decide
+# if he want to view plot using a bar plot or a bubble plot and the top 2-10
+# countries from which refugees come from
 CountryFilterTotal.Plotly = function(data = Country_data, amt = 5, type = 1) {
   temp = data %>% group_by(Country)  %>% summarise(sum = sum(Refugee.Status)) %>% arrange(desc(sum))
   temp = temp[1:amt,]
@@ -144,6 +143,10 @@ CountryFilterTotal.Plotly = function(data = Country_data, amt = 5, type = 1) {
                        xaxis = list(title = ""), yaxis = list(title = "Refugee Total"), barmode = 'stack')
 }
 
+# The purpose of this function is to display the countries
+# with the most Refugees from 2006-2015 in descending order.
+# Used with shiny, the user will be able to select the
+# top 2-10 countries 
 CountryFilterSum.Plotly = function(data = Country_data, amt = 5, type = 1) {
   temp = data %>% group_by(Country)  %>% summarise(sum = sum(Refugee.Status)) %>% arrange(desc(sum))
   temp = temp[1:amt,]
@@ -157,6 +160,10 @@ CountryFilterSum.Plotly = function(data = Country_data, amt = 5, type = 1) {
                        xaxis = list(title = ""), yaxis = list(title = "Refugee Total"))
 }
 
+# The purpose of this function is to create a trend plot to allow the user
+# to compare individual countries against the total refugees per year. 
+# Used with shiny, the user can select multiple countries and compare them
+# against the total refugees for each year
 CountryFilterUsrInteract.Plotly = function(data = Country_data, var = "Nigeria") {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Refugee.Status))
   plot_ly() %>% add_trace(data = filter(data, Country %in% c(var)), x = ~Year, y = ~Refugee.Status, color = ~Country, type = 'scatter', 
@@ -166,6 +173,10 @@ CountryFilterUsrInteract.Plotly = function(data = Country_data, var = "Nigeria")
     layout(title = '', xaxis = list(title = ""), yaxis = list(title = "Refugee Total"))
 }
 
+# The purpose of this function is to create a trend plot to allow the user
+# to compare each continent against the total refugees per year.
+# Used with shiny, the user can select multiple continents and compare them
+# against the total refugees for each year
 ContinentFilterUsrInteract.Plotly = function(data = Continent_data, var = "Africa") {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Refugee.Status))
   plot_ly() %>% add_trace(data = filter(data, Continent %in% c(var)), x = ~Year, y = ~Refugee.Status, color = ~Continent, type = 'scatter', 
@@ -175,6 +186,8 @@ ContinentFilterUsrInteract.Plotly = function(data = Continent_data, var = "Afric
     layout(title = '', xaxis = list(title = ""), yaxis = list(title = "Refugee Total"))
 }
 
+# The purpose of this function is to create a bar plot to
+# display the total refugees per year
 Total.Plotly = function(data = Continent_data) {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Refugee.Status))
   plot_ly() %>% add_trace(data =temp, x = ~Year, y = ~sum, name = "Total Refugees",type = 'bar', 

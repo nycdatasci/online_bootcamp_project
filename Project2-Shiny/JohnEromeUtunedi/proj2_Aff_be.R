@@ -32,39 +32,12 @@ map.world.Aff = subset(map.world.Aff, region!="Antarctica")
 Country_data_match_Aff = merge(Country_Aff_data, map.world.Aff, by.x = "Country", by.y = "region")
 Country_data_match_Aff = arrange(Country_data_match_Aff, group, order)
 
-CountryFilterMap.Aff = function(data1 = Country_data_match_Aff, data2 = map.world.Aff, data3 = "2006") {
-  gg = ggplot(data = data2) + geom_polygon(aes(x = long, y = lat, group = group), color = "white") +
-    geom_polygon(data = filter(data1,Year == data3), aes(x = long, y = lat, group = group, fill = Affirmative.Asylum 
-                                                         ,text = paste("Country: ", Country)), color =  "white") 
-  gg = gg + scale_fill_gradient(low = "blue", high = "red") + guides(alpha = FALSE) + coord_map()
-  #gg = ggplotly(gg)
-  return(gg)
-}
-
-CountryFilterBar.Aff = function(data1 = Country_Aff_data, fil = "2006", height = 5, arrange = 1) {
-  if(arrange == 1) {
-    gg= ggplot(data = arrange(filter(data1, Year == fil, Affirmative.Asylum!=0),desc(Affirmative.Asylum))[1:height,]) + 
-      geom_bar(aes(x = reorder(Country, -Affirmative.Asylum), y = Affirmative.Asylum, fill = Country), stat = 'identity')
-  }
-  else {
-    gg= ggplot(data = arrange(filter(data1, Year == fil,Affirmative.Asylum!=0),Affirmative.Asylum)[1:height,]) + 
-      geom_bar(aes(x = reorder(Country, Affirmative.Asylum), y = Affirmative.Asylum, fill = Country), stat = 'identity')    
-  }
-  return(gg)
-}
-
-ContinentFilterBar.Aff = function(data1 = Cont_Aff_data, fil = "2006", height = 2, arrange = 1) {
-  if(arrange == 1) {
-    gg= ggplot(data = arrange(filter(data1, Year == fil),desc(Affirmative.Asylum))[1:height,]) + 
-      geom_bar(aes(x = reorder(Continent, -Affirmative.Asylum), y = Affirmative.Asylum, fill = Continent), stat = 'identity')
-  }
-  else {
-    gg= ggplot(data = arrange(filter(data1, Year == fil),Affirmative.Asylum)[1:height,]) + 
-      geom_bar(aes(x = reorder(Continent, Affirmative.Asylum), y = Affirmative.Asylum, fill = Continent), stat = 'identity')    
-  }
-  return(gg)
-}
-
+# The purpose of this function is to plot
+# a bar chart indicating the top/least 2-6 Continents
+# from where affirmative asylees come from
+# based on the year selected by the user.
+# This function will also allow the bar plots 
+# to be shown in ascending or descending order
 ContinentFilterBar_Aff.Plotly = function(data1 = Cont_Aff_data, fil = "2006", height = 2, arrange = 1) {
   if(arrange == 1) {
     temp = arrange(filter(data1, Year == fil),desc(Affirmative.Asylum))[1:height,]
@@ -85,6 +58,10 @@ ContinentFilterBar_Aff.Plotly = function(data1 = Cont_Aff_data, fil = "2006", he
   return(val)
 }
 
+# The purpose of this function is to view the affirmative asylyees from each continent
+# on a yearly basis. Used with shiny, the user will also be able to decide
+# if he want to view plot using a bar plot or a bubble plot and the top 2-6
+# continents from which affirmative asylees come from
 ContinentFilterTotal_Aff.Plotly = function(data = Cont_Aff_data, amt = 2, type = 1) {
   temp = data %>% group_by(Continent)  %>% summarise(sum = sum(Affirmative.Asylum)) %>% arrange(desc(sum))
   temp = temp[1:amt,]
@@ -99,6 +76,10 @@ ContinentFilterTotal_Aff.Plotly = function(data = Cont_Aff_data, amt = 2, type =
                        xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"), barmode = 'stack')
 }
 
+# The purpose of this function is to display the continents
+# with the most affirmative asylees from 2006-2015 in descending order.
+# Used with shiny, the user will be able to select the
+# top 2-6 continets 
 ContinentFilterSum_Aff.Plotly = function(data = Cont_Aff_data, amt = 2, type = 1) {
   temp = data %>% group_by(Continent)  %>% summarise(sum = sum(Affirmative.Asylum)) %>% arrange(desc(sum))
   temp = temp[1:amt,]
@@ -112,6 +93,12 @@ ContinentFilterSum_Aff.Plotly = function(data = Cont_Aff_data, amt = 2, type = 1
                        xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"))
 }
 
+# The purpose of this function is to plot
+# a bar chart indicating the top/least 2-10 Countries
+# from where affirmative asylees come from
+# based on the year selected by the user.
+# This function will also allow the bar plots 
+# to be shown in ascending or descending order
 CountryFilterBar_Aff.Plotly = function(data = Country_Aff_data, Year_val = 2006, height = 10, arrange = 1) {
   if(arrange == 1) {
     temp = arrange(filter(data, Year == Year_val, Affirmative.Asylum!=0), desc(Affirmative.Asylum))[1:height,]
@@ -128,12 +115,10 @@ CountryFilterBar_Aff.Plotly = function(data = Country_Aff_data, Year_val = 2006,
   }
 }
 
-CountryFilterFill_Aff.Plotly = function(data = Country_Aff_data, Year_val = 2006, height = 10) {
-  temp = arrange(filter(data, Year == Year_val, Affirmative.Asylum!=0), desc(Affirmative.Asylum))[1:height,]
-  plot_ly(data = temp, x = ~Country, y = ~Affirmative.Asylum, color = ~Country, size = ~Affirmative.Asylum, type = "scatter",mode = "markers", 
-          marker = list(sizemode = 'diameter', opacity = 0.75))
-}
-
+# The purpose of this function is to view the affirmative asylees from each country
+# on a yearly basis. Used with shiny, the user will also be able to decide
+# if he want to view plot using a bar plot or a bubble plot and the top 2-10
+# countries from which affirmative asylees come from
 CountryFilterTotal_Aff.Plotly = function(data = Country_Aff_data, amt = 5, type = 1) {
   temp = data %>% group_by(Country)  %>% summarise(sum = sum(Affirmative.Asylum)) %>% arrange(desc(sum))
   temp = temp[1:amt,]
@@ -149,6 +134,10 @@ CountryFilterTotal_Aff.Plotly = function(data = Country_Aff_data, amt = 5, type 
                        xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"), barmode = 'stack')
 }
 
+# The purpose of this function is to display the countries
+# with the most affirmative asylees from 2006-2015 in descending order.
+# Used with shiny, the user will be able to select the
+# top 2-10 countries 
 CountryFilterSum_Aff.Plotly = function(data = Country_Aff_data, amt = 5, type = 1) {
   temp = data %>% group_by(Country)  %>% summarise(sum = sum(Affirmative.Asylum)) %>% arrange(desc(sum))
   temp = temp[1:amt,]
@@ -163,6 +152,10 @@ CountryFilterSum_Aff.Plotly = function(data = Country_Aff_data, amt = 5, type = 
                        xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"))
 }
 
+# The purpose of this function is to create a trend plot to allow the user
+# to compare individual countries against the total affirmative asylees per year. 
+# Used with shiny, the user can select multiple countries and compare them
+# against the total affirmative asylees for each year
 CountryFilterUsrInteract_Aff.Plotly = function(data = Country_Aff_data, var = "Nigeria") {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Affirmative.Asylum))
   plot_ly() %>% add_trace(data = filter(data, Country %in% c(var)), x = ~Year, y = ~Affirmative.Asylum, color = ~Country, type = 'scatter', 
@@ -172,6 +165,10 @@ CountryFilterUsrInteract_Aff.Plotly = function(data = Country_Aff_data, var = "N
     layout(title = '', xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"))
 }
 
+# The purpose of this function is to create a trend plot to allow the user
+# to compare each continent against the total affirmative asylees per year.
+# Used with shiny, the user can select multiple continents and compare them
+# against the total affirmative asylees for each year
 ContinentFilterUsrInteract_Aff.Plotly = function(data = Cont_Aff_data, var = "Africa") {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Affirmative.Asylum))
   plot_ly() %>% add_trace(data = filter(data, Continent %in% c(var)), x = ~Year, y = ~Affirmative.Asylum, color = ~Continent, type = 'scatter', 
@@ -181,6 +178,8 @@ ContinentFilterUsrInteract_Aff.Plotly = function(data = Cont_Aff_data, var = "Af
     layout(title = '', xaxis = list(title = ""), yaxis = list(title = "Affirmative Asylum Total"))
 }
 
+# The purpose of this function is to create a bar plot to
+# display the total affirmative asylees per year
 Total_Aff.Plotly = function(data = Cont_Aff_data) {
   temp = data %>% group_by(Year) %>% summarise(sum = sum(Affirmative.Asylum))
   plot_ly() %>% add_trace(data =temp, x = ~Year, y = ~sum, name = "Total Affirmative Asylum", type = 'bar', color = ~sum, 

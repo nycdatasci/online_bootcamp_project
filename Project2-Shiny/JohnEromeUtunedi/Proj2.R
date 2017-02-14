@@ -1,4 +1,6 @@
-#rm(list=ls())
+# Installing libraries for initial load in order to run
+# all required built-in functions
+rm(list=ls())
 library(shiny)
 library(shinydashboard)
 library(plotly)
@@ -7,12 +9,21 @@ library(ggplot2)
 library(reshape2)
 library(maps)
 library(mapproj)
-library(plotly)
 library(zoo)
 library(RColorBrewer)
+
+# Running files in order to give access
+# to the different data types - Refugee, 
+# Defensive Asylum and Affirmative Asylum and functions
+# accessing those datas
 source("Project2/proj2_be.R")
 source("Project2/proj2_Def_be.R")
 source("Project2/proj2_Aff_be.R")
+
+# Function created for summary page of UI/Server of Shiny
+# application. It will display a bar plot and trends comparing
+# the different refugee types and amount from 2006-2015
+
 summaryplot.plotly = function(data1 = Continent_data, data2 = Cont_Aff_data, data3 = Cont_Def_data) {
   t1 = data1 %>% mutate(type = 'Refugees') %>% rename(Total = Refugee.Status)
   t2 = data2 %>% mutate(type = 'Affirmative') %>% rename(Total = Affirmative.Asylum)
@@ -28,6 +39,8 @@ summaryplot.plotly = function(data1 = Continent_data, data2 = Cont_Aff_data, dat
                                      hoverinfo = "text") %>% layout(barmode = 'stack', 
              xaxis = list(title = ''), yaxis = list(title = 'Total Amount of People seeking Refuge in the US'))
 }
+
+# Run Shiny APP
 runApp("Project2")
 
 
