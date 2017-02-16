@@ -1,0 +1,16 @@
+# Use the following statements to install required packages, if not already installed.
+
+#install.packages("DT")
+#install.packages("shiny")
+#install.packages("shinydashboard")
+#install.packages("dplyr")
+#install.packages("dygraphs")
+#install.packages("httpuv")
+#install.packages("twitteR")
+#install.packages("quantmod")
+#install.packages("stringr")
+#install.packages("data.table")
+#if (require(devtools)) install.packages("devtools", dependencies = TRUE)#if not already installed
+#devtools::install_github("wesm/feather/R")
+#devtools::install_github("ramnathv/htmlwidgets")
+#devtools::install_github("bokeh/rbokeh")

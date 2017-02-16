@@ -1,0 +1,8 @@
+# Replace my_consumer_key, my_consumer_secret, my_access_token, and my_access_secret below with
+# your own credentials for Twitter API access. Then, move this file to your home directory and
+# rename it to .Rprofile or add the lines below to your .Rprofile file if it already exists.
+
+Sys.setenv(consumer_key = "my_consumer_key")
+Sys.setenv(consumer_secret = "my_consumer_secret")
+Sys.setenv(access_token = "my_access_token")
+Sys.setenv(access_secret = "my_access_secret")

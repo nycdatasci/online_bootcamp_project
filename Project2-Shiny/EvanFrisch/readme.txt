@@ -1,10 +1,10 @@
-healthinequality.R
+Trump Effect Dashboard
 Evan Frisch
 
-Performs exploratory visualization of selected data on life expectancy in the U.S.
-with particular attention to differences according to income, geography, and gender.
-
-Acquires data provided by the Health Inequality Project, which is found at:
-https://healthinequality.org/data/
+An R Shiny web application to acquire and display tweets by Donald Trump
+and enable search for major companies that may have been referenced in the tweets
+along with contemporaneous stock price charts for those companies.
 
 Refer to packages.txt for a list of required R packages.
+
+See myRprofile for information on the required .Rprofile file.
