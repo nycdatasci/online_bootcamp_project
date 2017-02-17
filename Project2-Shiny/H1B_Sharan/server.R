@@ -1,27 +1,40 @@
+# Author: Sharan Naribole
+# Filename: server.R
+# H-1B Visa Petitions Dashboard web application to enable exploratory data analysis
+# on H-1B Visa applications disclosure data in the period 2011-2016
+
 library(shiny)
-library(shinyjs)
 library(ggplot2)
-library(ggthemes)
 library(dplyr)
 library(lazyeval)
+library(hashmap)
+library(ggrepel)
+
+# H-1B Visa transformed dataset
+# Data transformation source code available at https://git.io/vDyOE
 h1b_df <- readRDS("data/h1b_shiny.rds")
+#Helper functions
 source("helpers.R")
 
-# Define server logic for slider examples
+# Initializing value containers used for plotting
+metric_lab_hash <- hashmap(c("TotalApps","CertiApps","Wage"),c("TOTAL H-1B VISA APPLICATIONS", "CERTIFIED H-1B VISA APPLICATIONS","MEDIAN PREVAILING WAGE"))
+USA = map_data(map = "usa")
+
+# Define Server logic
 shinyServer(function(input, output) {
   
-  ## Initializing Reactive values
+  ## Initializing Reactive values for inputs
   reactive_inputs <- reactiveValues(job_list = c('data scientist','data engineer','machine learning'),
                                     employer_list = c(), 
                                     year = as.character(seq(2011,2016)), 
                                     metric = "TotalApps",
-                                    location = "USA")
+                                    location = "USA",
+                                    Ntop = 3)
   
+  # Compute button triggers update of reactive inputs
   observeEvent(input$compute,{
     job_list <-tolower(trimws(c(input$job_type_1,input$job_type_2,input$job_type_3)))
     reactive_inputs$job_list <- job_list[job_list != ""]
-    
-    #if(reactive_inputs$job_list)
     
     employer_list <-tolower(trimws(c(input$employer_1,input$employer_2,input$employer_3)))
     reactive_inputs$employer_list <- employer_list[employer_list != ""]
@@ -31,21 +44,23 @@ shinyServer(function(input, output) {
     reactive_inputs$metric <- input$metric
     
     reactive_inputs$location <- input$location
+    
+    reactive_inputs$Ntop <- input$Ntop
   })
   
-
-  output$debugEmployerList <- renderText(({
-    reactive_inputs$employer_list
-    #as.character(dim(employer_input()))
-  }))
   
-  output$debugJobList <- renderText(({
-    reactive_inputs$job_list
-    #as.character(dim(employer_input()))
-  }))
+  # output$debugEmployerList <- renderText(({
+  #   reactive_inputs$employer_list
+  #   #as.character(dim(employer_input()))
+  # }))
+  # 
+  # output$debugJobList <- renderText(({
+  #   reactive_inputs$job_list
+  #   #as.character(dim(employer_input()))
+  # }))
     
 
-  ## Filtering based on inputs
+  ## Filtering based on input dimensions: year range, location, job type, employer
   
   # Filter year input
   year_input <- reactive({
@@ -60,14 +75,14 @@ shinyServer(function(input, output) {
   
   
   # Filtering based on job type
-  # If no match found, then use all Jobs
+  # If no match found, then use all unique Job Titles
   job_input <- reactive({
     job_filter(location_input(),reactive_inputs$job_list)
   })
 
-  output$debugJobInput <- renderText({
-    as.character(dim(job_input()))
-  })
+  # output$debugJobInput <- renderText({
+  #   as.character(dim(job_input()))
+  # })
   
   # Filtering based on employer names
   # If no match found, then use all Employers
@@ -80,10 +95,10 @@ shinyServer(function(input, output) {
     }
   })
   
-  output$debugEmployerInput <- renderText(({
-    #reactive_inputs$employer_list
-    as.character(dim(employer_input()))
-  }))
+  # output$debugEmployerInput <- renderText(({
+  #   #reactive_inputs$employer_list
+  #   as.character(dim(employer_input()))
+  # }))
   
   # Final input data frame for plotting
   data_input <- reactive({
@@ -108,71 +123,90 @@ shinyServer(function(input, output) {
     head(data_input())
   })
   
+  # output$metricInput <- renderText({
+  #   reactive_inputs$metric
+  # })
+  
   ## Plotting
-
-  output$metricInput <- renderText({
-    reactive_inputs$metric
-  })
+  
+  ## Job Type Comparison Plot
   
   # Job Type Input
   job_plot_input <- reactive({
-     plot_input(data_input(),"JOB_INPUT_CLASS", "YEAR",reactive_inputs$metric,filter = TRUE, Ntop = 3)
+     plot_input(data_input(),"JOB_INPUT_CLASS", "YEAR",reactive_inputs$metric,filter = TRUE, Ntop = reactive_inputs$Ntop)
    })
-
+  
+  # Job Type data subset
   output$job_type_table <- renderDataTable({
     job_plot_input()
   }, options = list(lengthMenu = c(10, 20,50), pageLength = 10)
   )
   
-  # Job Type Output
+  # Job Type Plot
   output$job_type <- renderPlot({
-    plot_output(job_plot_input(),"JOB_INPUT_CLASS", "YEAR", reactive_inputs$metric)
+    plot_output(job_plot_input(),"JOB_INPUT_CLASS", "YEAR", reactive_inputs$metric, "JOB TYPE",
+                metric_lab_hash[[reactive_inputs$metric]])
   })
 
-
-  # Locations Input
+  
+  ## Locations Input
+  
+  # Location Input
   location_plot_input <- reactive({
-    plot_input(data_input(),"WORKSITE", "YEAR",reactive_inputs$metric, filter = TRUE, Ntop = 3)
+    plot_input(data_input(),"WORKSITE", "YEAR",reactive_inputs$metric, filter = TRUE, Ntop = reactive_inputs$Ntop)
   })
 
+  # Location data subset
   output$location_table <- renderDataTable({
     location_plot_input()
   }, options = list(lengthMenu = c(10, 20,50), pageLength = 10)
   )
   
-  # Locations Output
+  # Locations Plot
   output$location <- renderPlot({
-    plot_output(location_plot_input(),"WORKSITE", "YEAR", reactive_inputs$metric)
+    plot_output(location_plot_input(),"WORKSITE", "YEAR", reactive_inputs$metric,"LOCATION", 
+                metric_lab_hash[[reactive_inputs$metric]])
   })
 
-
-   # Employers Input
+   ## Employers Input
+   
+   # Employers input
    employer_plot_input <- reactive({
-     plot_input(data_input(),"EMPLOYER_NAME", "YEAR",reactive_inputs$metric, filter = TRUE, Ntop = 3)
+     plot_input(data_input(),"EMPLOYER_NAME", "YEAR",reactive_inputs$metric, filter = TRUE, Ntop = reactive_inputs$Ntop)
    })
 
+   # Employers data subset
    output$employertable <- renderDataTable({
      employer_plot_input()
    }, options = list(lengthMenu = c(10, 20,50), pageLength = 10)
    )
 
-   # Employer Output
+   # Employer Plot
    output$employer <- renderPlot({
-     plot_output(employer_plot_input(),"EMPLOYER_NAME", "YEAR",reactive_inputs$metric)
+     plot_output(employer_plot_input(),"EMPLOYER_NAME", "YEAR",reactive_inputs$metric, "EMPLOYER",
+                 metric_lab_hash[[reactive_inputs$metric]])
    })
+   
+   # Map Output
+   # plotting map for input metric
+   # Map pinpoints to top "Ntop" worksite cities based on the input metric
+   output$map <- renderPlot({
+     map_gen(data_input(),reactive_inputs$metric,USA, Ntop = reactive_inputs$Ntop)
+   })
+   
+   output$map_table <- renderDataTable({
+     data_input() %>%
+       mutate(certified =ifelse(CASE_STATUS == "CERTIFIED",1,0)) %>%
+       group_by(WORKSITE) %>%
+       summarise(TotalApps = n(),CertiApps = sum(certified), Wage = median(PREVAILING_WAGE))
+   }, options = list(lengthMenu = c(10, 20,50), pageLength = 10))
    
    observeEvent(input$resetAll, {
      reset("inputs")
    })
    
-   # observeEvent(input$resetEmployer, {
-   #   reset("employer")
-   # })
-   # observeEvent(input$resetYear, {
-   #   reset("year")
-   # })
-   # observeEvent(input$resetJobType, {
-   #   reset("job_type")
+   # session$onSessionEnded(function() {
+   #   q()
    # })
    
 })
