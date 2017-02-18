@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600');
+html {
+	font-family: "Source Sans Pro", sans-serif;
+}
+
+div.row {
+	margin:0 auto;
+	max-width: 1024px;
+}
+
+div#intro {
+	padding:20px;
+	padding-top: 0;
+	font-size: 1.05em;
+	font-family: "Source Sans Pro", sans-serif;
+	font-weight: 400;
+	color:#888;
+}
+
+div#location-summary-text,
+div#occupation-summary-text {
+	max-width: 500px;
+	font-family: "Source Sans Pro", sans-serif;
+	font-weight: 400;
+	margin:0 auto;
+}
+div#location-summary-plot,
+div#occupation-summary-plot {
+	font-family: "Source Sans Pro", sans-serif;
+	font-weight: 400;
+	margin:0 auto;
+}
+
+.nav-tabs>li {
+	width: 50%;
+}
+.nav>li>a {
+	text-align: center;	
+}
+
+div.tab-content {
+	text-align: center;
+}
+
+div.tab-content .form-group.shiny-input-container {
+	text-align: center;
+	margin:0 auto;
+}
+
+
+
+
+
