@@ -6,20 +6,20 @@ library(reshape2)
 library(ggmap)
 
 #------------Read Datasets -----------------------------------------------------------------------#
-annual_net_generation <- read.csv("D:/NYCDatascience/Project - 1/Netmetering/annual_net_generation_stat.csv",
+annual_net_generation <- read.csv("annual_net_generation_stat.csv",
                                   header=TRUE, stringsAsFactors = FALSE)
-annual_retail_sale <- read.csv("D:/NYCDatascience/Project - 1/Netmetering/annual_retail_sales_stat.csv",
+annual_retail_sale <- read.csv("annual_retail_sales_stat.csv",
                                header=TRUE, stringsAsFactors = FALSE)
-net_meter_generation <- read.csv("D:/NYCDatascience/Project - 1/Netmetering/netmeter_annual_generation.csv",
+net_meter_generation <- read.csv("netmeter_annual_generation.csv",
                                  header=TRUE, stringsAsFactors = FALSE)
-net_meter_sales <- read.csv("D:/NYCDatascience/Project - 1/Netmetering/netmetering-energy_sold_back.csv",
+net_meter_sales <- read.csv("netmetering-energy_sold_back.csv",
                             header=TRUE, stringsAsFactors = FALSE)
 
-net_meter_2015 <- read.csv("D:/NYCDatascience/Project - 1/Netmetering/Netmetering_2015.csv",
+net_meter_2015 <- read.csv("Netmetering_2015.csv",
                             header=TRUE, stringsAsFactors = FALSE)
-annual_retail_2015 <- read.csv("D:/NYCDatascience/Project - 1/Netmetering/retail_sales_annual_end_sector_state.csv",
+annual_retail_2015 <- read.csv("retail_sales_annual_end_sector_state.csv",
                             header=TRUE, stringsAsFactors = FALSE)
-annual_customer_stat <- read.csv("D:/NYCDatascience/Project - 1/Netmetering/annual_customer_stat.csv",
+annual_customer_stat <- read.csv("annual_customer_stat.csv",
                                header=TRUE, stringsAsFactors = FALSE)
 
 #------------Data Cleaning -------------------------------------------------#
@@ -102,16 +102,17 @@ shinyServer(function(input, output) {
   #-----------------------------------------------------
   output$line_net_sales <- renderPlot({
   
-    plot_pc <- ggplot(df1, aes(x=Net_Retail_Sales, y=Net_Generation)) +
+           ggplot(df1, aes(x=Net_Retail_Sales, y=Net_Generation)) +
            geom_point(aes(col=Year),size=3)  +
            geom_smooth(alpha=0.1)   +
             ylab("Net Generation in 1000 MWh")   +
             xlab("Net Retail Sales in Mwh") +
             ggtitle("Total Electric Generation and Retail Sales over the years")+
             scale_x_continuous(labels = scales::comma)+
-            scale_y_continuous(labels = scales::comma)
+            scale_y_continuous(labels = scales::comma)+
+            theme(plot.title = element_text(hjust=.4))
     
-    print(plot_pc)
+     
   })    
    
   #-----------------------------------------------------
@@ -119,15 +120,16 @@ shinyServer(function(input, output) {
   #-----------------------------------------------------
   output$scatter_netmeter <- renderPlot({
     df4$Year <- as.character(df4$Year)
-      plot_pc1 <- ggplot(df4, aes(x=Total_Netmeter_Energy_Sold, y=Total_Netmeter_Capacity)) +
+      ggplot(df4, aes(x=Total_Netmeter_Energy_Sold, y=Total_Netmeter_Capacity)) +
         geom_point(aes(col=Year),size=3) +
         geom_smooth(alpha=1)   +
         ylab("Net Meter Generation in MWh")   +
         xlab("Net Meter Retail Sales in Mwh") +
-        ggtitle("Net Meter Electric Generation/Capacity and Energy sold back over the years") +
-        scale_x_continuous(limits=c(0,700000),  labels = scales::comma)
+        ggtitle("Net Meter Electric Generation/Capacity and \n Energy sold back over the years") +
+        scale_x_continuous(limits=c(0,700000),  labels = scales::comma)+
+        theme(plot.title = element_text(hjust=.4))
       
-      print(plot_pc1)
+       
     })  
  
   #-----------------------------------------------------
@@ -155,7 +157,7 @@ shinyServer(function(input, output) {
     #Use long table to plot
     df5_reshape <- melt(df5, id.vars = "Year", variable.name = "Sector")  
     
-    plot_rc <- ggplot(df5_reshape, aes(x=Year, y=value, color=Sector, palette("Blues"))) +
+          ggplot(df5_reshape, aes(x=Year, y=value, color=Sector, palette("Blues"))) +
            geom_point() +
            theme_dark() +
            facet_wrap(~Sector, scale="free_y") + geom_line(size=1) +
@@ -163,10 +165,11 @@ shinyServer(function(input, output) {
            scale_x_discrete(limits=c(2005:2015)) +
            theme(legend.position="bottom") +
            theme(panel.grid=element_blank(), legend.key=element_blank(), axis.text.x=element_text(angle=90))+
-           ggtitle("Overall Retails Sales per Customer for each sector")
+           ggtitle("Overall Retails Sales per Customer for each sector")+
+            theme(plot.title = element_text(hjust=.4))
           
        
-    plot_rc
+     
   })    
   
   #-----------------------------------------------------------------------------
@@ -182,7 +185,7 @@ shinyServer(function(input, output) {
     
     df6_reshape <- melt(df6_netmeter, id.vars = "Year", variable.name = "Sector")  
     
-    plot_rc1 <- ggplot(df6_reshape, aes(x=Year, y=value, color=Sector, palette("Blues"))) +
+     ggplot(df6_reshape, aes(x=Year, y=value, color=Sector, palette("Blues"))) +
       geom_point() +
       facet_wrap(~Sector, scale="free_y") + 
       geom_line(size=1) +
@@ -191,15 +194,17 @@ shinyServer(function(input, output) {
       scale_x_discrete(limits=c(2010:2015)) +
       theme(legend.position="bottom") +
       theme(panel.grid=element_blank(), legend.key=element_blank(), axis.text.x=element_text(angle=90))+
-      ggtitle("Retails Sales per Customer for each sector using Net Meter")
+      labs(title= "Retails Sales per Customer for each sector \n using Net Meter") +
+       theme(plot.title = element_text(hjust=.4))
+     
     
-    plot_rc1
+     
   })    
   #-----------------------------------------------------------------------------
   #Customer Leaflet
   #----------------------------------------------------------------------------
   output$leaflet_customer <- renderLeaflet({
-    long_lat <- read.csv("D:/NYCDatascience/Project - 1/Netmetering/state_lat_lon.csv",
+    long_lat <- read.csv("state_lat_lon.csv",
                          header=TRUE, stringsAsFactors = FALSE)
     names(long_lat)[2] <- "State" 
 
@@ -231,13 +236,14 @@ shinyServer(function(input, output) {
     df7_top_5$State <- factor(df7_top_5$State, levels = df7_top_5$State[order(df7_top_5[[input$sector]])])
     
     #plot bar chart
-    plot_top <- ggplot(df7_top_5, aes(x=State, y=df7_top_5[[input$sector]], fill=State)) +
+       ggplot(df7_top_5, aes(x=State, y=df7_top_5[[input$sector]], fill=State)) +
        geom_bar(stat="identity", position = "identity")  + coord_flip()+
        theme_bw() +
         theme(axis.ticks=element_blank(), panel.grid=element_blank())+
         guides(fill=FALSE) +
        ggtitle(paste0("Top 5 states using Net Meter in ", input$sector, " sector in 2015")) +
-       ylab(paste0(input$sector, " Customers"))
-    plot_top
+       ylab(paste0(input$sector, " Customers"))+
+         theme(plot.title = element_text(hjust=.4))
+     
   })   
 })

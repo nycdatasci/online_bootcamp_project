@@ -19,7 +19,7 @@ shinyUI(fluidPage(theme=shinytheme("slate"),
   tabsetPanel(
   tabPanel("Introduction",
       fluidRow(
-        box(width=12,
+        column(width=12,
       h1("Net Metering Overview",
       style = "font-size: 16px;
                font-style: bold;
@@ -68,10 +68,10 @@ shinyUI(fluidPage(theme=shinytheme("slate"),
   tabPanel("Net Generation & Sales",
        
         fluidRow(
-           box( width=6,
+           column( width=6,
              plotOutput("line_net_sales")  #facet/lines/scatter
               ), #box
-            box(width=6, 
+            column(width=6, 
               plotOutput("scatter_netmeter")  #facet/lines/scatter
                ) #box
         ) #fluid row
@@ -79,7 +79,7 @@ shinyUI(fluidPage(theme=shinytheme("slate"),
    
   tabPanel("Sales per Customer",
        fluidRow( 
-             box(width = 6,
+             column(width = 6,
                  p ("Map showing points within geographic extent of Nigeria, West Africa",
                     style="position:absolute;
                    bottom:470px;
@@ -92,7 +92,7 @@ shinyUI(fluidPage(theme=shinytheme("slate"),
                  )
              ),  
        fluidRow( 
-          box(width = 6,
+          column(width = 6,
                plotOutput("overall_sales_customer", height=400) 
                
            ), #box
@@ -109,10 +109,10 @@ shinyUI(fluidPage(theme=shinytheme("slate"),
           sidebarLayout(position="right",
             sidebarPanel(width=2,
                 fluidRow(
-                      box(width = 12,
+                     width = 12,
                            selectInput("sector", label="Select sector",
                                      choices=sector)
-                         ) #box
+                         
                         ) #fluid Row
                        ), #sidebar
                mainPanel(
