@@ -9,13 +9,12 @@ library(shinydashboard)
 # This file imports and processes the underlying data used in the server.R and ui.R scripts 
 
 # Source graph function
-setwd('/Users/tkassel/Desktop/NYCDSA/Projects/online_bootcamp_project/Project2-Shiny/ThomasKassel')
-source('./supporting/ggplot_theme.R')
+source(paste0(getwd(),'/supporting/ggplot_theme.R'))
 # Read in all supporting data tables
-setwd('./tables')
-for (i in 1:length(dir())){
-  tablename <- unlist(strsplit(dir()[i],'.csv'))[1]
-  table <- read.csv(dir()[i],stringsAsFactors = F,colClasses = c(seqID='character'))
+tablesdir <- paste0(getwd(),'/tables')
+for (i in 1:length(dir(tablesdir))){
+  tablename <- unlist(strsplit(dir(tablesdir)[i],'.csv'))[1]
+  table <- read.csv(paste0(tablesdir,'/',dir(tablesdir)[i]),stringsAsFactors = F,colClasses = c(seqID='character'))
   assign(tablename,table)
 }
 

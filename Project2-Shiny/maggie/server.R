@@ -15,8 +15,8 @@ function(input, output) {
   output$timebarplot <- renderPlot({
       ggplot(data, aes(Area, Time_min, fill = Year)) +
         geom_bar(position = "dodge", stat = "identity") +
-      ggtitle("Average Commute Time(in minutes)") +
-      theme(legend.position="top")
+      ggtitle("Average Commute Time(in minutes)") 
+      
     
 
   })
