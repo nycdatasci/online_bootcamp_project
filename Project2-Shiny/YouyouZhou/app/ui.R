@@ -29,10 +29,8 @@ shinyUI(fluidPage(
     tags$p('News reports say that the Trump administration has been considering 
         a new executive order to increase the minimum wage requirement for 
         H-1B visa sponsored workers, so that companies cannot hire H-1B workers 
-        to pay lower pages and consequently take jobs away from potential American workers.
-        Depending who you are, you might be interested in different aspects of the topic. 
-        This tool shows you the pay levels of H-1B workers in 2016 and tries to answer
-           questions that you care.'),
+        to pay lower pages and consequently take jobs away from potential American workers.'),
+    tags$p('Depending who you are, you might be interested in different aspects of the topic.'),
     radioButtons('user_select', h4('Let’s start with who you are:'), 
                  c('American citizens' = 'american','H-1B applicants'='applicant'), 
                  selected = character(0), 
@@ -97,7 +95,7 @@ shinyUI(fluidPage(
                 hr(),
                 fluidRow(
                     column(8, offset=2, h4(textOutput('occupation-employer-text'))),
-                    column(6, offset=3, plotOutput('occupation-employer-plot'))
+                    column(8, offset=2, plotOutput('occupation-employer-plot'))
                 ),
                 br()
                 

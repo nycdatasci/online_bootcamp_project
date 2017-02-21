@@ -15,13 +15,15 @@ library(dplyr)
 
 american_intro = 'Do foreign workers steal jobs from American workers in your 
 area or industry? The question gets down to whether foreign workers are paid higher 
-or lower than the prevailing wages of the area or industry. Use the tool below to find out. 
+or lower than the industry median in a specific area. Use the tool below to find out. 
 You can start from one location or occupation.'
 
 foreigner_intro = 'Which companies in your industry underpay foreign workers? 
-How about in your area? You might want to avoid these employers so as not to get hurt by
-potential policy changes. Use the tool below to find out. 
-You can start from one location or occupation'
+How about in your area of interest? 
+You might want to avoid these employers who consistently lower than industry median wages 
+to foreigners in order to avoid being hurt by potential policy changes. 
+Use the tool below to find out. 
+You can start from one location or occupation.'
 
 data <- read.csv('data/data_for_use.csv',header=T)
 states <- read.csv('data/states.csv',header=T)
