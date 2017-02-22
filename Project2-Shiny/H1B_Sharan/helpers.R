@@ -33,7 +33,7 @@ job_filter <- function(df,input_vec) {
 }
 
 
-employer_filter <- function(df, value_vec) {
+employer_filter <- function(df, input_vec) {
   # Function to filter only the rows in dataframe with 
   # Employers provided in the inputs
   # Inputs:
@@ -43,13 +43,13 @@ employer_filter <- function(df, value_vec) {
   # If no match, returns an empty data frame
   # If the inputs are all equal to "", it returns the complete dataframe
   # Only difference from job_filter() is that there is no new column created
-  if(length(value_list) == 0) {
+  if(length(input_vec) == 0) {
     return(df)
   }
   
   new_df <- data.frame()
   
-  for(value in value_list){
+  for(value in input_vec){
     new_df <- rbind(new_df, df %>% 
                       filter(regexpr(value,EMPLOYER_NAME,ignore.case=TRUE) != -1))
   }
@@ -121,7 +121,7 @@ plot_output <- function(df, x_feature,fill_feature,metric, xlabb,ylabb) {
   # ylabb         : y label
   # Output        : ggplot object
   
-  # 
+  # Prevents numbers on plot transforming into scientific notation
   options(scipen = 999)
   
   g <- ggplot(df, aes_string(x=x_feature,y=metric)) +
