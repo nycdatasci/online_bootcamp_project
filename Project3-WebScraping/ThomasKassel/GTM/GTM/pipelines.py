@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
-
+import json
 from scrapy.exceptions import DropItem
 from scrapy.exporters import CsvItemExporter
 
@@ -20,7 +20,7 @@ class WriteItemPipeline(object):
     	self.filename = 'GTM.csv'
 
 	def open_spider(self,spider):
-		self.csvfile = open(spider.name, 'wb')
+		self.csvfile = open(self.filename, 'wb')
 		self.exporter = CsvItemExporter(self.csvfile)
 		self.exporter.start_exporting()
 		
