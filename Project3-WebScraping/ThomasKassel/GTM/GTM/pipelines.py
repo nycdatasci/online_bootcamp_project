@@ -20,7 +20,7 @@ class WriteItemPipeline(object):
     	self.filename = 'GTM.csv'
 
 	def open_spider(self,spider):
-		self.csvfile = open(spider.name, 'wb')
+		self.csvfile = open(self.filename, 'wb')
 		self.exporter = CsvItemExporter(self.csvfile)
 		self.exporter.start_exporting()
 		
