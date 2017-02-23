@@ -16,7 +16,10 @@ NEWSPIDER_MODULE = 'GTM.spiders'
 
 DOWNLOAD_DELAY = 3
 
-ITEM_PIPELINES = {'GTM.pipelines.WriteItemPipeline': 100, }
+ITEM_PIPELINES = {
+'GTM.pipelines.ValidateItemPipeline':100,
+'GTM.pipelines.WriteItemPipeline': 100,
+}
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'GTM (+http://www.yourdomain.com)'

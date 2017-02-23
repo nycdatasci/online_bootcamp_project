@@ -1,26 +1,33 @@
 # -*- coding: utf-8 -*-
-
-# Define your item pipelines here
-#
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
+
+from scrapy.exceptions import DropItem
+from scrapy.exporters import CsvItemExporter
+
+class ValidateItemPipeline(object):
+
+	def process_item(self,item,spider):
+		if not all(item.values()):
+			raise DropItem('Missing Values!')
+		else:
+			return item
 
 
 class WriteItemPipeline(object):
     
     def __init__(self):
-    	self.filename = 'GTM.txt'
+    	self.filename = 'GTM.csv'
 
 	def open_spider(self,spider):
-		self.file = open(self.filename, 'wb')
+		self.csvfile = open(spider.name, 'wb')
+		self.exporter = CsvItemExporter(self.csvfile)
+		self.exporter.start_exporting()
 		
 	def close_spider(self,spider):
-		self.file.close()
+		self.exporter.finish_exporting()
+		self.csvfile.close()
 
     def process_item(self,item,spider):
-    	line = str(item['title']) + '\t' +\
-        	   str(item['subtitle']) + '\t' +\
-        	   str(item['pubDate']) + '\t' +\
-        	   str(item['comments']) + '\n'
-        self.file.write(line)
-        return item
+    	self.exporter.export_item(item)
+    	return item

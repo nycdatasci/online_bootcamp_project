@@ -5,9 +5,8 @@ from scrapy import Item , Field
 
 # Define containers for scraped items from GTM website
 class ArticleItem(Item):
-	#theme = Field()
+	theme = Field()
 	title = Field()
-	subtitle = Field()
 	pubDate = Field()
 	#body = Field()
 	tags = Field()
