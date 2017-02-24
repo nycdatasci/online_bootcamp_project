@@ -3,6 +3,9 @@
 # H-1B Visa Petitions Dashboard web application to enable exploratory data analysis
 # on H-1B Visa applications disclosure data in the period 2011-2016
 
+require(lazyeval)
+require(dplyr)
+
 job_filter <- function(df,input_vec) {
   # Function to filter only the rows from dataframe 
   # with Job titles provided in the inputs
@@ -70,7 +73,8 @@ find_top <- function(df,x_feature,metric, Ntop = 3) {
     mutate(certified =ifelse(CASE_STATUS == "CERTIFIED",1,0)) %>%
     summarise(TotalApps = n(),
               Wage = median(PREVAILING_WAGE), 
-              CertiApps = sum(certified)) %>%
+              CertiApps = sum(certified),
+              Share = CertiApps/850) %>%
     arrange_(arrange_criteria) -> top_df
   
   top_len <- min(dim(top_df)[1],Ntop)
@@ -107,7 +111,10 @@ plot_input <- function(df, x_feature, fill_feature, metric,filter = FALSE, ...) 
   return(df %>% 
     group_by_(.dots=c(x_feature,fill_feature)) %>% 
     mutate(certified =ifelse(CASE_STATUS == "CERTIFIED",1,0)) %>%
-      summarise(TotalApps = n(),CertiApps = sum(certified), Wage = median(PREVAILING_WAGE)))
+      summarise(TotalApps = n(),
+                CertiApps = sum(certified), 
+                Wage = median(PREVAILING_WAGE),
+                Share = CertiApps/850))
 }
   
 plot_output <- function(df, x_feature,fill_feature,metric, xlabb,ylabb) {  
@@ -186,6 +193,15 @@ get_theme <- function() {
           legend.position = "right",
           legend.text = element_text(size = rel(1.5)),
           legend.title = element_text(size=rel(1.5)),
-          axis.text = element_text(size=rel(1.5))) 
+          axis.text.y = element_text(size=rel(1.5),face="bold"),
+          axis.text.x = element_text(size=rel(1.5),face="bold")) 
   )
+}
+
+split_first <- function(word, split = " ") {
+  # Function to obtain first value ina  strsplit
+  # Inputs:
+  # word      : word to be split
+  # split     : split parameter to be passed to strsplit
+  return(strsplit(word,split= split)[[1]][1])
 }
