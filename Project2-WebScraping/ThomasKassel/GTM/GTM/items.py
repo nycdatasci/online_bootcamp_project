@@ -7,8 +7,9 @@ from scrapy import Item , Field
 class ArticleItem(Item):
 	theme = Field()
 	title = Field()
-	pubDate = Field()
-	#body = Field()
+	body = Field()
 	tags = Field()
 	comments = Field()
+		
+
 

@@ -18,8 +18,11 @@ DOWNLOAD_DELAY = 3
 
 ITEM_PIPELINES = {
 'GTM.pipelines.ValidateItemPipeline':100,
-'GTM.pipelines.WriteItemPipeline': 100,
+'GTM.pipelines.JsonWriterPipeline': 200,
 }
+
+#FEED_URI = '/Users/tkassel/Desktop/NYCDSA/Projects/online_bootcamp_project/Project2-WebScraping/ThomasKassel/GTM/GTM_output.jl'
+
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'GTM (+http://www.yourdomain.com)'

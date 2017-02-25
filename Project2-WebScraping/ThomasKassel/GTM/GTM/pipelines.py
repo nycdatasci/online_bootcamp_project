@@ -3,31 +3,24 @@
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import json
 from scrapy.exceptions import DropItem
-from scrapy.exporters import CsvItemExporter
 
 class ValidateItemPipeline(object):
-
 	def process_item(self,item,spider):
 		if not all(item.values()):
 			raise DropItem('Missing Values!')
 		else:
 			return item
 
+class JsonWriterPipeline(object):
 
-class WriteItemPipeline(object):
-    
-    def __init__(self):
-    	self.filename = 'GTM.csv'
+    def open_spider(self, spider):
+        self.file = open('GTM_output.json', 'wb')
 
-	def open_spider(self,spider):
-		self.csvfile = open(self.filename, 'wb')
-		self.exporter = CsvItemExporter(self.csvfile)
-		self.exporter.start_exporting()
-		
-	def close_spider(self,spider):
-		self.exporter.finish_exporting()
-		self.csvfile.close()
+    def close_spider(self, spider):
+        self.file.close()
 
-    def process_item(self,item,spider):
-    	self.exporter.export_item(item)
-    	return item
+    def process_item(self, item, spider):
+        line = json.dumps(dict(item)) + "\n"
+        self.file.write(line)
+        return item
+
