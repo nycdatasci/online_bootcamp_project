@@ -1,0 +1,10 @@
+name: stock_macd
+title:
+account: clattanzio
+server: shinyapps.io
+appId: 159418
+bundleId: 725682
+url: https://clattanzio.shinyapps.io/stock_macd/
+when: 1488135670.71902
+asMultiple: FALSE
+asStatic: FALSE
