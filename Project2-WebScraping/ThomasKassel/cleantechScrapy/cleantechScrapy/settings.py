@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Scrapy settings for GTM project
-#
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
 #
@@ -9,16 +7,16 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'GTM'
+BOT_NAME = 'cleantechScrapy'
 
-SPIDER_MODULES = ['GTM.spiders']
-NEWSPIDER_MODULE = 'GTM.spiders'
+SPIDER_MODULES = ['cleantechScrapy.spiders']
+NEWSPIDER_MODULE = 'cleantechScrapy.spiders'
 
 DOWNLOAD_DELAY = 3
 
 ITEM_PIPELINES = {
-'GTM.pipelines.ValidateItemPipeline':100,
-'GTM.pipelines.JsonWriterPipeline': 200,
+'cleantechScrapy.pipelines.ValidateItemPipeline':100,
+'cleantechScrapy.pipelines.JsonWriterPipeline': 200,
 }
 
 #FEED_URI = '/Users/tkassel/Desktop/NYCDSA/Projects/online_bootcamp_project/Project2-WebScraping/ThomasKassel/GTM/GTM_output.jl'

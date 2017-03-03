@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
+# Pipelines - validate all fields for each item, save as JSON
+
 import json
 from scrapy.exceptions import DropItem
 
@@ -12,9 +11,8 @@ class ValidateItemPipeline(object):
 			return item
 
 class JsonWriterPipeline(object):
-
     def open_spider(self, spider):
-        self.file = open('GTM_output.json', 'wb')
+        self.file = open('%s.json' %(spider.name), 'wb')
 
     def close_spider(self, spider):
         self.file.close()
