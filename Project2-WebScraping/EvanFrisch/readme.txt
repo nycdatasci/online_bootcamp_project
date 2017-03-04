@@ -1,10 +1,27 @@
-healthinequality.R
-Evan Frisch
+GitHub Profiler
 
-Performs exploratory visualization of selected data on life expectancy in the U.S.
-with particular attention to differences according to income, geography, and gender.
+GitHub Profiler provides a profile of a GitHub repository that provides an indication of participation and maintenance
+over time as well as information about the readability of the documentation.
 
-Acquires data provided by the Health Inequality Project, which is found at:
-https://healthinequality.org/data/
+It should be called with three arguments:
+1. The name of the file containing GitHub credentials (see below)
+2. The name of the creator of the GitHub repository
+3. The name of the repository itself
 
-Refer to packages.txt for a list of required R packages.
+Example:
+__main__.py github_credentials.txt ayush1997 visualize_ML
+
+GitHub Credentials:
+Create a file called github_credentials.txt in your home directory.
+Enter your GitHub username in the first line of the file and your GitHub password in the second line.
+
+Installation Requirements:
+pip install PyGithub
+pip install -U textblob
+python -m textblob.download_corpora
+pip install textstat
+pip install beautifulsoup4
+pip install requests
+pip install bokeh
+
+
