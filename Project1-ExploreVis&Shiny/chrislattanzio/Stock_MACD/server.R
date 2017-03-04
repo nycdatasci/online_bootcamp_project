@@ -2,7 +2,7 @@
 
 library(quantmod)
 library(ggplot2) 
-shinyServer(function(input, output) {
+server = shinyServer(function(input, output) {
 
   dataInput = reactive({
 
