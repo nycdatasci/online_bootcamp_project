@@ -1,7 +1,7 @@
 GitHub Profiler
 
-GitHub Profiler provides a profile of a GitHub repository that provides an indication of participation and maintenance
-over time as well as information about the readability of the documentation.
+GitHub Profiler provides a profile of a GitHub repository that provides an indication of activity, participation,
+and maintenance over time as well as information about the readability of the documentation.
 
 It should be called with three arguments:
 1. The name of the file containing GitHub credentials (see below)
