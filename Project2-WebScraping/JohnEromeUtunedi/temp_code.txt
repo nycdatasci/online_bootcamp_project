@@ -1,0 +1,88 @@
+drop = ["\'",". . .","(",")",".","And","!!","]","[",",","!","?!","\"","?","+"]
+replce = [" ","-&-","--"]
+hard_code:[]
+for keys in temp1.keys():
+    xcount = 0
+    for x in temp1[keys]:
+        ycount = 0
+        for y in x:
+            y = y.strip()
+            for ch1 in drop:
+                if ch1 in y:
+                    y = y.strip().replace(ch1,"")
+                    y = y.strip()
+            for ch in replce:
+                if ch in y:
+                    y = y.strip().replace(ch,"-")
+                    y = y.strip()
+            if y[len(y)-1] == "-":
+                y = y[:-1]
+            y,sep,tail = y.partition('-Featuring')
+            y,sep,tail = y.partition('-Feat')
+            y = y.replace("The-2-Live-Crew","2-Live-Crew")
+            y = y.replace("Jack-Swing","Jack-Swing-PT-2")
+            y = y.replace("The-Humpty","Humpty")
+            #y = y.replace('-Feat-KRS-One-Chuck-D','')
+            y = y.replace('Playing-Tricks-On',"Playin-Tricks-On")
+            y = y.replace("F-ck","Fuck")
+            y = y.replace("F**k","Fuck")
+            y = y.replace("S**t","Shit")
+            y = y.replace('Intl','International')
+            y = y.replace('CL-Smooth','And-CL-Smooth')
+            y = y.replace('Your-Gunz','Ya-Gunz')
+            y = y.replace('Getz-Buzy','Getz-Busy')
+            y = y.replace('The-Pharcyde','Pharcyde')
+            #y = y.replace("-Supercat","")
+            y = y.replace('Whats-My-Name','Who-Am-I-Whats-My-Name')
+            #y = y.replace("-Featuring-En-Vogue","")
+            y = y.replace('Gin-Juice','Gin-And-Juice')
+            y = y.replace('Warren-G-Nate-Dogg','Warren-G')
+            y = y.replace('Method-Man-Mary-J-Blige','Method-Man')
+            y = y.replace('Ill-Be-There-For-You','Ill-Be-There-For-YouYoure-All-I-Need-To-Get-By')
+            y = y.replace('Coolio-LV','Coolio')
+            y = y.replace('Gangstas-Paradise-From-Dangerous-Minds','Gangstas-Paradise')
+            #y = y.replace('Junior-MAFIA-Featuring-The-Notorious-BIG','Junior-MAFIA')
+            #y = y.replace('2Pac-Featuring-K-Ci-JoJo','2Pac')
+            #y = y.replace('Do-Or-Die-Featuring-Twista','Do-Or-Die')
+            y = y.replace('Puff-Daddy-Faith-Evans','Puff-Daddy')
+            y = y.replace('Magoo-Timbaland','Timbaland-Magoo')
+            y = y.replace('Da-Boogie','Da-Boogie-Remix')
+            y = y.replace('Puff-Daddy-The-Family','Puff-Daddy')
+            y = y.replace('Deja-Vu-Uptown-Baby','Deja-Vu')
+            y = y.replace('SuperThug-What-What','Superthug')
+            y = y.replace('Mo-Thugs-Family','Mo-Thugs')
+            y = y.replace('No-Pigeons','No-Pigeons-Parody-Of-Tlcs-No-Scrubs')
+            y = y.replace('Jigga-My-N****',"Jigga-My-Nigga")
+            y = y.replace('Missy-Misdemeanor-Elliot','Missy-Elliot')
+            y = y.replace('Talib-Kweli-Hi-Tek','Talib-Kweli')
+            y = y.replace('Mos-Def-Pharoahe-Monch','Mos-Def')
+            y = y.replace('Feels-Good-Dont-Worry-Bout-A-Thing','Feels-Good')
+            y = y.replace('Lil-Jon-The-East-Side','Lil-Jon-Eastside')
+            y = y.replace('J-Kwon','Jkwon')
+            y = y.replace('R-Kelly-Or-Bow-Wow','R-Kelly')
+            y = y.replace('Soulja-Boy-Tellem','Soulja-Boy')
+            y = y.replace('Dead-Gone','Dead-And-Gone')
+            y = y.replace('The-Black-Eyed-Peas','Black-Eyed-Peas')
+            y = y.replace('Jay-Z','JayZ')
+            y = y.replace('JayZ-Rihanna-Kanye-West','JayZ')
+            y = y.replace('JayZ-Alicia-Keys','JayZ')
+            y = y.replace('Black-Yellow','Black-And-Yellow')
+            y = y.replace('JayZ-Kanye-West','JayZ')
+            y = y.replace('Ni**as-in-Paris','Niggas-In-Paris')
+            y = y.replace('Ca$h-Out','Cash-Out')
+            y = y.replace('The-Monster','Monster')
+            y = y.replace('Pitbull-Ne-Yo','Pitbull')
+            y = y.replace('G-Eazy-x-Bebe-Rexha',"G-Eazy")
+            y = y.replace('Lil-Wayne-Wiz-Khalifa-Imagine-Dragons-With-Logic-Ty-Dolla-$ign','Lil-Wayne')
+            y = y.replace('The-Notorious-BIG','Notorious-BIG')
+            y = y.replace('Kanye-West-Big-Sean-Pusha-T-2-Chainz','Kanye-West')
+            y = y.replace('Nelly-P-Diddy-Murphy-Lee','Nelly')
+            y = y.replace('Kris','Kriss')
+            y = y.replace('Turn-It-Up-Remix','Turn-It-Up')
+            y = y.replace('Keep-Their-Heads-Ringin-From-Friday','Keep-Their-Headz-Ringin')
+            y,sep,tail = y.partition('/')
+            temp1[keys][xcount][ycount] = y
+            #print(keys,temp[keys][xcount][ycount])
+            ycount+=1
+            print(keys,y)
+        xcount+=1
