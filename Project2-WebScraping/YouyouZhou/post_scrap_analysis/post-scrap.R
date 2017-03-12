@@ -98,7 +98,7 @@ zipfile <- data.frame(zip=as.character(zip), long=NA, lat=NA, address=NA)
 
 url <- function(zipcode) {
     root <- "https://maps.googleapis.com/maps/api/geocode/json?address="
-    api_key <- 'AIzaSyBTWTEm1BON1Zmez5MwJzKtAA0JED9FIlg'
+    api_key <- 'YOURKEYHERE'
     key <- sprintf("&key=%s",api_key)
     u <- paste(root, zipcode, key, sep = "")
     return(URLencode(u))
