@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style>
+
+html,body {
+	margin:0;
+	padding:0;
+	font-family: Arial, "Lantinghei TC","DejaVu Sans", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+	height: 100%;
+
+}
+
+text.district-label {
+	fill:#444;
+	font-size: 0.75em;
+	text-anchor:middle;
+	pointer-events:none;
+	display: none;
+}
+text.district-label.show {
+	display: block;
+}
+
+circle.province-center {
+	pointer-events:none;
+	fill:none;
+	stroke:#FF5F7F;
+	stroke-width:1.2px;
+	fill-opacity:0.6;
+}
+circle.province-center.hidden {
+	display: none;
+}
+
+circle.destination {
+	pointer-events:none;
+	fill:none;
+	stroke:#64a2a2;
+	stroke-width:1.2px;
+	fill-opacity:0.6;
+	display: none;
+}
+circle.destination.show {
+	display: block;
+}
+
+
+
+path {
+	fill:none;
+	stroke:#444;
+	stroke-width:0.8px;
+	pointer-events:none;
+}
+
+.routes path.route {
+  display: none;
+}
+
+.routes path.route.show {
+	display: block;
+}
+
+header h2 {
+	margin:0.5em auto;
+	color:#444;
+	line-height: 1.5;
+	text-align: center;
+	font-weight: 400;
+	/*font-family: "Hiragino Sans GB",sans-serif;*/
+}
+
+.footer {
+	font-size: 12px;
+	color:#888;
+	margin-left: 1em;
+	margin-top: -2em;
+}
+
+#control-panel {
+	display: block;
+	position: fixed;
+	top: 10%;
+	right:20px;
+	max-width:30%;
+	width:300px;
+	height: 60%;
+	min-height: 500px;
+	z-index: 10;
+	box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+	/*border:1px solid #eee;*/
+}
+#control-panel .companies {
+	position: relative;
+	margin-left: 10px;
+	width: 100%;
+	height: 90%;
+}
+
+#control-panel .companies ul {
+	position: relative;
+	margin:0;
+	padding:0;
+	list-style: none;
+	font-size: 12px;
+	height: 90%;
+	width:95%;
+	overflow-y:scroll;
+}
+
+#control-panel ul li {
+	margin: 0 0.5em 0 0;
+	border-bottom: 1px solid #eee;
+	line-height: 1.5;
+	padding: 5px 0 5px 4px;
+	font-size: 1em;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+	font-family: 'Helvetica Neue', sans-serif;
+	font-weight: 600;
+	pointer-events: all;
+	cursor: pointer;
+	transition:0.2s ease-in;
+}
+#control-panel ul li.selected {
+	background:#666;
+	color:#fff;
+}
+
+
+
+</style>
+</head>
+<body>
+<header>
+	<h2>Company to Worksite – Where are foreign workers based?</h2>	
+</header>
+
+<div class='content'>
+	<div id='control-panel'>
+		<div class='companies'>
+			<h2>Companies</h2>
+			<ul></ul>
+		</div>
+	</div>
+</div>
+<div class='footer'>
+	Demo - March 11, 2017
+</div>
+
+
+
+<script src="http://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/topojson.v2.min.js"></script>
+<script type="text/javascript" src='//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js'></script>
+<script type="text/javascript" src='http://code.jquery.com/jquery-2.1.4.min.js'></script>
+<script>
+
+
+	var width = window.innerWidth*0.7,
+	    height = width*0.7;
+
+	var svg = d3.select(".content").append("svg")
+	    .attr("width", width)
+	    .attr("height", height);
+
+
+	var projection = d3.geoAlbers().scale(width);
+	var path = d3.geoPath(projection);
+
+	d3.json('us.json',function(error,us) {
+
+		if (error) {return console.error(error);}
+
+		svg.append("g")
+			.attr("class", "states")
+			.selectAll("path")
+			.data(topojson.feature(us, us.objects.states).features)
+			.enter().append("path")
+			.attr("d", path);
+
+		svg.append("path")
+			.attr("class", "state-borders")
+			.attr("d", path(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; })));
+
+
+
+		d3.csv('diff_site.csv', function(error, cases){
+
+			// build list on the side 
+			var employers = _.sortBy(_.uniq(_.pluck(cases, 'employer')), function(d) {return d;});
+			var html = '';
+			_.each(employers, function(d) {
+				var fmt_employer = d.replace(/\&|\.|,|\(|\)|\s/g,'');
+				var temp = '<li data-name="' + fmt_employer + '">' + d.toLowerCase() + '</li>';
+				html += temp;
+			})
+			$('#control-panel .companies ul').append(html);
+
+
+			var startingPoints = _.uniq(cases, function(d) { 
+				return (d.employer_zip + d.employer);
+			});
+
+			_.each(startingPoints, function(d) {
+				var source = projection([+d.employer_long, +d.employer_lat]);
+				var target = _.filter(cases, function(m) {
+					return m.employer_zip == d.employer_zip && m.employer == d.employer;
+				});
+
+				var all_cases = 0;
+				_.each(target, function(m) {all_cases += +m.diff_cases});
+
+				var outgoings = [];
+				var max = d3.max(target, function(m) {return +m.diff_cases;});
+				var identifier = d.employer.replace(/\&|\.|,|\(|\)|\s/g,'') + '-' + d.employer_zip;
+
+				d.id = identifier;
+				d.all_diff_cases = all_cases;
+
+				_.each(target, function(x) {
+					outgoings.push({
+						'id':identifier + '-' + x.work_zip,
+						'source_axis':source,
+						'target_axis':projection([+x.work_long, +x.work_lat]),
+						"source": projection.invert(source),
+						"target": [+x.work_long, +x.work_lat],
+						'value': +x.diff_cases,
+						'max': max
+					})
+				});
+
+				d.outgoing = outgoings;
+
+			});
+
+			// FOR ROUTES
+
+			var defs = svg.append("defs");
+
+			_.each(startingPoints, function(point) {
+
+				var grads = defs.selectAll('linearGradient.' + point.id)
+					.data(point.outgoing)
+					.enter().append('linearGradient')
+					.attr('class', point.id)
+					.attr('id', getGradID)
+					.attr('gradientUnits','userSpaceOnUse')
+					.attr('x1',function(d) {
+
+						return d.source_axis[0];})
+					.attr('x2',function(d) {return d.target_axis[0];})
+					.attr('y1',function(d) {return d.source_axis[1];})
+					.attr('y2',function(d) {return d.target_axis[1];});
+
+				grads.html('')
+					.append('stop')
+					.attr('offset','0%')
+					.attr('stop-color','#ff6252');
+				grads.append('stop')
+					.attr('offset','50%')
+					.attr('stop-color','rgba(191,202,210,0.6)');
+				grads.append('stop')
+					.attr('offset','100%')
+					.attr('stop-color','#64a2a2');
+
+			});
+
+			function getGradID(d) {
+				return 'grad-'+d.id;
+			}
+
+			var routes = svg.selectAll('.routes')
+				.data(startingPoints).enter()
+				.append('g').attr('class',function(d) {
+					return 'routes ' + d.employer.replace(/\&|\.|,|\(|\)|\s/g,'');
+				});
+
+			routes
+				.selectAll("path")
+	      		.data(function(d) {return d.outgoing; })
+	    		.enter()
+	    		.append("path")
+	    		.style('stroke', function(d) {
+	    			return "url(#" + getGradID(d) + ")";
+
+	    		})
+	    		.style('stroke-width',function(d) {
+	    			return Math.max(0.8,d.value/d.max*5);
+	    		})
+	    		.attr('class',function(d) {
+	    			return 'route ' + d.id + ' ' + d.id.split('-')[0];
+	    		})
+	      		.attr("d", function(d) { 
+	      			return path({type: "LineString", coordinates: [d.source, d.target]}); 
+	      		});
+
+			routes.append('circle')
+				.attr('class','province-center')
+				.attr("transform", function(d) { 
+					return "translate(" + projection([d.employer_long, d.employer_lat]) + ")"; })
+				.attr('r',function(d) {
+					return Math.max(2,Math.sqrt(d.all_diff_cases));
+				})
+
+			routes.selectAll('circle.destination')
+				.data(function(d) {return d.outgoing})
+				.enter().append('circle')
+				.attr('class','destination')
+				.attr("transform", function(d,i) { 
+					if (i ==0) {
+						console.log(d)
+					}
+					return "translate(" + d.target_axis + ")"; })
+				.attr('r',function(d) {
+					return Math.max(2,Math.sqrt(d.value*2));
+				});
+
+
+
+
+			// FOR LABELS
+
+			routes
+				.append('text')
+				.attr("class", "district-label")
+				.attr("transform", function(d) { return "translate(" + projection([d.employer_long, d.employer_lat]) + ")"; })
+	    		.attr("dy",'-10px')
+	    		.style('text-anchor','middle')
+				.text(function(d) {return d.employer;});
+		});
+
+
+
+
+	});
+
+	setTimeout(bindEvents,500)
+
+	function bindEvents(){
+		d3.selectAll('#control-panel ul li')
+			.on('mouseover', function(d,i) {
+				d3.select(this).classed('selected',true)
+			var selector = d3.select(this).attr('data-name');
+
+			d3.selectAll('circle.province-center').classed('hidden',true);
+			d3.selectAll('.routes.'+selector).selectAll('circle.province-center')
+				.classed('hidden', false);
+
+			d3.selectAll('.routes.'+selector).selectAll('circle.destination')
+				.classed('show', true)
+
+			d3.selectAll('.routes.'+selector).selectAll('path')
+				.classed('show', true)
+			d3.selectAll('.routes.'+selector).selectAll('text')
+				.classed('show', true)
+
+			})
+			.on('mouseout', function(d) {
+				d3.select(this).classed('selected',false)
+				d3.selectAll('circle.province-center.hidden')
+					.classed('hidden',false);
+				d3.selectAll('.routes path.show').classed('show', false)
+				d3.selectAll('.routes text.show').classed('show', false)
+				d3.selectAll('.routes circle.destination').classed('show', false)
+
+			})
+
+
+
+	}
+
+
+
+
+</script>
+
+</body>
+
