@@ -8,6 +8,7 @@
 # library(ggplot2)
 library(h2o)
 library(data.table)
+library(MLmetrics)
 
 #################################
 ##### EDA & Pre-processing ######
@@ -23,7 +24,6 @@ table(train$target) #classes 2 and 6 are most frequent
 plot(table(train$target))
 
 # Remove ID column and make sure response variable is a factor
-train <- train[,-1]
 train$target <- as.factor(train$target)
 
 # Sub-sample 30K observations for faster model training, split into train/validation/test
@@ -32,9 +32,11 @@ train.sub <- as.h2o(train[sample(1:nrow(train),30000),])
 response <- 94
 predictors <- 1:93
 splits <- h2o.splitFrame(data = train.sub,ratios = c(.7,.2),destination_frames = c('training','validation','testing'),seed = 0)
-training <- splits[[1]]
-validation <- splits[[2]]
-testing <- splits[[3]]
+training <- splits[[1]][,-1]
+validation <- splits[[2]][,-1]
+testing.ids <- h2o.ascharacter(splits[[3]][,1])
+testing.outcomes <- as.h2o(splits[[3]][,"target"])
+testing <- splits[[3]][,-1]
 
 
 #############################
@@ -98,3 +100,22 @@ gbm.grid <- h2o.grid(algorithm = "gbm",
                     search_criteria = list(strategy = "RandomDiscrete",max_runtime_secs = 60))
 gbm.sorted.grid <- h2o.getGrid(grid_id = "gbm.test.grid", sort_by = "logloss")
 best.gbm <- h2o.getModel(gbm.sorted.grid@model_ids[[1]])
+
+
+#################################################
+##### Predict on test data using h2o models #####
+#################################################
+glm.predictions <- as.data.table(h2o.predict(glm.baseline,testing))
+glm.mat <- cbind(as.data.table(testing.ids),as.data.table(glm.predictions[,-1]))
+fwrite(x = glm.mat,file = './modelOutputs/glm.predictions.csv',row.names = F)
+
+rf.predictions <- as.data.table(h2o.predict(rf.baseline,testing))
+rf.mat <- cbind(as.data.table(testing.ids),as.data.table(rf.predictions[,-1]))
+fwrite(x = rf.mat,file = './modelOutputs/rf.predictions.csv',row.names = F)
+
+gbm.predictions <- as.data.table(h2o.predict(gbm.baseline,testing))
+gbm.mat <- cbind(as.data.table(testing.ids),as.data.table(gbm.predictions[,-1]))
+fwrite(x = gbm.mat,file = './modelOutputs/gbm.predictions.csv',row.names = F)
+
+# Write the actual true class labels for calculation of mult-log loss
+write.csv(x = as.vector(testing.outcomes),file = './modelOutputs/testing.outcomes.csv',row.names = F)
