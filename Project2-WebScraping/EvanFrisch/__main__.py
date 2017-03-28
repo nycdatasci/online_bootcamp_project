@@ -121,6 +121,7 @@ page.set_part("{B3}", div['comment_polarity_timeseries'])
 # Insert the key text phrases and hide the remaining area of template.
 page.set_part("{C1}", repo.get_text_key_phrases())
 page.set_part("{C2}", "")
+page.set_part("{C3}", "")
 
 # Calculate and display time elapsed.
 time_end = time.time()
