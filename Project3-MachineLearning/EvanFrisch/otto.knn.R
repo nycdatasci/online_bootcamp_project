@@ -105,5 +105,16 @@ cl.full <- train.df$target.int
 # Calculate combined probabilities for test subset extracted from training data.
 combined.prob.test.full <- calculateCombinedProbabilities(train.full, test.full, ids.full, cl.full, kvalues)
 
+# Set column names for csv file
+colnames(combined.prob.test.full) <- c('Class_1','Class_2','Class_3','Class_4','Class_5',
+                                       'Class_6','Class_7','Class_8','Class_9')
+
+# Add id
+id <- as.integer(ids.full)
+combined.prob.test.full <- as.data.frame(combined.prob.test.full)
+rownames(combined.prob.test.full) <- id
+
 # Save results to csv file.
 write.csv(combined.prob.test.full, file = "knn.predictions.csv")
+
+
