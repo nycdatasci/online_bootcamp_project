@@ -34,24 +34,10 @@ summary(train)
 
 # take a sample
 train <- train[sample(nrow(train), 5000),]
+# create output file for testing
 output_train <- data.frame(id=train$id)
 
-# assign binary target
-t1 <- train %>% mutate(target = ifelse(target == 'Class_1', 1, 0))
-t1$target <- as.factor(t1$target)
-
-# fit the model
-model1 <- glm(target~.-id, family='binomial', data=t1)
-model1.empty <- glm(target ~ 1, family = 'binomial', data=t1)
-scope = list(lower = formula(model1.empty), upper = formula(model1))
-forwardAIC = step(model1.empty, scope, direction = "forward", k = 2)
-
-class1_pre <- as.numeric(predict(forwardAIC, test, type = "response"))
-class1_strength <- 1 - forwardAIC$deviance/forwardAIC$null.deviance
-
-output$class1 <- class1_pre*class1_strength
-output_train$class1 <- as.numeric(predict(forwardAIC, train, type = "response"))*class1_strength
-
+# function to run for each class
 regressOnClass = function(class_index){
   
   #assign binary target
@@ -81,8 +67,12 @@ regressOnClass = function(class_index){
 for (i in 2:9){
   regressOnClass(i)
 }
-colnames(output_train) <- c('id', 'Class_1', 'Class_2', 'Class_3', 'Class_4','Class_5','Class_6','Class_7', 'Class_8','Class_9')
 
+
+
+# === TESTING === #
+
+colnames(output_train) <- c('id', 'Class_1', 'Class_2', 'Class_3', 'Class_4','Class_5','Class_6','Class_7', 'Class_8','Class_9')
 output_train_trans <- output_train
 for (i in 1:nrow(output_train)){
   total_p = output_train$Class_1[i] + output_train$Class_2[i] + output_train$Class_3[i] + output_train$Class_4[i] + output_train$Class_5[i] + output_train$Class_6[i] + output_train$Class_7[i] + output_train$Class_8[i] + output_train$Class_9[i]
@@ -107,6 +97,10 @@ MultiLogLoss(y_pred = as.matrix(output_train_trans[,-1]), y_true = train$target)
 write.csv(output_train, 'output/output_train.csv', row.names=F)
 write.csv(output, 'output/output_test.csv', row.names=F)
 write.csv(output_train_trans, 'output/output_train_adjusted.csv', row.names = F)
+
+
+
+
 
 #  ===== CODE NOT USED ===== 
 
