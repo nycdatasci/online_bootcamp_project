@@ -1,19 +1,16 @@
-# library(glmnet)
-# library(nnet)
-# library(class)
-# library(tree)
-# library(randomForest)
-# library(xgboost)
-# library(gbm)
-# library(ggplot2)
+# 1 - Fit a GLM (multinomial classification), Random Forest, and Gradient Boosted Trees 
+#     model on the Otto Classification training set (70% split)
+# 2 - Use the classifications of these models as meta-feature inputs for a level 2 xgboost algorithm
+# 3 - Train the xgboost model and create test prob predictions on the holdout 30% for csv averaging
+
 library(h2o)
 library(data.table)
-library(MLmetrics)
 
 #################################
 ##### EDA & Pre-processing ######
 #################################
 train <- fread('./otto_train.csv')
+h2o.init(nthreads = -1,max_mem_size = "16G")
 
 # Check for missing data
 dim(train)
@@ -22,13 +19,13 @@ sum(complete.cases(train))  #all cases complete; no missing data
 summary(train)
 table(train$target) #classes 2 and 6 are most frequent
 plot(table(train$target))
-
 # Remove ID column and make sure response variable is a factor
 train$target <- as.factor(train$target)
 
-# Sub-sample 30K observations for faster model training, split into train/validation/test
+# Training/test split
 set.seed(0)
-train.sub <- as.h2o(train[sample(1:nrow(train),30000),])
+trainIndex <- sample(1:nrow(train),nrow(train)*0.7)
+
 response <- 94
 predictors <- 1:93
 splits <- h2o.splitFrame(data = train.sub,ratios = c(.7,.2),destination_frames = c('training','validation','testing'),seed = 0)
@@ -42,15 +39,13 @@ testing <- splits[[3]][,-1]
 #############################
 ##### Modeling with h2o #####
 #############################
-# Start h2o instance
-h2o.init(nthreads = -1)
 
-##### Multinomial classification
+###### Multinomial classification
 # Establish baseline GLM performance with no hyperparameter tuning
 glm.baseline <- h2o.glm(x = predictors,y = response,training_frame = training,validation_frame = validation,family = "multinomial")
 h2o.logloss(h2o.performance(model = glm.baseline,newdata = validation)) # Logloss of 0.6525 on 20% validation split
 # Grid search - this throws an error saying "Failed to find ModelMetrics for criterion: logloss"
-glm.params <- list(alpha = c(0,.25,.5,.75,1),lambda = c(1000,10,1,.1))
+glm.params <- list(alpha = seq(0,1,.1),lambda = 10^seq(5, -2, length = 10))
 glm.grid <- h2o.grid(algorithm = "glm",
                      grid_id = 'glm.test.grid',
                      x = predictors,y = response,
@@ -60,7 +55,7 @@ glm.grid <- h2o.grid(algorithm = "glm",
                      family='multinomial')
 
 
-##### Random forest
+###### Random forest
 # Establish baseline GLM performance with no hyperparameter tuning
 rf.baseline <- h2o.randomForest(x = predictors,y = response,training_frame = training,validation_frame = validation)
 h2o.logloss(h2o.performance(model = rf.baseline,newdata = validation)) # Logloss of 0.6955 on 20% validation split
@@ -97,7 +92,7 @@ gbm.grid <- h2o.grid(algorithm = "gbm",
                     stopping_rounds = 5,
                     stopping_tolerance = 1e-4,
                     stopping_metric = "logloss",
-                    search_criteria = list(strategy = "RandomDiscrete",max_runtime_secs = 60))
+                    search_criteria = list(strategy = "RandomDiscrete",stopping_tolerance = 0.001))
 gbm.sorted.grid <- h2o.getGrid(grid_id = "gbm.test.grid", sort_by = "logloss")
 best.gbm <- h2o.getModel(gbm.sorted.grid@model_ids[[1]])
 

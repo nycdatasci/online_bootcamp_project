@@ -14,7 +14,7 @@ AvgModels <- function(probabilityDFs){
   return(averaged)
 }
 
-# Example usage - read in the predictions for each of three models (glm,randomforest,gbm) and average their predictions together
+# Example usage - read in the predictions for each of three h2o models (glm,randomforest,gbm) and average their predictions together
 glmPred <- fread('./modelOutputs/glm.predictions.csv',colClasses = c(id="character"))
 rfPred <- fread('./modelOutputs/rf.predictions.csv',colClasses = c(id="character"))
 gbmPred <- fread('./modelOutputs/gbm.predictions.csv',colClasses = c(id="character"))
