@@ -1,116 +1,79 @@
 # 1 - Fit a GLM (multinomial classification), Random Forest, and Gradient Boosted Trees 
 #     model on the Otto Classification training set (70% split)
-# 2 - Use the classifications of these models as meta-feature inputs for a level 2 xgboost algorithm
-# 3 - Train the xgboost model and create test prob predictions on the holdout 30% for csv averaging
+# 2 - For each model, output a csv with test predictions (probability matrix) on the 30% test split
 
 library(h2o)
 library(data.table)
 
-#################################
-##### EDA & Pre-processing ######
-#################################
-train <- fread('./otto_train.csv')
+# Start h2o
 h2o.init(nthreads = -1,max_mem_size = "16G")
 
-# Check for missing data
-dim(train)
-sum(complete.cases(train))  #all cases complete; no missing data
-# Summary info and class frequencies
-summary(train)
-table(train$target) #classes 2 and 6 are most frequent
-plot(table(train$target))
-# Remove ID column and make sure response variable is a factor
-train$target <- as.factor(train$target)
-
-# Training/test split
+##### Train/test split #####
+train <- fread('./otto_train.csv')
 set.seed(0)
 trainIndex <- sample(1:nrow(train),nrow(train)*0.7)
+traindata <- train[trainIndex,]
+testdata <- train[-trainIndex,]
 
-response <- 94
-predictors <- 1:93
-splits <- h2o.splitFrame(data = train.sub,ratios = c(.7,.2),destination_frames = c('training','validation','testing'),seed = 0)
-training <- splits[[1]][,-1]
-validation <- splits[[2]][,-1]
-testing.ids <- h2o.ascharacter(splits[[3]][,1])
-testing.outcomes <- as.h2o(splits[[3]][,"target"])
-testing <- splits[[3]][,-1]
+##### Format for model #####
+h2o.traindata <- as.h2o(traindata[,target := as.factor(target)])
+h2o.testdata <- as.h2o(testdata[,target := as.factor(target)])
 
 
 #############################
 ##### Modeling with h2o #####
 #############################
 
+
 ###### Multinomial classification
-# Establish baseline GLM performance with no hyperparameter tuning
-glm.baseline <- h2o.glm(x = predictors,y = response,training_frame = training,validation_frame = validation,family = "multinomial")
-h2o.logloss(h2o.performance(model = glm.baseline,newdata = validation)) # Logloss of 0.6525 on 20% validation split
-# Grid search - this throws an error saying "Failed to find ModelMetrics for criterion: logloss"
-glm.params <- list(alpha = seq(0,1,.1),lambda = 10^seq(5, -2, length = 10))
-glm.grid <- h2o.grid(algorithm = "glm",
-                     grid_id = 'glm.test.grid',
-                     x = predictors,y = response,
-                     training_frame = training,
-                     validation_frame = validation,
-                     hyper_params = glm.params,
-                     family='multinomial')
+# Fit glm model with default parameters
+glm.baseline <- h2o.glm(x = 2:94,y = 95,training_frame = h2o.traindata,family = "multinomial")
+h2o.logloss(h2o.performance(model = glm.baseline,newdata = h2o.testdata))
+h2o.saveModel(glm.baseline,path = './saved_models')
+
+# Grid search - consider a hyperparameter space with 6 values for alpha and 10 for lambda
+glm.params <- list(alpha = seq(0,1,.2),lambda = 10^seq(4, -2, length = 10))
+glm.grid <- h2o.grid(algorithm = "glm",grid_id = 'glm.test.grid',x = 2:94,y = 95,training_frame = h2o.traindata,
+                     validation_frame = h2o.testdata,hyper_params = glm.params,stopping_rounds = 2,
+                     stopping_tolerance = 1e-3,stopping_metric = "logloss",max_runtime_secs = 300,family='multinomial')
+glm.sorted.grid <- h2o.getGrid(grid_id = "glm.test.grid", sort_by = "logloss")
+bst.glm.grid <- h2o.getModel(glm.sorted.grid@model_ids[[1]]) # Even the best alpha/lambda combo does not improve test set performance
+h2o.saveModel(bst.glm.grid,path = './saved_models')
 
 
 ###### Random forest
-# Establish baseline GLM performance with no hyperparameter tuning
-rf.baseline <- h2o.randomForest(x = predictors,y = response,training_frame = training,validation_frame = validation)
-h2o.logloss(h2o.performance(model = rf.baseline,newdata = validation)) # Logloss of 0.6955 on 20% validation split
-# Grid search - after grid searching, best model has a validation logloss of 0.71, higher than above - am I just choosing the parameters wrong?
-rf.params <- list(ntrees = 1000,max_depth = seq(1),mtries = c(1,10,20,40,60,80))
-search_criteria = list(strategy = "RandomDiscrete", max_runtime_secs = 60, max_models = 100, stopping_metric = "AUTO", stopping_tolerance = 0.00001, stopping_rounds = 5, seed = 12345)
-rf.grid <- h2o.grid(algorithm = "randomForest",
-                     grid_id = 'rf.test.grid',
-                     x = predictors,y = response,
-                     training_frame = training,
-                     validation_frame = validation,
-                     hyper_params = rf.params,
-                     search_criteria = search_criteria)
-rf.sorted.grid <- h2o.getGrid(grid_id = "rf.test.grid", sort_by = "logloss")
-best.rf <- h2o.getModel(rf.sorted.grid@model_ids[[1]])
-
+# Fit random forest model with default parameters (ntrees = 50)
+rf.baseline <- h2o.randomForest(x = 2:94,y = 95,training_frame = h2o.traindata)
+h2o.logloss(h2o.performance(model = rf.baseline,newdata = h2o.testdata))
+h2o.saveModel(rf.baseline,path = './saved_models')
 
 ###### Gradient boosting
-# Establish baseline GBM performance with no hyperparameter tuning
-gbm.baseline <- h2o.gbm(x = predictors,y = response,training_frame = training,validation_frame = validation)
-h2o.logloss(h2o.performance(model = gbm.baseline,newdata = validation)) # Logloss of 0.598 on 20% validation split
-# Grid search - again after grid searching, best gbm has a logloss of 0.68, worse than using default parameters
-gbm.params = list(max_depth = seq(1,15,2), col_sample_rate = c(0.2,0.4,0.6,0.8))
-gbm.grid <- h2o.grid(algorithm = "gbm",
-                    grid_id = 'gbm.test.grid',
-                    x = predictors,y = response,
-                    training_frame = training,
-                    validation_frame = validation,
-                    hyper_params = gbm.params,
-                    ntrees = 1000,
-                    learn_rate = 0.05,
-                    learn_rate_annealing = 0.99,
-                    sample_rate = 0.8,
-                    stopping_rounds = 5,
-                    stopping_tolerance = 1e-4,
-                    stopping_metric = "logloss",
-                    search_criteria = list(strategy = "RandomDiscrete",stopping_tolerance = 0.001))
-gbm.sorted.grid <- h2o.getGrid(grid_id = "gbm.test.grid", sort_by = "logloss")
-best.gbm <- h2o.getModel(gbm.sorted.grid@model_ids[[1]])
+# Fit gbm model with default parameters (ntrees = 50, learn_rate = 0.1)
+gbm.baseline <- h2o.gbm(model_id = "gbm.baseline",x = 2:94,y = 95,training_frame = h2o.traindata)
+h2o.logloss(h2o.performance(model = gbm.baseline,newdata = h2o.testdata))
 
 
-#################################################
-##### Predict on test data using h2o models #####
-#################################################
-glm.predictions <- as.data.table(h2o.predict(glm.baseline,testing))
-glm.mat <- cbind(as.data.table(testing.ids),as.data.table(glm.predictions[,-1]))
+
+#####################################################
+##### Predict on 30% test data using h2o models #####
+#####################################################
+h2o.testdata.ids <- h2o.testdata[,1]  # id column
+h2o.testdata.data <- h2o.testdata[,2:94]  # feature columns
+h2o.testdata.outcomes <- h2o.testdata[,95]  # outcome column (class target)
+
+# For each model type, make predictions on the 30% test split and save as csv
+glm.predictions <- as.data.table(h2o.predict(glm.baseline,h2o.testdata.data))
+glm.mat <- cbind(as.data.table(h2o.testdata.ids),as.data.table(glm.predictions[,-1]))
 fwrite(x = glm.mat,file = './modelOutputs/glm.predictions.csv',row.names = F)
 
-rf.predictions <- as.data.table(h2o.predict(rf.baseline,testing))
-rf.mat <- cbind(as.data.table(testing.ids),as.data.table(rf.predictions[,-1]))
+rf.predictions <- as.data.table(h2o.predict(rf.baseline,h2o.testdata.data))
+rf.mat <- cbind(as.data.table(h2o.testdata.ids),as.data.table(rf.predictions[,-1]))
 fwrite(x = rf.mat,file = './modelOutputs/rf.predictions.csv',row.names = F)
 
-gbm.predictions <- as.data.table(h2o.predict(gbm.baseline,testing))
-gbm.mat <- cbind(as.data.table(testing.ids),as.data.table(gbm.predictions[,-1]))
+gbm.predictions <- as.data.table(h2o.predict(gbm.baseline,h2o.testdata.data))
+gbm.mat <- cbind(as.data.table(h2o.testdata.ids),as.data.table(gbm.predictions[,-1]))
 fwrite(x = gbm.mat,file = './modelOutputs/gbm.predictions.csv',row.names = F)
 
-# Write the actual true class labels for calculation of mult-log loss
-write.csv(x = as.vector(testing.outcomes),file = './modelOutputs/testing.outcomes.csv',row.names = F)
+# Write the actual true class labels for calculation of multi-log loss
+outcomes <- cbind(as.data.table(h2o.testdata.ids),as.data.table(h2o.testdata.outcomes))
+fwrite(x = outcomes,file = './modelOutputs/testing.outcomes.csv',row.names = F)
