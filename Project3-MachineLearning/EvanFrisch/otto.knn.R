@@ -2,6 +2,7 @@ library(caTools)
 library(dplyr)
 library(class)
 library(Matrix)
+library(MLmetrics)
 
 # Read in training and testing datasets.
 train.df <- read.csv(file="train.csv")
@@ -88,6 +89,10 @@ kvalues = c(1,2,3,5,10,25,50)
 # Calculate combined probabilities for test subset extracted from training data.
 combined.prob.test.subset <- calculateCombinedProbabilities(train, test, ids, cl, kvalues)
 
+# Evaluate combined probabilities for test subset using multiclass log loss
+logloss.knn.test.subset <- MultiLogLoss(y_true = test.sub$target.int, y_pred = combined.prob.test.subset)
+cat("logloss.knn.test.subset =", logloss.knn.test.subset)
+
 
 
 # Prepare data with full training and test data sets.
@@ -105,5 +110,16 @@ cl.full <- train.df$target.int
 # Calculate combined probabilities for test subset extracted from training data.
 combined.prob.test.full <- calculateCombinedProbabilities(train.full, test.full, ids.full, cl.full, kvalues)
 
+# Set column names for csv file
+colnames(combined.prob.test.full) <- c('Class_1','Class_2','Class_3','Class_4','Class_5',
+                                       'Class_6','Class_7','Class_8','Class_9')
+
+# Add id
+id <- as.integer(ids.full)
+combined.prob.test.full <- as.data.frame(combined.prob.test.full)
+rownames(combined.prob.test.full) <- id
+
 # Save results to csv file.
 write.csv(combined.prob.test.full, file = "knn.predictions.csv")
+
+
