@@ -3,11 +3,12 @@ Upload your **prediction csv on the 30% holdout** test set here.
 The process is as follows:
 
 1) Using the 61,878 row Otto labeled training set, run code below (make sure to set.seed(0)) to make a 70/30 split.
-    train <- fread('otto_train.csv')
-    set.seed(0)
-    trainIndex <- sample(1:nrow(train),nrow(train)*0.7)
-    traindata <- train[trainIndex,]
-    testdata <- train[-trainIndex,]
+    
+    - train <- fread('otto_train.csv')
+    - set.seed(0)
+    - trainIndex <- sample(1:nrow(train),nrow(train)*0.7)
+    - traindata <- train[trainIndex,]
+    - testdata <- train[-trainIndex,]
 
 2) Fit your model(s) of choice on the 70% training set (43,314 rows).
 
