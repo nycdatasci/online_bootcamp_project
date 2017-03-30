@@ -2,6 +2,7 @@ library(caTools)
 library(dplyr)
 library(class)
 library(Matrix)
+library(MLmetrics)
 
 # Read in training and testing datasets.
 train.df <- read.csv(file="train.csv")
@@ -87,6 +88,10 @@ kvalues = c(1,2,3,5,10,25,50)
 
 # Calculate combined probabilities for test subset extracted from training data.
 combined.prob.test.subset <- calculateCombinedProbabilities(train, test, ids, cl, kvalues)
+
+# Evaluate combined probabilities for test subset using multiclass log loss
+logloss.knn.test.subset <- MultiLogLoss(y_true = test.sub$target.int, y_pred = combined.prob.test.subset)
+cat("logloss.knn.test.subset =", logloss.knn.test.subset)
 
 
 
