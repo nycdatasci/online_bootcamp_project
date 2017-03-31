@@ -3,6 +3,7 @@ library(xgboost)
 library(MLmetrics)
 
 #### This script not used in final output ####
+# Exploratory use of xgboost to model the Otto Classification data set
 
 #### *** Read in data, create train/test split ***
 train <- fread('./otto_train.csv')
