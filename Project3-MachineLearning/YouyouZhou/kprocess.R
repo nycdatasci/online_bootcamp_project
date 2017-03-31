@@ -1,10 +1,12 @@
 setwd('~/Dropbox/nycds/kaggle')
 
 library(ggplot2)
-# library(reshape2)
 library(dplyr)
 library(car)
 library(MASS)
+library(MLmetrics)
+library(h2o)
+h2o.init(max_mem_size='4g')
 
 # === READ AND INSPECT DATA === # 
 
@@ -12,91 +14,228 @@ train <- read.csv('train.csv', header=T, stringsAsFactors = F)
 test <- read.csv('test.csv', header=T, stringsAsFactors = F)
 output <- data.frame(id=test$id)
 
-head(train)
-summary(train)
+# head(train)
+# summary(train)
 # cor(train[,2:94])
-
-## === DATA TRANSFORMATIONS === ### 
-
-# turn numeric values into factors for suitable features
-# for (i in 1:93){
-#   var_name = paste('feat',i,sep='_')
-#   if (length(levels(as.factor(train[[var_name]])))<20 & (i != 92)){
-#     print(i)
-#     train[[var_name]] = as.factor(train[[var_name]])
-#     test[[var_name]] = as.factor(test[[var_name]])
-#   }
-# }
-
 
 
 # === RUN LOGISTIC REGRESSION ON EACH CLASS === #
 
-# take a sample
-train <- train[sample(nrow(train), 5000),]
-# create output file for testing
-output_train <- data.frame(id=train$id)
+# partition the data
+set.seed(0)
+trainIndex <- sample(1:nrow(train), nrow(train)*0.7)
+testData <- train[-trainIndex,]
+trainData <- train[trainIndex,]
+output_train <- data.frame(id=testData$id)
+
 
 # function to run for each class
-regressOnClass = function(class_index){
+regressOnClass = function(class_index) {
   
   #assign binary target
-  class_index = 9
-  tx <- train %>% mutate(target = ifelse(target == paste("Class", class_index ,sep='_'), 1,0))
+  class_index = 1
+  tx <- trainData %>% mutate(target = ifelse(target == paste("Class", class_index ,sep='_'), 1,0))
   tx$target <- as.factor(tx$target)
   summary(tx$target)
+
+  
   #fit the model
-  mo.full <- glm(target~.-id, family='binomial', data=tx)
-  mo.empty <- glm(target ~ 1, family='binomial', data=tx)
+  
+  ## ===== the following code attempted to use h2o for stepwise feature selection ====
+  ## ===== and was abandoned because of java.lang.OutOfMemoryError ===================
+  
+          # stepThroughModel = function(aic_val, predictors) {
+          #     current_model = h2o.glm(y = "target", x=predictors, training_frame = as.h2o(tx[,-1]),family = "binomial")
+          #     return(h2o.aic(current_model))
+          # }
+          # 
+          # #initial full model
+          # aic = h2o.aic(h2o.glm(y = "target", x=colnames(tx[2:94]), training_frame = as.h2o(tx[,-1]),
+          #                       family = "binomial"))
+          # predictors = colnames(tx[2:94])
+          # for (i in 2:94) {
+          #     new_val = stepThroughModel(aic, predictors[-1])
+          # 
+          #     if (new_val > aic) {
+          #         predictors = predictors[-1]
+          #     } else {
+          #         print(predictors)
+          #         aic = new_val
+          #         predictors = c(predictors[-1], predictors[1])
+          #     }
+          # }
+
+
+  mo.full <- glm(target~., family='binomial', data=tx[,-1])
+  mo.empty <- glm(target ~ 1, family='binomial', data=tx[,-1])
   scope <- list(lower = formula(mo.empty), upper = formula(mo.full))
   mo.forwardAIC = step(mo.empty, scope, direction='forward', k=2)
   
   # forwardAIC9 = mo.forwardAIC (...pause here...)
-  
+
   #get prob. predictions for test data
   classx_pre <- as.numeric(predict(mo.forwardAIC, test, type='response'))
   classx_strength = 1 - mo.forwardAIC$deviance/ mo.forwardAIC$null.deviance
   
   # get prob. predictions for training data  
-  output[[paste('class',class_index, sep='')]] = classx_pre*classx_strength
-  output_train[[paste('class',class_index, sep='')]] <- 
-    as.numeric(predict(mo.forwardAIC, train, type = "response"))*classx_strength
-
+  output[[paste('Class',class_index, sep='_')]] = classx_pre*classx_strength
+  output_train[[paste('Class',class_index, sep='_')]] <- 
+    as.numeric(predict(mo.forwardAIC, testData, type = "response"))*classx_strength
+  
 }
+
+# tried an equal-weight model
+
+# outputx <- data.frame(id=test$id)
+# output_trainx <- data.frame(id=testData$id)
+# 
+# outputx$Class_1 <- as.numeric(predict(forwardAIC, test, type='response'))
+# output_trainx$Class_1 <- as.numeric(predict(forwardAIC, testData, type = "response"))
+# 
+# outputx$Class_2 <- as.numeric(predict(forwardAIC2, test, type='response'))
+# output_trainx$Class_2 <- as.numeric(predict(forwardAIC2, testData, type = "response"))
+# 
+# outputx$Class_3 <- as.numeric(predict(forwardAIC3, test, type='response'))
+# output_trainx$Class_3 <- as.numeric(predict(forwardAIC3, testData, type = "response"))
+# 
+# outputx$Class_4 <- as.numeric(predict(forwardAIC4, test, type='response'))
+# output_trainx$Class_4 <- as.numeric(predict(forwardAIC4, testData, type = "response"))
+# 
+# outputx$Class_5 <- as.numeric(predict(forwardAIC5, test, type='response'))
+# output_trainx$Class_5 <- as.numeric(predict(forwardAIC5, testData, type = "response"))
+# 
+# outputx$Class_7 <- as.numeric(predict(forwardAIC7, test, type='response'))
+# output_trainx$Class_7 <- as.numeric(predict(forwardAIC7, testData, type = "response"))
+# 
+# outputx$Class_9 <- as.numeric(predict(forwardAIC9, test, type='response'))
+# output_trainx$Class_9 <- as.numeric(predict(forwardAIC9, testData, type = "response"))
+
+
 
 for (i in 2:9){
   regressOnClass(i)
 }
 
+# output_trainx_add <- read.csv('output/outputx_train_2only.csv', header=T, stringsAsFactors = F)
+# outputx_add <- read.csv('output/outputx_test_2only.csv', header=T, stringsAsFactors=F)
+output_train_final <- merge(output_train, output_train_add)
+output_final <- merge(output, output_add)
+outputx_final <- merge(outputx, outputx_add)
+outputx_train_final <- merge(output_trainx, output_trainx_add)
+
 
 
 # === TESTING === #
 
-colnames(output_train) <- c('id', 'Class_1', 'Class_2', 'Class_3', 'Class_4','Class_5','Class_6','Class_7', 'Class_8','Class_9')
-output_train_trans <- output_train
-for (i in 1:nrow(output_train)){
-  total_p = output_train$Class_1[i] + output_train$Class_2[i] + output_train$Class_3[i] + output_train$Class_4[i] + output_train$Class_5[i] + output_train$Class_6[i] + output_train$Class_7[i] + output_train$Class_8[i] + output_train$Class_9[i]
+#scale total probability to 1
+output_train_trans <- outputx_train_final
+for (i in 1:nrow(output_train_final)){
+  total_p = outputx_train_final$Class_1[i] + 
+      outputx_train_final$Class_2[i] + 
+      outputx_train_final$Class_3[i] + 
+      outputx_train_final$Class_4[i] + 
+      outputx_train_final$Class_5[i] + 
+      outputx_train_final$Class_6[i] + 
+      outputx_train_final$Class_7[i] + 
+      outputx_train_final$Class_8[i] + 
+      outputx_train_final$Class_9[i]
   ratio = 1/total_p
-  print(ratio)
-  output_train_trans$Class_1[i] = ratio*output_train_trans$Class_1[i]
-  output_train_trans$Class_2[i] = ratio*output_train_trans$Class_2[i]
-  output_train_trans$Class_3[i] = ratio*output_train_trans$Class_3[i]
-  output_train_trans$Class_4[i] = ratio*output_train_trans$Class_4[i]
-  output_train_trans$Class_5[i] = ratio*output_train_trans$Class_5[i]
-  output_train_trans$Class_6[i] = ratio*output_train_trans$Class_6[i]
-  output_train_trans$Class_7[i] = ratio*output_train_trans$Class_7[i]
-  output_train_trans$Class_8[i] = ratio*output_train_trans$Class_8[i]
-  output_train_trans$Class_9[i] = ratio*output_train_trans$Class_9[i]
+  output_train_trans$Class_1[i] = ratio*outputx_train_final$Class_1[i]
+  output_train_trans$Class_2[i] = ratio*outputx_train_final$Class_2[i]
+  output_train_trans$Class_3[i] = ratio*outputx_train_final$Class_3[i]
+  output_train_trans$Class_4[i] = ratio*outputx_train_final$Class_4[i]
+  output_train_trans$Class_5[i] = ratio*outputx_train_final$Class_5[i]
+  output_train_trans$Class_6[i] = ratio*outputx_train_final$Class_6[i]
+  output_train_trans$Class_7[i] = ratio*outputx_train_final$Class_7[i]
+  output_train_trans$Class_8[i] = ratio*outputx_train_final$Class_8[i]
+  output_train_trans$Class_9[i] = ratio*outputx_train_final$Class_9[i]
 }
 
-#install.packages('MLmetrics')
-library(MLmetrics)
-MultiLogLoss(y_pred = as.matrix(output_train_trans[,-1]), y_true = train$target)
+MultiLogLoss(y_pred = as.matrix(output_train_trans[,-1]), y_true = testData$target)
 # result: 0.6288
 
-write.csv(output_train, 'output/output_train.csv', row.names=F)
-write.csv(output, 'output/output_test.csv', row.names=F)
-write.csv(output_train_trans, 'output/output_train_adjusted.csv', row.names = F)
+
+# based on unweighted models
+output_trans <- outputx_final
+for (i in 1:nrow(output_final)){
+    total_p = outputx_final$Class_1[i] + 
+        outputx_final$Class_2[i] + 
+        outputx_final$Class_3[i] + 
+        outputx_final$Class_4[i] + 
+        outputx_final$Class_5[i] + 
+        outputx_final$Class_6[i] + 
+        outputx_final$Class_7[i] + 
+        outputx_final$Class_8[i] + 
+        outputx_final$Class_9[i]
+    ratio = 1/total_p
+    output_trans$Class_1[i] = ratio*outputx_final$Class_1[i]
+    output_trans$Class_2[i] = ratio*outputx_final$Class_2[i]
+    output_trans$Class_3[i] = ratio*outputx_final$Class_3[i]
+    output_trans$Class_4[i] = ratio*outputx_final$Class_4[i]
+    output_trans$Class_5[i] = ratio*outputx_final$Class_5[i]
+    output_trans$Class_6[i] = ratio*outputx_final$Class_6[i]
+    output_trans$Class_7[i] = ratio*outputx_final$Class_7[i]
+    output_trans$Class_8[i] = ratio*outputx_final$Class_8[i]
+    output_trans$Class_9[i] = ratio*outputx_final$Class_9[i]
+}
+# ===> Kaggle submission score = 0.66987
+
+#based on a smaller sample size
+output_trans2 <- read.csv('output/output_test_unadjusted.csv',header=T,stringsAsFactors = F)
+colnames(output_trans2) <- c('id',"Class_1","Class_2","Class_3","Class_4",
+                             "Class_5","Class_6","Class_7","Class_8","Class_9")
+for (i in 1:nrow(output_trans2)){
+    total_p = output_trans2$Class_1[i] + 
+        output_trans2$Class_2[i] + 
+        output_trans2$Class_3[i] + 
+        output_trans2$Class_4[i] + 
+        output_trans2$Class_5[i] + 
+        output_trans2$Class_6[i] + 
+        output_trans2$Class_7[i] + 
+        output_trans2$Class_8[i] + 
+        output_trans2$Class_9[i]
+    ratio = 1/total_p
+    output_trans2$Class_1[i] = ratio*output_trans2$Class_1[i]
+    output_trans2$Class_2[i] = ratio*output_trans2$Class_2[i]
+    output_trans2$Class_3[i] = ratio*output_trans2$Class_3[i]
+    output_trans2$Class_4[i] = ratio*output_trans2$Class_4[i]
+    output_trans2$Class_5[i] = ratio*output_trans2$Class_5[i]
+    output_trans2$Class_6[i] = ratio*output_trans2$Class_6[i]
+    output_trans2$Class_7[i] = ratio*output_trans2$Class_7[i]
+    output_trans2$Class_8[i] = ratio*output_trans2$Class_8[i]
+    output_trans2$Class_9[i] = ratio*output_trans2$Class_9[i]
+}
+# ====> based on only 5000 tranining observations, the Kaggle submission score is 0.79601
+
+# based on weighted models
+output_trans3 <- output_final
+for (i in 1:nrow(output_final)){
+    total_p = output_final$Class_1[i] + 
+        output_final$Class_2[i] + 
+        output_final$Class_3[i] + 
+        output_final$Class_4[i] + 
+        output_final$Class_5[i] + 
+        output_final$Class_6[i] + 
+        output_final$Class_7[i] + 
+        output_final$Class_8[i] + 
+        output_final$Class_9[i]
+    ratio = 1/total_p
+    output_trans3$Class_1[i] = ratio*output_final$Class_1[i]
+    output_trans3$Class_2[i] = ratio*output_final$Class_2[i]
+    output_trans3$Class_3[i] = ratio*output_final$Class_3[i]
+    output_trans3$Class_4[i] = ratio*output_final$Class_4[i]
+    output_trans3$Class_5[i] = ratio*output_final$Class_5[i]
+    output_trans3$Class_6[i] = ratio*output_final$Class_6[i]
+    output_trans3$Class_7[i] = ratio*output_final$Class_7[i]
+    output_trans3$Class_8[i] = ratio*output_final$Class_8[i]
+    output_trans3$Class_9[i] = ratio*output_final$Class_9[i]
+}
+# ===> Kaggle score: 0.68142
+
+# write.csv(output_train_trans, 'output/output_train.csv', row.names=F)
+write.csv(output_trans, 'output/output_test.csv', row.names=F)
+write.csv(output_trans2, 'output/output_test2.csv', row.names=F)
+write.csv(output_trans3, 'output/output_test3.csv', row.names=F)
 
 
 
