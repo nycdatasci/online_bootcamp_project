@@ -2,6 +2,7 @@ library(data.table)
 library(xgboost)
 library(MLmetrics)
 
+#### This script not used in final output ####
 
 #### *** Read in data, create train/test split ***
 train <- fread('./otto_train.csv')
@@ -9,7 +10,6 @@ set.seed(0)
 trainIndex <- sample(1:nrow(train),nrow(train)*0.7)
 traindata <- train[trainIndex,]
 testdata <- train[-trainIndex,]
-
 
 #################################
 ##### Modeling with xgboost #####

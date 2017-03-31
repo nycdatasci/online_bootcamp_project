@@ -24,6 +24,7 @@ trueClasses <- fread('./modelOutputs/testing.outcomes.csv',col.names = c("id","a
 
 # Average probability over the three models for each observation, for each class
 averagePred <- AvgModels(list(glmPred,rfPred,gbmPred),c(1,1,10))
+fwrite(x = averagePred,file = 'AveragedPredictions.csv',row.names = F)
 
 # Calculate multi-class log loss over the new averaged predictions
 MultiLogLoss(y_pred = as.matrix(averagePred[,-"id"]), y_true = as.vector(trueClasses$actual))
