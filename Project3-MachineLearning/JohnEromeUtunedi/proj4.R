@@ -31,13 +31,12 @@ sapply(train,class)
 sapply(train,mean)
 sapply(train,sd)
 summary(train$target)
-set.seed(0)
 #####################
 ##Partition Data
 #####################
-
-#splitIndex = sample(1:nrow(train), 0.7*nrow(train))
-splitIndex = createDataPartition(train$target, p = 0.6, list = FALSE, times = 1)
+set.seed(0)
+splitIndex = sample(1:nrow(train), 0.5*nrow(train))
+#splitIndex = createDataPartition(train$target, p = 0.6, list = FALSE, times = 1)
 trainDF = train[splitIndex,]
 testDF = train[-splitIndex,]
 dim(trainDF)
@@ -219,9 +218,6 @@ final.pred = as.numeric(predict(bst.otto2, sparse.test.otto2))
 final.pred = matrix(final.pred, ncol = num_class, byrow = TRUE)
 final.pred
 MultiLogLoss(final.pred,test.otto.meta2)
-write.csv(final.pred,"Probabilities.csv")            
-write.csv(test.otto.meta2, "ActualValues.csv")             
-             
              
 ##Function
 ##Pass in your training data and test data (not final test data)
@@ -230,7 +226,7 @@ write.csv(test.otto.meta2, "ActualValues.csv")
 ##an xgboost model to predict the probabilities based on the new;y
 ##Created meta-features.
 ##Make sure to pass in dataframes!
-Efezino_stacking = function(trainDF,testDF){
+Efezino_stacking = function(trainDF,testDF, realtestset = 0){
   otto.train.meta = trainDF
   otto.test.meta = testDF
   otto.train.meta$nn = 0
@@ -240,7 +236,11 @@ Efezino_stacking = function(trainDF,testDF){
   fold.partition = 5
   otto.train.meta$foldID = sample(1:fold.partition,size = nrow(otto.train.meta),replace = TRUE)
   otto.train.meta = otto.train.meta[,c('foldID',names(trainDF[,-94]),'nn','xgb','target')]
-  otto.test.meta = otto.test.meta[,c(names(trainDF[,-94]),'nn','xgb','target')]
+  if(realtestset == 0){
+    otto.test.meta = otto.test.meta[,c(names(trainDF[,-94]),'nn','xgb','target')]
+  }else{
+    otto.test.meta = otto.test.meta[,c(names(trainDF[,-94]),'nn','xgb')]
+  }
   for(i in 1:fold.partition){
     ##Need to use N-Fold Cross Validation to determine what
     ##results will be using both NN and xgboost
@@ -278,22 +278,32 @@ Efezino_stacking = function(trainDF,testDF){
     otto.train.meta[otto.train.meta$foldID == i, 'nn'] = as.numeric(predict(neural.otto.nn, neural.data.test.otto, type = 'class'))
     
   }
+  print("Doing Test Set")
   ##########################
   ##Test Data
   ##########################
   ##XGBoost
   otto.data = select(otto.train.meta,-target,-nn,-xgb,-foldID)
-  otto.data.test = select(otto.test.meta,-target, -nn, -xgb)
+  if (realtestset == 0){
+    otto.data.test = select(otto.test.meta,-target, -nn, -xgb)
+  }else{
+    otto.data.test = select(otto.test.meta, -nn, -xgb) 
+  }
   sparse.matrix.otto = sparse.model.matrix(~ . -1 ,data = otto.data)
   sparse.test.otto = sparse.model.matrix(~ . -1 ,data = otto.data.test)
   label.otto = as.numeric(otto.train.meta$target) - 1
-  test.otto = as.numeric(otto.test.meta$target) - 1
   dtrain = xgb.DMatrix(sparse.matrix.otto, label = label.otto)
-  dtest = xgb.DMatrix(sparse.test.otto, label = test.otto)
+  if (realtestset == 0){
+    test.otto = as.numeric(otto.test.meta$target) - 1
+    dtest = xgb.DMatrix(sparse.test.otto, label = test.otto)
+    watchlist.list = list(train = dtrain, test = dtest)
+  }else{
+    watchlist.list = list(train = dtrain)
+  }
   bst.otto.tst.cv = xgb.cv(params = param.otto, data = sparse.matrix.otto, nrounds = 500, nfold = 5, label = label.otto,
                            early_stopping_rounds = 5, eval_metric = "mlogloss", subsample = 0.75, verbose = FALSE)
   bst.otto.tst = xgb.train(params = param.otto, data = dtrain, nrounds = bst.otto.tst.cv$best_ntreelimit, nfold = 5, 
-                           watchlist = list(train = dtrain, test = dtest), eval_metric = "mlogloss", subsample = 0.75, 
+                           watchlist = watchlist.list, eval_metric = "mlogloss", subsample = 0.75, 
                            early_stopping_rounds = 5, verbose = FALSE)
   otto.test.meta[,'xgb'] = as.numeric(predict(bst.otto.tst, sparse.test.otto))
   ##Neural Networks
@@ -304,33 +314,58 @@ Efezino_stacking = function(trainDF,testDF){
                         maxit = 300, trace = FALSE)
   otto.test.meta[,'nn'] = as.numeric(predict(neural.otto.nn, neural.data.test.otto, type = 'class'))
   ##Try XGBoost with new meta features
+  print('Meta Features Implementation.........Almost there!')
   otto.train.meta2 = select(otto.train.meta, -foldID, -target)
   otto.train.meta2$nn = as.factor(otto.train.meta2$nn)
   otto.train.meta2$xgb = as.factor(otto.train.meta2$xgb)
-  otto.test.meta2 = select(otto.test.meta, -target)
+  if(realtestset == 0){
+    otto.test.meta2 = select(otto.test.meta, -target)
+    test.otto.meta2 = as.numeric(otto.test.meta$target) - 1
+    sparse.test.otto2 = sparse.model.matrix(~ . -1 ,data = otto.test.meta2)
+    dtest.meta2 = xgb.DMatrix(sparse.test.otto2, label = test.otto.meta2)
+  }else{
+    otto.test.meta2 = otto.test.meta
+    sparse.test.otto2 = sparse.model.matrix(~ . -1 ,data = otto.test.meta2)
+  }
   otto.test.meta2$nn = as.factor(otto.test.meta2$nn)
   otto.test.meta2$xgb = as.factor(otto.test.meta2$xgb)
   label.otto.meta2 = as.numeric(otto.train.meta$target) - 1
-  test.otto.meta2 = as.numeric(otto.test.meta$target) - 1
   sparse.matrix.otto2 = sparse.model.matrix(~ . -1 ,data = otto.train.meta2)
-  sparse.test.otto2 = sparse.model.matrix(~ . -1 ,data = otto.test.meta2)
   dtrain.meta2 = xgb.DMatrix(sparse.matrix.otto2, label = label.otto.meta2)
-  dtest.meta2 = xgb.DMatrix(sparse.test.otto2, label = test.otto.meta2)
+  if (realtestset == 0){
+    watchlist.list = list(train = dtrain, test = dtest)
+  }else{
+    watchlist.list = list(train = dtrain)
+  }
   param.otto.meta2 = list(objective = "multi:softprob",num_class = num_class, eta = 0.3, max_depth = 5, nthread = 4)
   bst.otto.cv2 = xgb.cv(params = param.otto.meta2, data = sparse.matrix.otto2, nrounds = 500, nfold = 5, label = label.otto.meta2,
                         early_stopping_rounds = 5, eval_metric = "mlogloss", subsample = 0.75, verbose = FALSE)
   bst.otto2 = xgb.train(params = param.otto.meta2, data = dtrain.meta2, nrounds = bst.otto.cv2$best_ntreelimit, nfold = 5, 
-                        watchlist = list(train = dtrain.meta2, test = dtest.meta2), eval_metric = "mlogloss", subsample = 0.75, 
+                        watchlist = watchlist.list, eval_metric = "mlogloss", subsample = 0.75, 
                         early_stopping_rounds = 5, verbose = FALSE)
   final.pred = as.numeric(predict(bst.otto2, sparse.test.otto2))
   final.pred = matrix(final.pred, ncol = num_class, byrow = TRUE)
-  logloss = MultiLogLoss(final.pred,test.otto.meta2)
-  return(list(final.pred,logloss))
+  if (realtestset == 0) {
+    logloss = MultiLogLoss(final.pred,test.otto.meta2)
+    return(list(final.pred,logloss))
+  }else{
+    return(final.pred)
+  }
+
 }
              
-             
-             
-             
+results = Efezino_stacking(trainDF, testDF)
+write.csv(results[1],"Probabilities.csv")            
+write.csv(testDF$target, "ActualValues.csv")
+
+results.final = Efezino_stacking(train,test, realtestset = 1)
+results.final.temp = results.final
+test.id = seq(1,144368,by=1)
+results.final.temp = cbind(test.id,results.final.temp)
+names(results.final.temp) = c('id','class_1','class_2','class_3','class_4','class_5','class_6','class_7','class_8','class_9')
+write.csv(results.final.temp,"Probabilities_Final.csv")            
+
+
 ##########################
 ###SVM
 ##########################
