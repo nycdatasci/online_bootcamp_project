@@ -233,6 +233,10 @@ for (i in 1:nrow(output_final)){
 # ===> Kaggle score: 0.68142
 
 # write.csv(output_train_trans, 'output/output_train.csv', row.names=F)
+
+library(data.table)
+setcolorder(output_trans,c('id','Class_1','Class_2','Class_3','Class_4','Class_5','Class_6','Class_7','Class_8','Class_9'))
+
 write.csv(output_trans, 'output/output_test.csv', row.names=F)
 write.csv(output_trans2, 'output/output_test2.csv', row.names=F)
 write.csv(output_trans3, 'output/output_test3.csv', row.names=F)
