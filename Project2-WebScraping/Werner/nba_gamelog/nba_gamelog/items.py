@@ -10,7 +10,7 @@ from scrapy import Item, Field
 
 class NBA_Item(Item):
     # define the fields for your item here like:
-    
+
     player = Field()
     pos = Field()
     _min = Field()
