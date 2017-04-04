@@ -11,7 +11,7 @@ sys.setdefaultencoding('utf-8') # Need to set default to utf-8, otherwise ascii 
 
 class NBA_Pipeline(object):
     def __init__(self):
-        self.filename = 'NBA_Stat.txt'
+        self.filename = 'NBA_Stat.csv'
 
     def open_spider(self, spider):
         self.file = open(self.filename, 'wb')
