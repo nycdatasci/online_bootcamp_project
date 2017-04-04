@@ -2,9 +2,6 @@
 # start_urls: an attribute listing the URLs the spider will start from
 # parse(): a method of the spider responsible for processing a Response object downloaded from the URL and returning scraped data
 
-import sys
-reload(sys)
-sys.setdefaultencoding('utf-8') # Need to set default to utf-8, otherwise ascii codec will give error.
 import re
 
 from scrapy import Spider, Request
@@ -18,7 +15,7 @@ class NBA_Spider(Spider):
     allowed_urls = ['www.nba.com']
     days = range(1, 32)
     months = range(10, 13) + range(1, 5)
-    years = range(2010, 2016)
+    years = range(2010, 2017)
     start_urls = []
     for year in years:
         for month in months:
@@ -26,13 +23,12 @@ class NBA_Spider(Spider):
                 m = str(month).zfill(2)
                 d = str(day).zfill(2)
                 start_urls.append('http://www.nba.com/gameline/{}{}{}/'.format(\
-                                                                        year, str(month).zfill(2), \
+                                                                        year, \
+                                                                        str(month).zfill(2), \
                                                                         str(day).zfill(2)) \
                              )
 
     def parse(self, response):
-        # response.css("a.nbaFnlMnRecapDiv::attr('href')")
-
         if response.css("a.recapAnc::attr('href')"):
             for href in response.css("a.recapAnc::attr('href')"): # [0:1] only getting the first link
                 url = response.urljoin(href.extract())
@@ -50,12 +46,12 @@ class NBA_Spider(Spider):
 
     def parse_item(self, response):
         rows = response.xpath('//*[@id="nbaGITeamStats"]/tr').extract()
-        print 'Game ID: ', response.meta['game_id']
+        # print 'Game ID: ', response.meta['game_id']
 
         for row in rows:
-            player = Selector(text=row).xpath('//td[1]/a/text()').extract()
             total = Selector(text=row).xpath('//td[1]/text()').extract()
 
+            player = Selector(text=row).xpath('//td[1]/a/text()').extract()
             pos = Selector(text=row).xpath('//td[2]/text()').extract()
             _min = Selector(text=row).xpath('//td[3]/text()').extract()
             FGM_A = Selector(text=row).xpath('//td[4]/text()').extract()
@@ -94,7 +90,7 @@ class NBA_Spider(Spider):
 
             print "TOTAL: ", total
             print "Class type: ", type(total)
-            if not item['player'] and total == [u'Total']:
+            if not item['player'] and (total == [u'Total'] or total == [u'Totals']):
                 item['player'] = [response.meta['game_id']]
 
             yield item
