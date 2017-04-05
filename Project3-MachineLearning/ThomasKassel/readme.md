@@ -4,6 +4,8 @@
 
 **otto.h2o.R** - h2o modeling using 70/30 train/test split. Hyperparameter tuning/grid search is performed on the GLM model at different weights for ridge and lasso penalties, however no strong ridge or lasso normalization was used. Further parameter tuning could be conducted to identify optimal performance parameters for the random forest and gradient boosted models.
 
+Package xgboost was also explored in **otto.xgboost.R** and delivered relatively high test accuracy with limited parameter tuning and at reasonable computation speeds. Although the specific model trained in that script was not used, xgboost was ultimately used to achieve highest team submission accuracy. See "shared models folder" for this implementation of xgboost.
+
 - GLM (Multinomial logistic regression)
 - Random forest
 - Gradient boosting
