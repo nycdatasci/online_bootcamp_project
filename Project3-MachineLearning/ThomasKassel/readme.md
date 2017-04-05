@@ -8,6 +8,6 @@
 - Random forest
 - Gradient boosting
 
-Package xgboost was also explored in **otto.xgboost.R** and delivered relatively high test accuracy with limited parameter tuning and at reasonable computation speeds. Although the specific model trained in that script was not used, xgboost was ultimately used to achieve highest team submission accuracy. See "shared models folder" for the final implementation of xgboost.
+Package xgboost was also explored in **otto.xgboost.R** and delivered relatively high test accuracy with limited parameter tuning and at reasonable computation speeds. Although the specific model trained in that script was not used, xgboost was ultimately used to achieve highest team submission accuracy. See the "otto_team_code" folder for the final implementation of xgboost.
 
 The h2o models were used for three separate predictions on the Otto Classification test set of ~140,000 rows. Their predictions were blended together (using the short weighted average function in **../shared_functions/otto.ensemble.R**) and submitted to the Kaggle leaderboard.
