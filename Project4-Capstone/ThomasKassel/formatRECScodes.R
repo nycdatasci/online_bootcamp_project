@@ -26,9 +26,9 @@ ListOfCodeTables <- mapply(FUN = LinesToList,code$varName,code$varDesc,code$code
 FinalCodebook <- rbindlist(ListOfCodeTables)
 
 LabelVarType <- function(varCode){
-  # Determine whether a variable in the codebook is continuous, integer or categorical
+  # Determine whether a variable in the codebook is numeric, integer or factor
   regexInt <- '[0-9]+[ ][-][ ][0-9]+'
-  output <- ifelse(is.na(varCode),'continuous',ifelse(grepl(regexInt,varCode),'integer','categorical'))
+  output <- ifelse(is.na(varCode),'numeric',ifelse(grepl(regexInt,varCode),'integer','factor'))
   return(output)
 }
 
