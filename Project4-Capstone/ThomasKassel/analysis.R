@@ -14,7 +14,8 @@ names(colClasses) <- varTypes[,varName]
 
 # Read in raw RECS dataset, specifying each variable's class as determined above
 # The answer codes -2, -8, -9 translate to not applicable, refused, unknown - treat all as NA
-recs <- fread('./data/recs2009.csv',na.strings = c("-2","-8","-9"),colClasses = colClasses)
+recs <- fread('./data/recs2009.csv',colClasses = colClasses)
+#na.strings = c("-2","-8","-9")
 
 ### Light feature reduction
 # Missingness - drop variables with a less than 5% answer rate
