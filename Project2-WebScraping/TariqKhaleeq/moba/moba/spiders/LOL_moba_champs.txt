@@ -1,0 +1,136 @@
+Aatrox	the Darkin Blade	top	77%	50%	jung	22%	49%	2	2	2	2	1
+Ahri	The Nine-Tailed Fox	mid	97%	53%	-	-	-	3	1	2	3	1
+Akali	The Fist of Shadow	top	61%	53%	mid	36%	49%	3	1	1	3	1
+Alistar	The Minotaur	sup	97%	50%	-	-	-	1	3	3	1	2
+Amumu	The Sad Mummy	jung	97%	50%	-	-	-	2	3	3	1	1
+Anivia	The Cryophoenix	mid	88%	52%	-	-	-	3	1	3	1	2
+Annie	The Dark Child	mid	72%	53%	sup	19%	45%	3	1	3	1	2
+Ashe	The Frost Archer	bot	99%	50%	-	-	-	2	1	3	1	2
+Aurelion Sol	The Star Forger	mid	82%	51%	jung	16%	57%	3	1	2	2	1
+Azir	The Emperor of the Sands	mid	95%	45%	-	-	-	3	1	2	2	1
+Bard	The Wandering Caretaker	sup	97%	51%	-	-	-	1	1	3	2	3
+Blitzcrank	The Great Steam Golem	sup	97%	53%	-	-	-	1	2	3	1	1
+Brand	The Burning Vengeance	sup	78%	50%	mid	19%	48%	3	1	2	1	1
+Braum	the Heart of the Freljord	sup	99%	51%	-	-	-	1	2	3	1	2
+Caitlyn	The Sheriff of Piltover	bot	99%	50%	-	-	-	3	1	2	2	1
+Camille	The Steel Shadow	top	86%	48%	-	-	-	3	2	2	3	1
+Cassiopeia	The Serpent's Embrace	mid	87%	50%	top	10%	51%	3	1	3	1	1
+Cho'Gath	The Terror of the Void	top	58%	48%	jung	21%	44%	2	3	2	1	1
+Corki	The Daring Bombardier	mid	70%	47%	bot	26%	45%	3	1	1	2	1
+Darius	The Hand of Noxus	top	98%	51%	-	-	-	3	2	2	1	1
+Diana	The Scorn of the Moon	mid	65%	46%	jung	25%	44%	3	2	2	2	1
+Dr. Mundo	The Madman of Zaun	top	85%	46%	jung	12%	45%	2	3	1	1	1
+Draven	The Glorious Executioner	bot	97%	51%	-	-	-	3	1	1	2	1
+Ekko	The Boy Who Shattered Time	mid	73%	50%	top	21%	49%	3	2	2	3	1
+Elise	The Spider Queen	jung	99%	50%	-	-	-	2	2	2	2	1
+Evelynn	The Widowmaker	jung	99%	51%	-	-	-	2	2	1	2	2
+Ezreal	The Prodigal Explorer	bot	96%	46%	-	-	-	3	1	1	3	1
+Fiddlesticks	The Harbinger of Doom	jung	54%	50%	sup	32%	48%	3	1	3	1	1
+Fiora	The Grand Duelist	top	99%	50%	-	-	-	3	2	2	2	2
+Fizz	The Tidal Trickster	top	56%	50%	mid	40%	52%	3	1	2	3	1
+Galio	The Colossus	top	52%	50%	sup	18%	48%	2	3	3	2	1
+Gangplank	The Saltwater Scourge	top	77%	50%	mid	22%	48%	3	1	1	1	2
+Garen	The Might of Demacia	top	95%	47%	-	-	-	2	3	1	1	1
+Gnar	The Missing Link	top	98%	47%	-	-	-	2	3	2	2	1
+Gragas	The Rabble Rouser	jung	54%	51%	top	39%	50%	2	3	3	2	1
+Graves	The Outlaw	jung	97%	47%	-	-	-	3	2	1	2	2
+Hecarim	The Shadow of War	jung	97%	49%	-	-	-	2	2	2	2	1
+Heimerdinger	The Revered Inventor	top	56%	49%	mid	36%	53%	3	1	2	1	2
+Illaoi	The Kraken Priestess	top	98%	49%	-	-	-	3	2	1	1	1
+Irelia	The Will of the Blades	top	96%	51%	-	-	-	3	2	2	2	1
+Ivern	The Green Father	jung	99%	57%	-	-	-	1	1	3	2	3
+Janna	The Storm's Fury	sup	99%	53%	-	-	-	1	1	3	1	3
+Jarvan IV	The Exemplar of Demacia	jung	60%	50%	top	37%	52%	2	2	2	2	2
+Jax	Grandmaster at Arms	top	70%	51%	jung	29%	52%	3	2	2	2	1
+Jayce	The Defender of Tomorrow	top	72%	51%	mid	26%	48%	3	1	1	2	2
+Jhin	The Virtuoso	bot	98%	47%	-	-	-	3	1	2	1	1
+Jinx	the Loose Cannon	bot	99%	50%	-	-	-	3	1	2	1	1
+Kalista	The Spear of Vengeance	bot	99%	50%	-	-	-	3	1	1	3	2
+Karma	The Enlightened One	sup	89%	49%	-	-	-	2	1	2	1	2
+Karthus	The Deathsinger	mid	76%	52%	top	18%	51%	3	1	1	1	2
+Kassadin	The Void Walker	mid	94%	51%	-	-	-	3	2	1	3	1
+Katarina	The Sinister Blade	mid	89%	50%	-	-	-	3	1	1	3	1
+Kayle	The Judicator	top	63%	53%	mid	25%	55%	3	1	1	1	3
+Kennen	The Heart of the Tempest	top	80%	49%	bot	15%	49%	3	1	3	1	1
+Kha'Zix	The Voidreaver	jung	99%	51%	-	-	-	3	1	1	2	1
+Kindred	The Eternal Hunters	jung	99%	50%	-	-	-	3	1	2	3	2
+Kled	The Cantankerous Cavalier	top	96%	52%	-	-	-	3	2	1	3	1
+Kog'Maw	The Mouth of the Abyss	bot	94%	54%	-	-	-	3	1	1	1	1
+LeBlanc	The Deceiver	mid	93%	49%	-	-	-	3	1	2	3	1
+Lee Sin	The Blind Monk	jung	99%	50%	-	-	-	3	2	2	3	1
+Leona	The Radiant Dawn	sup	98%	50%	-	-	-	1	3	3	1	1
+Lissandra	the Ice Witch	mid	66%	47%	top	31%	46%	3	1	3	2	1
+Lucian	the Purifier	bot	98%	52%	-	-	-	3	1	1	3	1
+Lulu	The Fae Sorceress	sup	94%	52%	-	-	-	2	1	2	1	3
+Lux	The Lady of Luminosity	mid	85%	49%	sup	13%	45%	3	1	2	1	2
+Malphite	Shard of the Monolith	top	88%	52%	-	-	-	1	3	3	1	1
+Malzahar	The Prophet of the Void	sup	72%	49%	mid	23%	50%	3	1	3	1	2
+Maokai	The Twisted Treant	top	90%	46%	-	-	-	1	3	3	1	2
+Master Yi	The Wuju Bladesman	jung	91%	51%	-	-	-	3	1	1	2	1
+Miss Fortune	The Bounty Hunter	bot	98%	50%	-	-	-	3	1	1	1	1
+Mordekaiser	The Iron Revenant	top	71%	49%	mid	12%	56%	3	2	1	1	2
+Morgana	Fallen Angel	sup	81%	49%	mid	16%	51%	2	1	3	1	2
+Nami	the Tidecaller	sup	99%	50%	-	-	-	1	1	3	1	2
+Nasus	The Curator of the Sands	top	91%	48%	-	-	-	2	3	2	1	1
+Nautilus	The Titan of the Depths	top	74%	49%	sup	22%	48%	1	3	3	1	1
+Nidalee	The Bestial Huntress	jung	95%	50%	-	-	-	3	1	1	3	2
+Nocturne	The Eternal Nightmare	jung	95%	49%	-	-	-	3	1	2	2	2
+Nunu	The Yeti Rider	jung	84%	54%	top	10%	46%	1	3	2	1	2
+Olaf	The Berserker	jung	52%	47%	top	48%	51%	2	2	2	1	1
+Orianna	The Lady of Clockwork	mid	98%	50%	-	-	-	2	1	2	1	2
+Pantheon	The Artisan of War	top	75%	54%	jung	16%	52%	3	2	2	2	1
+Poppy	Keeper of the Hammer	top	85%	47%	-	-	-	2	3	3	2	1
+Quinn	Demacia's Wings	top	68%	51%	jung	13%	48%	3	1	2	3	1
+Rakan	The Charmer	sup	98%	44%	-	-	-	1	2	3	3	3
+Rammus	The Armordillo	jung	79%	50%	top	18%	51%	2	3	3	2	1
+Rek'Sai	The Void Burrower	jung	99%	49%	-	-	-	2	2	2	2	2
+Renekton	The Butcher of the Sands	top	98%	50%	-	-	-	2	2	2	2	1
+Rengar	The Pridestalker	jung	87%	46%	top	12%	50%	3	1	2	2	1
+Riven	The Exile	top	91%	51%	-	-	-	3	2	2	3	1
+Rumble	The Mechanized Menace	top	87%	50%	jung	10%	47%	3	2	2	1	1
+Ryze	The Rogue Mage	mid	81%	42%	top	17%	42%	3	1	2	2	2
+Sejuani	Fury of the North	jung	93%	47%	-	-	-	2	2	3	2	1
+Shaco	The Demon Jester	jung	89%	53%	-	-	-	3	1	2	2	2
+Shen	Eye of Twilight	top	93%	50%	-	-	-	2	3	2	2	3
+Shyvana	The Half-Dragon	jung	93%	51%	-	-	-	2	2	1	2	1
+Singed	Mad Chemist	top	96%	51%	-	-	-	2	3	2	2	1
+Sion	The Undead Juggernaut	top	70%	52%	sup	22%	54%	2	3	3	1	1
+Sivir	The Battle Mistress	bot	99%	48%	-	-	-	3	1	1	1	2
+Skarner	The Crystal Vanguard	jung	97%	51%	-	-	-	1	3	3	1	1
+Sona	The Maven of the Strings	sup	96%	52%	-	-	-	2	1	2	1	2
+Soraka	The Starchild	sup	98%	52%	-	-	-	1	1	2	1	3
+Swain	The Master Tactician	top	71%	52%	mid	28%	50%	2	2	2	1	1
+Syndra	The Dark Sovereign	mid	97%	51%	-	-	-	3	1	2	1	1
+Tahm Kench	The River King	sup	67%	49%	top	30%	49%	1	3	2	1	3
+Taliyah	The Stoneweaver	mid	85%	51%	-	-	-	3	1	2	1	3
+Talon	The Blade's Shadow	mid	73%	52%	top	20%	53%	3	1	1	2	1
+Taric	The Shield of Valoran	sup	98%	51%	-	-	-	1	2	2	1	3
+Teemo	The Swift Scout	top	81%	50%	bot	11%	47%	3	1	2	1	2
+Thresh	The Chain Warden	sup	99%	50%	-	-	-	1	2	3	1	3
+Tristana	The Megling Gunner	bot	97%	50%	-	-	-	3	1	2	2	1
+Trundle	The Cursed Troll	top	65%	49%	jung	19%	50%	2	3	1	1	2
+Tryndamere	The Barbarian King	top	89%	51%	-	-	-	3	2	1	2	1
+Twisted Fate	The Card Master	mid	91%	52%	-	-	-	3	1	2	2	2
+Twitch	The Plague Rat	bot	80%	55%	jung	19%	51%	3	1	1	2	1
+Udyr	The Animal Spirit	jung	90%	47%	-	-	-	2	3	2	2	1
+Urgot	The Headsman's Pride	top	60%	47%	bot	23%	48%	2	2	2	1	1
+Varus	The Arrow of Retribution	bot	97%	50%	-	-	-	3	1	2	1	1
+Vayne	The Night Hunter	bot	96%	49%	-	-	-	3	1	2	2	1
+Veigar	The Tiny Master of Evil	mid	75%	50%	sup	18%	48%	3	1	3	1	1
+Vel'Koz	Eye of the Void	mid	57%	51%	sup	40%	49%	3	1	2	1	1
+Vi	the Piltover Enforcer	jung	99%	49%	-	-	-	2	2	3	2	1
+Viktor	The Machine Herald	mid	97%	47%	-	-	-	3	1	2	1	1
+Vladimir	The Crimson Reaper	mid	69%	47%	top	30%	48%	3	2	1	1	1
+Volibear	The Thunder's Roar	jung	70%	50%	top	27%	46%	2	3	2	2	1
+Warwick	The Uncaged Wrath of Zaun	jung	87%	51%	top	13%	46%	2	2	2	1	1
+Wukong	The Monkey King	top	51%	49%	jung	43%	49%	2	2	2	2	1
+Xayah	The Rebel	bot	95%	47%	-	-	-	3	2	3	1	1
+Xerath	The Magus Ascendant	mid	91%	52%	-	-	-	3	1	2	1	1
+Xin Zhao	The Seneschal of Demacia	jung	84%	53%	top	14%	48%	2	2	2	2	1
+Yasuo	the Unforgiven	top	51%	50%	mid	45%	49%	3	1	2	3	2
+Yorick	The Shepherd of Lost Souls	top	97%	50%	-	-	-	2	2	2	1	2
+Zac	the Secret Weapon	jung	91%	50%	-	-	-	2	3	3	2	1
+Zed	the Master of Shadows	mid	93%	47%	-	-	-	3	1	1	3	1
+Ziggs	The Hexplosives Expert	mid	76%	52%	bot	22%	54%	3	1	2	2	1
+Zilean	The Chronokeeper	sup	64%	49%	mid	33%	52%	2	1	2	2	3
+Zyra	The Rise of the Thorns	sup	95%	49%	-	-	-	3	1	3	1	1
