@@ -1,6 +1,7 @@
 ################################
 ##### General helper funcs #####
 ################################
+# Functions to deal with missingness and formatting
 
 countNAs <- function(dt){
   # Calculate % of non-NA values in each column of a datatable
@@ -17,19 +18,19 @@ isImputedCol <- function(varName){
   return(substr(varName,1,1) == "Z")
 }
 
+equiv <- function(x,y){
+  # Normal equivalence test, but with NA error handling
+  if (!is.na(x) && x == y) {return(TRUE)
+  } else {return(FALSE)}
+}
+
 
 
 ############################################
 ##### Feature engineering helper funcs #####
 ############################################
-# These funcs help to re-code and consolidate info contained in one or more factor variables
+# Functions to help re-code and consolidate info contained in one or more factor variables
 # into new features which relate more closely to electricity use
-
-equiv <- function(x,y){
-  # Normal equivalence test, but with NA error handling
-  if (!is.na(x) && x == y) {return(TRUE)
-    } else {return(FALSE)}
-}
 
 impPOOL <- function(POOL,SWIMPOOL,FUELPOOL){
   return(ifelse(equiv(POOL,'1') | equiv(SWIMPOOL,'1'),ifelse(equiv(FUELPOOL,'5'),'2','1'),'0'))
@@ -108,12 +109,12 @@ impSIZFREEZ <- function(SIZFREEZ){
   return(x)
 }
 
-impSIZFRI1 <- function(SIZFRI1){
-  if (equiv(SIZFRI1,'1')){x <- 5
-  } else if (equiv(SIZFRI1,'2')){x <- 10
-  } else if (equiv(SIZFRI1,'3')){x <- 16
-  } else if (equiv(SIZFRI1,'4')){x <- 20
-  } else if (equiv(SIZFRI1,'5')){x <- 24
+impSIZRFRI1 <- function(SIZRFRI1){
+  if (equiv(SIZRFRI1,'1')){x <- 5
+  } else if (equiv(SIZRFRI1,'2')){x <- 10
+  } else if (equiv(SIZRFRI1,'3')){x <- 16
+  } else if (equiv(SIZRFRI1,'4')){x <- 20
+  } else if (equiv(SIZRFRI1,'5')){x <- 24
   } else {x <- NA}
   return(x)
 }
