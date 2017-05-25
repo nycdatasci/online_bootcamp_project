@@ -1,11 +1,16 @@
-library(h2o)
-library(data.table)
 source('EDA_featureEng.R')
 
-##### MODELING #####
+##### PRE-PROCESS ###############################################################################################
 # Input: cleaned, pre-processed and engineered RECs dataframe from EDA_featureEng.R
-# Conduct regression modeling (prediction of yearly KWH) comparatively with h2o models
+# Conduct modeling (prediction of yearly KWH) comparatively with h2o models
 # Make use of h2o's RandomDiscrete hyperparameter search and early stopping methods to speed training
+
+# Establish a baseline for RMSE
+# Any algorithm's RMSE should at least be better than simply guessing avg kWh
+avg <- rep(mean(recs.reduced2$KWH),nrow(recs.reduced2))
+baseline.rmse <- sqrt(sum((avg - recs.reduced2$KWH)^2)/nrow(recs.reduced2))
+# Guessing the average every time would lead to an RMSE of 7640 kWh
+
 
 # Initiate remote h2o cluster (receives and processes dataset)
 # No modeling is done locally - an address key is saved to reference the remote version
@@ -23,7 +28,9 @@ y = "KWH"
 x <- setdiff(x = colnames(train), y = "KWH")
 
 
-##### GLM #####
+
+
+##### GLM Modeling #############################################################################################
 # Default GLM model to obtain interpretable coeffs and p-values
 GLMdefault <- h2o.glm(x = x,y = y,training_frame = train,lambda = 0,compute_p_values = T)
 GLMcoeffsTable <- GLMdefault@model$coefficients_table %>% filter(p_value < 0.05)
@@ -44,27 +51,30 @@ bestGLMID <- GLMgrid1@model_ids[[1]]
 bestGLM <- h2o.getModel(bestGLMID)
 bestGLMparams <- bestGLM@allparameters
 
-# Using best model's params, train final model on combined train + valid for larger sample size
+# Using best GLM model's params, train final model on combined train + valid for larger sample size
 finalGLM <- h2o.glm(x = x, y = y, training_frame = full.train, alpha = bestGLMparams$alpha,
                     lambda = bestGLMparams$lambda)
 
 # Final GLM model's performance on holdout test set
 finalGLMperformance <- h2o.performance(finalGLM,newdata = test)
 # Predictions on holdout test set
-pred <- h2o.predict(finalGLM,test)
-GLMgraphdata <- data.frame('pred' = as.vector(pred), 'actual' = as.vector(test[[y]]))
-################
+GLMpred <- h2o.predict(finalGLM,test)
+GLMgraphdata <- data.frame('pred' = as.vector(GLMpred), 'actual' = as.vector(test[[y]]),
+                           'model' = rep('GLM',nrow(GLMpred)),'TOTCSQFT' = as.vector(test[['TOTCSQFT']]),
+                           'CDD30YR' = as.vector(test[['CDD30YR']]),'NHSLDMEM' = as.vector(test[['NHSLDMEM']]))
 
 
 
-##### GBM #####
+
+##### GBM Modeling #############################################################################################
 # Define hyperparameter spaces and search criteria for random grid search
-GBM_params1 <- list(learn_rate = seq(.01,.05,.01), # lower is better
-                    max_depth = seq(10,24,2), # centered around sqrt(# of features) = 20
-                    sample_rate = seq(0.6, 1.0, 0.1),
-                    col_sample_rate = seq(0.6, 1.0, 0.1))
-GBM_searchCriteria1 <- list(strategy = "RandomDiscrete", max_runtime_secs = 300)
-GBMgrid <- h2o.grid(algorithm = "gbm", grid_id = "GBM_grid1", x = x, ntrees = 500,
+GBM_params1 <- list(learn_rate = c(.005,seq(.01,.05,.01)), # lower is better
+                    max_depth = seq(6,24,6), # centered around sqrt(# of features) = 20
+                    sample_rate = seq(0.7, 1.0, 0.1), # rows chosen per tree
+                    col_sample_rate = seq(0.6, 1.0, 0.1)) # cols chosen per split
+GBM_searchCriteria1 <- list(strategy = "RandomDiscrete", max_runtime_secs = 900,
+                            stopping_rounds = 5, stopping_metric = "RMSE")
+GBMgrid <- h2o.grid(algorithm = "gbm", grid_id = "GBM_grid1", x = x, ntrees = 10000,
                     y = y, training_frame = train, validation_frame = valid,
                     hyper_params = GBM_params1, search_criteria = GBM_searchCriteria1, seed = 1234)
 
@@ -72,26 +82,22 @@ GBMgrid <- h2o.grid(algorithm = "gbm", grid_id = "GBM_grid1", x = x, ntrees = 50
 GBMgrid1 <- h2o.getGrid("GBM_grid1",sort_by = "rmse",decreasing = F)
 bestGBMID <- GBMgrid1@model_ids[[1]]
 bestGBM <- h2o.getModel(bestGBMID)
+bestGBMparams <- bestGBM@allparameters
 
-# Best GLM model's performance
-bestGBMperformance <- h2o.performance(bestGBM,newdata = test)
-################
+# Using best GBM model's params, train final model on combined train + valid for larger sample size
+finalGBM <- h2o.gbm(x = x, y = y,training_frame = full.train, ntrees = 10000,
+                    max_runtime_secs = 300,
+                    stopping_rounds = 5,stopping_metric = "RMSE",
+                    learn_rate = bestGBMparams$learn_rate,
+                    max_depth = bestGBMparams$max_depth,
+                    sample_rate = bestGBMparams$sample_rate,
+                    col_sample_rate = bestGBMparams$col_sample_rate)
 
+# Final GLM model's performance on holdout test set
+finalGBMperformance <- h2o.performance(finalGBM,newdata = test)
+# Predictions on holdout test set
+GBMpred <- h2o.predict(finalGBM,test)
+GBMgraphdata <- data.frame('pred' = as.vector(GBMpred), 'actual' = as.vector(test[[y]]),
+                           'model' = rep('GBM',nrow(GBMpred)),'TOTCSQFT' = as.vector(test[['TOTCSQFT']]),
+                           'CDD30YR' = as.vector(test[['CDD30YR']]),'NHSLDMEM' = as.vector(test[['NHSLDMEM']]))
 
-
-##### DEEP LEARNING #####
-# Define hyperparameter spaces and search criteria for random grid search
-NN_params1 <- list()
-NN_searchCriteria1 <- list(strategy = "RandomDiscrete", max_models = 40, max_runtime_secs = 180)
-NNgrid <- h2o.grid(algorithm = "deeplearning", grid_id = "NN_grid1", x = x, ntrees = 500,
-                    y = y, training_frame = train, validation_frame = valid,
-                    hyper_params = NN_params1, search_criteria = NN_searchCriteria1, seed = 1234)
-
-# Select the best model from grid search results according to lowest validation RMSE
-NNgrid1 <- h2o.getGrid("NN_grid1",sort_by = "rmse",decreasing = F)
-bestNNID <- NNgrid1@model_ids[[1]]
-bestNN <- h2o.getModel(bestNNID)
-
-# Best GLM model's performance
-bestNNperformance <- h2o.performance(bestNN,newdata = test)
-################

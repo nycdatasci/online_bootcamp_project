@@ -1,3 +1,7 @@
+# This script conducts EDA, feature engineering and dimension reduction on the raw RECS 2009 dataset
+# Requires a pre-formatted RECS codebook (done in formatRECScodes.R)
+# Produces the cleaned and pre-processed dataset used for modeling (h2oModeling.R)
+
 library(data.table)
 library(car)
 library(psych)
@@ -10,8 +14,7 @@ source("formatRECScodes.R")
 source("helperFunctions.R")
 
 
-##### 1) READ/FORMAT RECS DATA #####
-
+##### 1) READ/FORMAT RECS DATA ######################################################################
 # Use formatted codebook (from formatRECScodes.R) to create named vector of all variable classes
 varTypes <- FinalCodebook[,.(varType = varType[1]),by = varName]
 colClasses <- varTypes[,varType]
@@ -26,8 +29,7 @@ table(sapply(recs,class))
 
 
 
-##### 2) INITIAL FEATURE ENGINEERING/DIMENSION REDUCTION #####
-
+##### 2) INITIAL FEATURE ENGINEERING/DIMENSION REDUCTION ############################################
 # Clean/consolidate info from raw factor variables
 # Most appliance-related vars re-coded to 0 (no appliance), 1 (appliance), 2 (electrically heated appliance)
 # Appliance-related ordinal factor vars recoded as integers
@@ -84,8 +86,7 @@ recs.reduced[, (imputeCols) := NULL]
 
 
 
-##### 3) SECONDARY FEATURE ENGINEERING #####
-
+##### 3) SECONDARY FEATURE ENGINEERING #########################################################
 # Further address multicollinearity among numeric variables
 # Subset features to only the numeric/integer variables for correlation study
 numericCols <- colnames(recs.reduced)[sapply(recs.reduced,function(x){!is.factor(x)})]
@@ -112,6 +113,6 @@ splitVars <- function(x) {unlist(strsplit(x,'[.]'))[1]}
 varimpsGLM[,varName := sapply(names,splitVars)]
 varCoefAvg <- varimpsGLM[,.(CoefAvg = mean(coefficients)),by = varName]
 # If avg coefficient across all levels of the factor (or single numeric coef) = 0, all variable's levels have been regularized to 0
-# suggesting candidate to drop from the model
+# suggesting good candidate to drop from the model
 nonImportant <- varCoefAvg[CoefAvg == 0,varName]
 recs.reduced2 <- recs.reduced[,(nonImportant) := NULL]
