@@ -39,22 +39,22 @@ walltype <- left_join(data.frame('codes' = recs$WALLTYPE),
                       filter(FinalCodebook,varName == 'WALLTYPE'),
                       by = 'codes') %>% select(varName,labels)
 agefri1 <- left_join(data.frame('codes' = recs$AGERFRI1),
-                      filter(FinalCodebook,varName == 'AGERFRI1'),
-                      by = 'codes') %>% select(varName,labels)
+                     filter(FinalCodebook,varName == 'AGERFRI1'),
+                     by = 'codes') %>% select(varName,labels)
 graphdata <- rbind(walltype,agefri1) %>% dplyr::group_by(varName,labels) %>% dplyr::summarise('obs' = n())
 graphdata$varName <- factor(graphdata$varName,levels = c('WALLTYPE','AGERFRI1'),ordered = T)
 graphdata <- graphdata[complete.cases(graphdata),]
 
 factorComparisonGraph <- ggplot(graphdata) + geom_bar(aes(x = labels, y = obs),stat = 'identity',fill = 'dodgerblue4',alpha = 0.8) + 
-    xlab('Factor Levels') + ylab('# Observations') + ggtitle('Nominal vs Ordinal Factors\n') +
-    facet_grid(.~varName,scales = 'free_x') + light_theme() + theme(axis.text.x = element_text(angle = 45,hjust=1))
+  xlab('Factor Levels') + ylab('# Observations') + ggtitle('Nominal vs Ordinal Factors\n') +
+  facet_grid(.~varName,scales = 'free_x') + light_theme() + theme(axis.text.x = element_text(angle = 45,hjust=1))
 ggsave(plot = factorComparisonGraph,filename = 'factorCompareBarchart.png',width = 7,height = 5)
 
 # Build missingness plots
 missingMatInt <- missingMat %>% select_if(is.integer) %>% cbind('KWH' = missingMat$KWH)
 ggpairMissingIntGraph <- ggpairs(missingMatInt,axisLabels = 'show',upper = list(continuous = 'cor',na = 'blank'),diag = list(continuous = wrap('densityDiag',colour = 'dodgerblue4')),
-                         lower = list(continuous = wrap('points',alpha = 0.5,colour = 'dodgerblue4'),na = 'blank')) + 
-                         theme(axis.line=element_blank(),axis.text=element_blank(),axis.ticks=element_blank(),panel.grid.major= element_blank())
+                                 lower = list(continuous = wrap('points',alpha = 0.5,colour = 'dodgerblue4'),na = 'blank')) + 
+  theme(axis.line=element_blank(),axis.text=element_blank(),axis.ticks=element_blank(),panel.grid.major= element_blank())
 ggsave(plot = ggpairMissingIntGraph,filename = 'ggpairMissingIntGraph.png',width = 7,height = 5)
 
 # Build numerics multicollinearity plot
@@ -68,8 +68,8 @@ roundCoefs <- function(name,coef){
 }
 GLMpvalsGraph$coefficients <- mapply(roundCoefs,GLMpvalsGraph$names,GLMpvalsGraph$coefficients)
 GLMtopPvalGraph <- ggplot(GLMpvalsGraph,aes(x = reorder(names,GLMpvalsGraph$z_value),y = z_value)) + geom_bar(stat = 'identity',fill = 'dodgerblue4',alpha = 0.8,width = 0.8) +
-                   light_theme() + coord_flip() + xlab('Feature') + ylab('Z-statistic') + 
-                   geom_text(aes(label = coefficients),hjust = 1.2,size = 5, colour = "white")
+  light_theme() + coord_flip() + xlab('Feature') + ylab('Z-statistic') + 
+  geom_text(aes(label = coefficients),hjust = 1.2,size = 5, colour = "white")
 ggsave(plot = GLMtopPvalGraph,filename = 'GLM.PvaluesBarchart.png',width = 7,height = 5)
 
 
