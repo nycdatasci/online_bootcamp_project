@@ -1,8 +1,8 @@
 ### playing with Allstate data
 library(dummy)
 library(glmnet)
-train<-read.csv("~/nycdsa/MachineL/MLprojects/Allstate Project/train.csv", stringsAsFactors = FALSE)
-test<-read.csv("~/nycdsa/MachineL/MLprojects/Allstate Project/test.csv")
+train<-read.csv("~/train.csv")
+test<-read.csv("~/test.csv")
  
 #Feature engineering of train and test data.
 #use dummy to 
@@ -28,58 +28,12 @@ cont.train.lm<-lm(loss~.,train[,c(-1,-90,-93,-97,-100,-104,-107,-110,-111,-112,-
 #F-statistic: 217.9091 on 965 and 187352 DF,  p-value: < 0.00000000000000022204
 
 model.lm<-predict(cont.train.lm, test[,c(-1,-90,-93,-97,-100,-104,-107,-110,-111,-112,-114,-117)])
-#MSE?
 
 model.data<-data.frame(id=test$id,loss=model.lm, stringsAsFactors=FALSE)
 
-write.csv(model.data,"~/allstate-linearmodel.csv",row.names=FALSE, quote=FALSE)
-# Kaggle says the model shoul have 125546 rows -> when I predict the model, the length of the 
-# model.lm turns to 188318
-
-# No nas in model.lm
-
-# Lasso
-grid = 10^seq(5, -2, length = 100)
-x= model.matrix(loss~., train[,-1])[,-1]
-y= train$loss
-
-train.index=sample(1:nrow(x), nrow(x)/2)
-test.index=(-train.index)
-y.test=y[test.index]
-
-lasso.train<-glmnet(x[train.index,],y[train.index], alpha =1,family = "gaussian")
-lasso.mod<-predict(lasso.train,newx=x[test.index,],s=20)
-MSE.lasso = mean((lasso.mod - y.test)^2)
-lasso.coef<-predict(lasso.train, type = "coefficients", s=20)
-
-#also need the best CV lambda
-
-#cv.lasso.train = cv.glmnet(x[train.index,],y[train.index], alpha=1, family = "gaussian",type.measure="mse" )
-#best.lambda = cv.lasso.train$lambda.min
-#final.model<-predict(cv.lasso.train, s=cv.lasso.train$lambda.1se, newx=x[test.index,])
-
-# Ridge
-ridge.train<-glmnet(x[train.index,],y[train.index], alpha =0,lambda=grid)
-plot(ridge.train$lambda)
-ridge.mod<-predict(ridge.train,newx=x[test.index,],s=10)
-MSE.ridge = mean((ridge.mod - y.test)^2)
-
-#ridge.train<-cv.glmnet(x[train.index,],y[train.index], alpha =0)
-#best.lambda.r = ridge.train$lambda.min
-#ridge.mod<-predict(ridge.train,newx=x[test.index,],s=best.lambda.r)
-#MSE.ridge = mean((ridge.mod - y.test)^2)
-
-#elastic net
-enet.train<-glmnet(x[train.index,],y[train.index], alpha =0.5,lambda=grid)
-best.lambda.e = enet.train$lambda.min
-enet.mod<-predict(enet.train, newx=x[test.index,], s=10)
-MSE.enet = mean((enet.mod - y.test)^2)
-
-#https://stats.stackexchange.com/questions/72251/an-example-lasso-regression-using-glmnet-for-binary-outcome
-#fit.elnet <- glmnet(x.train, y.train, family="gaussian", alpha=.5)
-#http://www4.stat.ncsu.edu/~post/josh/LASSO_Ridge_Elastic_Net_-_Examples.html <-*****
 
 ############################
+# LASSO, RIDGE and ELASTICNET
 ############################
 fit.lasso <- glmnet(x[train.index,],y[train.index], family="gaussian", alpha=1)
 fit.ridge <- glmnet(x[train.index,],y[train.index], family="gaussian", alpha=0)
@@ -109,15 +63,18 @@ yhat1<-predict(fit.lasso.cv, s = fit.lasso.cv$lambda.1se, newx=x[test.index,])
 mean0<-mean((y.test-yhat0)^2)
 mean0.5<-mean((y.test-yhat0.5)^2)
 mean1<-mean((y.test-yhat1)^2)
+
+# Ridge continues to have a better score. The graphs show that the data has a high multicollinearity
+
 ############################
+# Further feature enginering
 ############################
 
-# find multi colinear predictors
-# vif does not work on glmnet only lm or glm 
 vif(lm(loss~.,data=best.train))
 # generates and error link says it is due to perfect collinearality. Run alias to see which predictors
 dep_variables=alias(lm(loss~., data = train[,-1]))
 possible_dep<-rownames(dep_variables[[2]])
+# Columns that have high collinearity:
 #cat74, cat81, cat87, cat89, cat90, cat91, cat92, cat99, cat100, cat101, cat102, cat103, cat107
 #cat108, cat111, cat113, cat114, cat115, cat116
 colnames(train)
@@ -125,8 +82,9 @@ bad<-(-c(75,77,78,82,86,87,88,90,91:93,97,99,100:104,107,108,109,112:117,123,128
 best.train<-train[,bad]
 best.test<-test[,bad]
 
-# first lets test lasso, ridge and elasticnet
-# Objective is to see whether we further reduce the features.
+# first lets test lasso, ridge and elasticnet again
+# Objective is to see whether removing these features predicts for a better model.
+# First lets make a training and test set from the training set.
 
 x1= model.matrix(loss~., best.train[,-1])[,-1]
 y1= best.train$loss
@@ -164,15 +122,12 @@ mean0<-mean((y.test1-yhat0)^2)
 mean0.5<-mean((y.test1-yhat0.5)^2)
 mean1<-mean((y.test1-yhat1)^2)
 
-# Ridge still wins mean0 = 4589096 mean0.5=11667780 mean1=11847863
+# Models becomes a bit better but Ridge still wins mean0 = 4589096 mean0.5=11667780 mean1=11847863
 
-# run vif on the best dataset
+# rerun on original train and test set
 
 vif_best.data<-car::vif(lm(loss~.,data=best.train[,c(-1,-86)]))
 # 77 87 99 123 128:130 > 5
-# re did bad and ended up having new best train and best test
-
-# run lm
 
 model.lm<-lm(loss~.,best.train[,c(-1,-86,-c(90:92))])
 #Residual standard error: 2091 on 188155 degrees of freedom
@@ -217,39 +172,17 @@ mean0<-mean((y.test1-yhat0)^2)
 mean0.5<-mean((y.test1-yhat0.5)^2)
 mean1<-mean((y.test1-yhat1)^2)
 
+# Ridge is still the winner
+
 
 ###########################
+#### XGboost ##############
 ###########################
-###########################
-# PCA
-library(psych)
-# need dummified version of the data
-#train.dummy<-dummy(train)
-# Problem seems to be with factors. Thats why it gave that error that x should be numeric.
-# newdata_float<-as.integer(unlist(newdata))
-fa.parallel(fa="pc",n.iter=100)
-pc.train<-principal(train.dummy, nfactors =2, rotate ="none")
-#`Error in cor(r, use = "pairwise") : 'x' must be numeric``
 
-# XGboost
-#https://xgboost.readthedocs.io/en/latest/R-package/xgboostPresentation.html#dataset-presentation
-#http://xgboost.readthedocs.io/en/latest/R-package/discoverYourData.html
+
 library(xgboost)
 
-data(agaricus.train, package='xgboost')
-data(agaricus.test, package='xgboost')
-train <- agaricus.train
-test <- agaricus.test
-# fit model
-bst <- xgboost(data = train$data, label = train$label, max.depth = 2, eta = 1, nround = 2,
-               nthread = 2, objective = "binary:logistic")
-# predict
-pred <- predict(bst, test$data)
-
-
-
-# play with best.train | play with train
-#play with best.train first
+# Feature engineer for XGBoost
 library(dummy)
 head(best.train)
 best.dummy.train<-dummy(best.train)
@@ -270,16 +203,11 @@ output_vector[which(output_vector==FALSE)]<-0
 # cuttoff was determined with the help of histogram hist(best.train$loss,ylim=c(0,5000))
 # [x] Need to revert the 1 and 0. Previously tried 1 {x< 10000} | 0 {x>range(train[,132])[2]/2}
 # now we try 0 {x< 10000} | 1 {x>range(train[,132])[2]/2}
-# This generates test error 0.00000!!
-#Loading required package: data.table
-#data.table 1.10.4
-#**********
-#  This installation of data.table has not detected OpenMP support. It will still work but in single-threaded mode. 
-#If this a Mac and you obtained the Mac binary of data.table from CRAN, CRAN's Mac does not yet support OpenMP. 
-#In the meantime please follow our Mac installation instructions on the data.table homepage. If it works and you observe benefits from multiple threads as others have reported, please convince Simon Ubanek by sending him evidence and ask him to turn on OpenMP support when CRAN builds package binaries for Mac. Alternatives are to install Ubuntu on your Mac (which I have done and works well) or use Windows where OpenMP is supported and works well.
 
+###############################################
+# Logistic Regression for binary classifications
+###############################################
 xg.model<-xgboost(data=foo, label=output_vector, max.depth =2, eta=1, nround =10, nthread =2, objective="binary:logistic", eval_metric="auc")
-# train error goes to zero!?
 # eval_metric="rmse"
 #[1]	train-rmse:0.192795 
 #[2]	train-rmse:0.161695 
@@ -295,13 +223,13 @@ xg.model<-xgboost(data=foo, label=output_vector, max.depth =2, eta=1, nround =10
 pred <- predict(xg.model,foo.test)
 
 # test error
-# because of the dataset. We will assume the test$label = train$label = train$loss
+# We will assume the test$label = train$label = train$loss
 err <- mean(as.numeric(pred > 0.5) != output_vector)
 print(paste("test-error=", err))
 
-# increasing the number of rounds and max.dept of the tree increases the test error. 
-
-## XGBoost using linear regression
+##################################
+## XGBoost using linear regression and CV
+#################################
 
 # objective = 'multi:softprob'
 params = list(
@@ -346,7 +274,3 @@ pred2<-predict(trained_xgb,foo.test)
 err2 <- mean(as.numeric(pred2 > 0.5) != output_vector)
 print(paste("test-error=", err2))
 
-model.data2<-data.frame(id=test$id,loss=pred, stringsAsFactors=FALSE)
-foo.pred<-pred2[1:length(pred)]
-model.data3<-data.frame(id=test$id,loss=foo.pred, stringsAsFactors=FALSE)
-write.csv(model.data3,"~/allstate-xgboost2.csv",row.names=FALSE, quote=FALSE)
