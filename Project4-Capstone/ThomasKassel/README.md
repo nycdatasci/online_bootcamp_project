@@ -1,11 +1,12 @@
-## Machine Learning on RECS 2009 for Energy Efficiency Opportunities
+## Residential Energy Usage Prediction
 
 #### About RECS
 The Residential Energy Consumption Survey, or [RECS](https://www.eia.gov/consumption/residential/index.php), is a survey of energy-related data on a representative sample of U.S. homes, collected and published every 4-5 years by the [Energy Information Administration](https://www.eia.gov). Survey results are anonymized and made publicly available.
 
 #### Project Overview
-Conduct both supervised and unsupervised learning on the 2009 RECS data (most recent publication). Attempt to conduct the following:
+- **Dimension Reduction/Feature Engineering**. Correlation study, regularization to identify multicollinearity and reduce dimensions among the ~950 features; use of domain knowledge to re-factor features and engineer new ones.
+- **Variable Importance**. Features with strong statistical evidence of a relationship with kWh usage.
+- **Regression**. Prediction of yearly kWh usage at residential homes using generalized linear models and gradient boosted machines in [h2o](https://www.h2o.ai/).
+- **Classification**. (Future TBD) Predict features based off of other categorical attributes of the household (example: ability to predict whether the household uses window AC units given features climate zone, building envelope, etc).
 
-- **Unsupervised Learning**. PCA and correlation study to identify multicollinearity among the ~950 features. Association rules to identify commonly occurring combinations of features.
-- **Regression**. Prediction of yearly energy usage (of different fuel types) using feature variables.
-- **Classification**. Predict features based off of other categorical attributes of the household (e.g. ability to predict whether the household uses window AC units given features climate zone, building envelope, etc).
+For full project overview and results, please refer to the [blog post](http://blog.nycdatascience.com/student-works/capstone/u-s-residential-energy-use-machine-learning-recs-dataset/).
