@@ -1,0 +1,75 @@
+---
+title: "Credit Card Fraud Detection - Naive Bias Model"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
+wants <- c("caret")
+has   <- wants %in% rownames(installed.packages())
+if(any(!has)) install.packages(wants[!has])
+```
+
+## Naive Bias Algorithm - Caret Package
+
+## Initialization and loading of data
+```{r Loading data}
+library(caret)
+ccfraud <- read.csv('creditcard.csv')
+names(ccfraud)
+ccfraud$Class <- as.factor(ccfraud$Class)
+#levels(ccfraud$Class) <- c("Geniune", "Fraud")
+ftable(ccfraud$Class)
+
+```
+
+## Splitting Data for our train/test 
+
+```{r splitting data}
+library(caret)
+set.seed(123)
+
+index <- createDataPartition(ccfraud$Class, p = 0.7, list = FALSE)
+train_data <- ccfraud[index, ]
+
+
+test_data  <- ccfraud[-index, ]
+ftable(train_data$Class)
+ftable(test_data$Class)
+```
+##Running Naive Bias
+For predictors, we used all columns except Time and Class
+Y component is Class
+
+```{r Naive Bias}
+x=train_data[, -c(1,31)]   # Removing Time and Class
+y=train_data$Class
+names(x)
+grid <- data.frame(fL=c(0,0.5,1.0), usekernel = TRUE, adjust=c(0,0.5,1.0))
+
+model = train(x,y,'nb',trControl=trainControl(method='cv',number=10),tuneGrid=grid)
+model
+
+prediction <- predict(model$finalModel,x)
+
+table(prediction$class,y)
+
+
+naive_ccfraud <- NaiveBayes(ccfraud$Class ~ ., data = ccfraud)
+plot(naive_ccfraud)
+
+
+```
+
+
+###Making Predictions
+```{r Making Predictions on test data}
+x=test_data[, -c(1,31)]   # Removing Time and Class
+y=test_data$Class
+prediction <- predict(model$finalModel,x)
+
+table(prediction$class,y)
+
+```
+
+

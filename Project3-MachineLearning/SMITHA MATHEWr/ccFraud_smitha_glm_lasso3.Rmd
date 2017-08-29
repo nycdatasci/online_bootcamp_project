@@ -1,0 +1,114 @@
+---
+title: "Credit Card Fraud Detection"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+wants <- c("VIM", "mice", "Amelia","corrplot","caret","pROC","ggthemr")
+has   <- wants %in% rownames(installed.packages())
+if(any(!has)) install.packages(wants[!has])
+## Load VIM package for Visualization and Imputation of Missing Values
+library(VIM)
+## Load mice package for Multivariate Imputation by Chained Equations (MICE)
+library(mice)
+```
+
+## GLM Lasso
+
+```{r Loading data}
+ccfraud <- read.csv('creditcard.csv')
+ccfraud$Class <- as.factor(ccfraud$Class)
+levels(ccfraud$Class) <- c("Geniune", "Fraud")
+
+dim(ccfraud)
+ftable(ccfraud$Class)
+
+```
+
+## Splitting Data for our train/test
+```{r splitting data}
+library(caret)
+set.seed(123)
+
+index <- createDataPartition(ccfraud$Class, p = 0.7, list = FALSE)
+train_data <- ccfraud[index, ]
+test_data  <- ccfraud[-index, ]
+ftable(train_data$Class)
+ftable(test_data$Class)
+
+```
+```{r Logistic Regression - Lasso}
+MiscFactors <- c()
+pcafactors <-paste("V", 1:28, sep="")
+formula = reformulate(termlabels = c(MiscFactors,pcafactors), response = 'Class')
+print (formula)
+tuneGrid=expand.grid(
+              .alpha=1,
+              .lambda=seq(0, 100, by = 0.1))
+
+ControlParamteres <- trainControl(method = "cv",
+                                  number = 10,
+                                  savePredictions = TRUE,
+                                  classProbs = TRUE,
+                                  verboseIter = TRUE
+)
+str(train_data)
+y <- train_data$Class
+x <- model.matrix(data=train_data, formula)
+
+#lasso
+
+
+
+
+#RIDGE
+#lambdas <- seq(50,0.1,length=30)
+library(glmnet)
+#cc_lasso <-glmnet(x,y,alpha=1, lambda = lambdas, family="binomial")
+
+#plot(cc_lasso, xvar="lambda", label=TRUE)
+fit.ridge<-glmnet(x,y,alpha=0,family="binomial")
+plot(fit.ridge,xvar="lambda",label=TRUE)
+
+#MODEL SELECTION
+
+
+cv.ridge=cv.glmnet(x,y,alpha=0,family="binomial")
+plot(cv.ridge)
+
+cv.ridge$lambda.min
+cv.ridge$lambda.lse
+coef(cv.ridge,s=cv.ridge$lambda.min)
+
+
+
+
+
+
+model.glm <- train(formula, data = train_data,method = "glmnet", family="binomial", metric="F",  trControl = ControlParamteres, tuneGrid=tuneGrid)
+
+exp(coef(model.glm$finalModel))
+summary(model.glm)
+
+```
+
+
+###Making Predictions
+```{r Making Predictions}
+
+pred <- predict(model.glm, newdata=test_data)
+accuracy <- table(pred, test_data[,"Class"])
+print(accuracy)
+sum(diag(accuracy))/sum(accuracy)
+confusionMatrix(data=pred, test_data$Class)
+
+library(pROC)
+auc <- roc(test_data[,Class], pred)
+print(auc$auc)
+
+```
+
+
+

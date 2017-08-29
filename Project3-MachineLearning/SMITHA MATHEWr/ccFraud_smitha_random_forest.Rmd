@@ -1,0 +1,83 @@
+---
+title: "Credit Card Fraud Detection"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+wants <- c("VIM", "mice", "Amelia","corrplot","caret","pROC","ggthemr")
+has   <- wants %in% rownames(installed.packages())
+if(any(!has)) install.packages(wants[!has])
+## Load VIM package for Visualization and Imputation of Missing Values
+library(VIM)
+## Load mice package for Multivariate Imputation by Chained Equations (MICE)
+library(mice)
+```
+
+## RANDOM FOREST
+
+```{r Loading data}
+ccfraud <- read.csv('creditcard.csv')
+ccfraud$Class <- as.factor(ccfraud$Class)
+levels(ccfraud$Class) <- c("Geniune", "Fraud")
+
+dim(ccfraud)
+ftable(ccfraud$Class)
+
+```
+
+## Splitting Data for our train/test
+```{r splitting data}
+library(caret)
+set.seed(123)
+
+index <- createDataPartition(ccfraud$Class, p = 0.7, list = FALSE)
+train_data <- ccfraud[index, ]
+test_data  <- ccfraud[-index, ]
+ftable(train_data$Class)
+ftable(test_data$Class)
+
+```
+```{r random forest}
+library(randomForest)
+library(mlbench)
+library(caret)
+MiscFactors <- c()
+pcafactors <-paste("V", 1:28, sep="")
+formula = reformulate(termlabels = c(MiscFactors,pcafactors), response = 'Class')
+print (formula)
+mtry <- sqrt(ncol(train_data))
+
+tuneGrid=expand.grid(.mtry=mtry)
+
+ControlParamteres <- trainControl(method = "cv",
+                                  number = 10,
+                                  savePredictions = TRUE,
+                                  classProbs = TRUE,
+                                  verboseIter = TRUE
+)
+str(train_data)
+
+model.rf <- train(formula, data = train_data,method = "rf", family="binomial", metric="Accuracy",  trControl = ControlParamteres, tuneGrid=tuneGrid)
+
+#exp(coef(model.rf$finalModel))
+summary(model.rf)
+#plot(model.rf)
+
+```
+
+
+###Making Predictions
+```{r Making Predictions}
+
+pred <- predict(model.rf, newdata=test_data)
+accuracy <- table(pred, test_data[,"Class"])
+print(accuracy)
+sum(diag(accuracy))/sum(accuracy)
+confusionMatrix(data=pred, test_data$Class)
+
+```
+
+
+
