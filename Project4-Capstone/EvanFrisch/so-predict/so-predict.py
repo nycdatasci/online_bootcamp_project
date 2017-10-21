@@ -42,7 +42,7 @@ def compete():
 def setQuestionsData():
     """Reads data describing Stack Overflow questions from an AWS S3 bucket into a dictionary."""
     print("Starting setQuestionsData()")
-    obj = s3.Object('so_predict','questions_qf.json')
+    obj = s3.Object(bucket_name,'questions_qf.json')
     data = json.loads(obj.get()['Body'].read())
 
     for q in data:
@@ -64,7 +64,7 @@ def setQuestionsData():
 def setUsersData():
     """Reads data describing Stack Overflow users from an AWS S3 bucket into a dictionary."""
     print("Starting setUsersData()")
-    obj = s3.Object('so_predict','users_rq.json')
+    obj = s3.Object(bucket_name,'users_rq.json')
     data = json.loads(obj.get()['Body'].read())
 
     for u in data:
@@ -84,7 +84,7 @@ def setUsersData():
 def setQuestionsQuantiles():
     """Reads data about Stack Overflow questions by quantile from an AWS S3 bucket into a dictionary."""
     print("Starting setQuestionsQuantiles()")
-    obj = s3.Object('so_predict','questions_quantiles.json')
+    obj = s3.Object(bucket_name,'questions_quantiles.json')
     global questions_quantiles
     questions_quantiles = json.loads(obj.get()['Body'].read().decode())
     print("questions_quantiles: {}".format(questions_quantiles))
@@ -92,7 +92,7 @@ def setQuestionsQuantiles():
 def setUsersQuantiles():
     """Reads data about Stack Overflow users by quantile from an AWS S3 bucket into a dictionary."""
     print("Starting setUsersQuantiles()")
-    obj = s3.Object('so_predict','users_quantiles.json')
+    obj = s3.Object(bucket_name,'users_quantiles.json')
     global users_quantiles
     users_quantiles = json.loads(obj.get()['Body'].read().decode())
     print("users_quantiles: {}".format(users_quantiles))
