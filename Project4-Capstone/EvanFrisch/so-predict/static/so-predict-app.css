@@ -1,0 +1,82 @@
+.jumbotron {
+  margin-top: 1em;
+}
+
+h1 {
+  color: red;
+}
+
+.panel-homepage > .panel-body {
+  min-height: 150px;
+}
+
+#isCheating {
+  margin-bottom: 0.5em;
+}
+
+.label {
+  margin-right: 0.3em;
+}
+.slider.slider-horizontal {
+  width: 95%;
+}
+
+.slider-selection {
+  background: #BABABA;
+}
+#slider-row {
+  margin: 4em 0 0 0;
+}
+#predictButton {
+  margin-top: 2em;
+}
+
+.answered {
+  text-decoration: line-through;
+}
+
+.image-small-container {
+  height: 50px;
+  width: 50px;
+  display: inline-block;
+  margin: 1em;
+}
+
+.image-small {
+  max-height: 50px;
+  max-width: 50px;
+}
+
+.image-medium {
+  max-height: 150px;
+  max-width: 150px;
+}
+
+.selected-tag {
+  border: 4px black solid;
+}
+#clear-filter {
+  margin-left: 1.5em;
+}
+
+.modal-dialog {
+    width: 800px;
+    margin: 395px auto !important;
+}
+
+#levelBox {
+    text-align: center;
+}
+
+.jqsfield {
+    font: 1.5em !important;
+    padding: 1em 2em 1em 2em;
+}
+
+.container.question {
+    margin-bottom: 2em;
+}
+
+.container.question > .row {
+    margin-bottom: 1em;
+}

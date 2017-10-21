@@ -1,0 +1,6 @@
+{
+    "dev": {
+        "app_function": "so-predict.app",
+        "s3_bucket": "handy-s3-bucket"
+    }
+}

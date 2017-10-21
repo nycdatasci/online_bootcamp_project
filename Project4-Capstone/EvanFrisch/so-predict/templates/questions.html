@@ -1,0 +1,53 @@
+{%- extends "base.html" %}
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('.static', filename='game.js') }}"></script>
+<script src="{{ url_for('.static', filename='questions.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h1>{{ app_name }}</h1>
+        <h2>Questions</h2>
+      </div>
+    </div>
+    <div class="jumbotron">
+          <h3>Explore Stack Overflow questions</h3>
+          <div id="tag-filter">
+            <span class="h4">Tag Filter: {{ tag }}</span>
+            <a type="button" id="clear-filter" class="btn btn-xs btn-primary" href="{{ url_for('questions', tag='') }}">Clear Filter</a>
+          </div>
+          <ul>
+            {% for dict_item in questions %}
+              <li id="{{ questions[dict_item]['question_id'] }}" class="item"><a href="{{ url_for('question', question_id=dict_item) }}">{{ questions[dict_item]['question_title'] }}</a></li>
+            {% endfor %}
+          </ul>
+      <!--    <p><em>{{ questions_json }}</em></p> -->
+      <!--
+          <ul>
+            <li><a href="{{ url_for('question', question_id='12345678') }}">How can I open a CSV in Python?</a></li>
+            <li><a href="{{ url_for('question', question_id='13579135') }}">Make $JAVA_HOME easily changeable in Ubuntu</a></li>
+          </ul>
+      <p>
+        <a class="btn btn-lg btn-default" role="button"
+           href="http://pythonhosted.org/Flask-Bootstrap" >Show docs</a>
+      </p>
+      -->
+    </div>
+    <!--
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <h3>Explore Stack Overflow questions</h3>
+          <ul>
+            <li><a href="{{ url_for('question', question_id='12345678') }}">12345678</a></li>
+            <li><a href="{{ url_for('question', question_id='13579135') }}">13579135</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    -->
+  </div>
+{%- endblock %}

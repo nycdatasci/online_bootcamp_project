@@ -1,0 +1,42 @@
+{%- extends "base.html" %}
+
+{% block content %}
+  <div class="container">
+
+    <div class="jumbotron">
+      <h1>Compete against the Machine</h1>
+      <p>Can you do better at predicting real-world outcome on Stack Overflow than machine learning models that have trained 
+on millions of pieces of data? Now you can view questions that actual users posted on Stack Overflow and use the information
+presented to predict whether other users marked those questions as favorites. Once you make your choice, you'll not only find
+out whether you chose correctly. You'll also see whether you beat the machine or the machine beat you. Beat the machine to 
+earn 10 points or tie the machine for a correct answer and you and the machine will each gain 5 points.
+      </p>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="panel panel-primary panel-homepage">
+           <div class="panel-heading">Identify Favorited Questions better than the Machine!</div>
+           <div class="panel-body">
+                <p>Can you beat a machine learning model at predicting which questions Stack Overflow users favorite or which users they reward 
+                with reputation points?</p> 
+           </div>
+           <div class="panel-footer">
+                <a class="btn btn-primary" role="button" href="{{ url_for('questions') }}" >Compete</a>
+           </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="panel panel-primary panel-homepage">
+           <div class="panel-heading">Outcompete the Machine in Predicting which Users Will Gain Reputation</div>
+           <div class="panel-body">
+                <p>Challenge the machine by viewing new users' participation in Stack Overflow and predicting their long-term 
+reputations.</p> 
+           </div>
+           <div class="panel-footer">
+                <a class="btn btn-primary" role="button" href="{{ url_for('users') }}" >Compete</a>
+           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endblock %}

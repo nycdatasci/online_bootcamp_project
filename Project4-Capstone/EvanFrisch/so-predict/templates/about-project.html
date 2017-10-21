@@ -1,0 +1,24 @@
+{%- extends "base.html" %}
+
+{% block content %}
+  <div class="container">
+    <div class="jumbotron">
+      <h1>About this Project</h1>
+      <p>This project set out to extract a large amount of data from the copious Stack Overflow dataset, 
+develop machine learning models to predict outcomes for questions and users, and enable people to challenge
+themselves to predict as well as a machine. To do this, the project relies upon
+a variety of technologies. These include:</p>
+<ul>
+  <li>Google BigQuery, a SQL-based data warehouse on Google Cloud Platform, which Stack Overflow uses
+to make its data available to the public;</li>
+  <li>Apache Spark, an open source big data framework</li>
+  <li>H2O, an open source machine learning platform</li>
+  <li>AWS Lambda serverless compute service</li>
+  <li>Python programming language for use with the PySpark and H2O APIs and for web development</li>
+  <li>Flask</li>
+  <li>Bootstrap</li>
+  <li>Ubuntu Linux</li>
+</ul>
+    </div>
+  </div>
+{%- endblock %}

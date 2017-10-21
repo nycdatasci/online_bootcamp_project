@@ -1,0 +1,36 @@
+{%- extends "base.html" %}
+
+{% block content %}
+  <div class="container">
+    <div class="jumbotron">
+      <h1>About Stack Overflow</h1>
+      <p>Launched on September 15, 2008, Stack Overflow has grown to become not only the leading question and answer site for programmers, 
+but also among the top 50 to 60 of the world's most visited websites. Founded by programmers and bloggers Joel Spolsky and Jeff Atwood,
+Stack Overflow sought from the beginning to build a more larger, more effective community of developers than existing sites had achieved. 
+It would be free to join and participate to help bring about the large scale participation needed to answer a full spectrum of questions.
+The site would also integrate voting and editing to allow the wisdom of the crowd to identify the best answers and to improve and update 
+questions and answers as appropriate.</p>
+<p>Stack Overflow CEO Joel Spolsky explained how the now-familiar site works in his 
+<a href="https://www.joelonsoftware.com/2008/09/15/stack-overflow-launches/" target="_blank">blog post</a> on the site's launch date 9 
+years ago:</p>
+<blockquote><p>Every question in Stack Overflow is like the Wikipedia article for some extremely narrow, specific programming question. 
+<em>How do I enlarge a fizzbar without overwriting the user’s snibbit?</em> This question should only appear once in the site. Duplicates
+should be cleaned up quickly and redirected to the original question.</p>
+<p>Some people propose answers. Others vote on those answers. If you see the right answer, vote it up. If an answer is obviously wrong
+(or inferior in some way), you vote it down. Very quickly, the best answers bubble to the top. The person who asked the question in the 
+first place also has the ability to designate one answer as the “accepted” answer, but this isn’t required. The accepted answer floats
+above all the other answers.</p>
+</blockquote>
+<p>While keeping the site open to all, its founders recognized the drawbacks of giving everyone the ability to edit questions and
+answers from the start. For this reason, the site needed to calculate each user's reputation, and grant greater capabilities to users
+who proved themselves by writing questions that others valued or through other constructive actions.</p>
+<p>With the enormous popularity of Stack Overflow among developers and its continuing growth, Stack Overflow now maintains a database 
+consisting of tables ranging from 1 GB to 90 GB each, as SQL Server expert Brent Ozar
+<a href="https://www.brentozar.com/archive/2017/07/love-stack-overflow-database/" target="_blank">notes</a>. By making its database 
+largely available to the public, including as a Google BigQuery public dataset, the company enables all manner of research.
+Given that Quantcast <a href="https://www.quantcast.com/stackoverflow.com#/demographicsCard" target="_blank">estimates</a> that Stack
+Overflow reaches more than 29 million people each month and has seen more than 12 billion visits since its founding, its growing dataset 
+is likely to remain a valuable source of insights.</p>
+    </div>
+  </div>
+{%- endblock %}

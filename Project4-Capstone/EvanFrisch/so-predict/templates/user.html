@@ -1,0 +1,178 @@
+
+{%- extends "base.html" %}
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('.static', filename='bootstrap-slider.min.js') }}"></script>
+<script src="{{ url_for('.static', filename='jquery.sparkline.min.js') }}"></script>
+<script src="{{ url_for('.static', filename='game.js') }}"></script>
+<script src="{{ url_for('.static', filename='user.js') }}"></script>
+<script>
+var userData = {{ user|tojson|safe }};
+var quants = {{ quantiles|tojson|safe }};
+</script>
+{% endblock %}
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h1>{{ app_name }}</h1>
+            <div class="col-md-2">
+              <h2>Human</h2>
+              <h3 id="humanPoints">0</h3>
+            </div>
+            <div class="col-md-8">
+            </div>
+            <div class="col-md-2">
+              <h2 class="text-right">Machine</h2>
+              <h3 id="machinePoints" class="text-right">0</h3>
+            </div>
+      </div>
+    </div>
+    <div class="jumbotron">
+        <img src="{{ user.user_profile_image_url }}" id="user-profile" class="image-medium" />
+        <h2>User: {{ user.user_display_name }}</h2>
+        <!-- <p>{{ quantiles.questions_count }}</p> -->
+        <p>Within one year of joining Stack Overflow:</p>
+
+          <div class="container question">
+           <div class="row">
+            <div class="col-md-3">
+              Number of Questions Submitted:
+            </div>
+            <div class="col-md-2">
+              <span id="questions-count">{{ user.questions_count }}</span>
+            </div>
+            <div class="col-md-7">
+              <span id="boxplot-questions-count"></span>
+            </div>
+           </div>
+           <div class="row">
+            <div class="col-md-3">
+              Number of Answers Submitted:
+            </div>
+            <div class="col-md-2">
+              <span id="answers-count">{{ user.answers_count }}</span>
+            </div>
+            <div class="col-md-7">
+              <span id="boxplot-answers-count"></span>
+            </div>
+           </div>
+           <div class="row">
+            <div class="col-md-3">
+              Number of Comments Submitted:
+            </div>
+            <div class="col-md-2">
+              <span id="comments-count">{{ user.comments_count }}</span>
+            </div>
+            <div class="col-md-7">
+              <span id="boxplot-comments-count"></span>
+            </div>
+           </div>
+           <div class="row">
+            <div class="col-md-3">
+              Questions Total Score:
+            </div>
+            <div class="col-md-2">
+              <span id="questions-total-score">{{ user.questions_total_score }}</span>
+            </div>
+            <div class="col-md-7">
+              <span id="boxplot-questions-total-score"></span>
+            </div>
+           </div>
+           <div class="row">
+            <div class="col-md-3">
+              Answers Total Score:
+            </div>
+            <div class="col-md-2">
+              <span id="answers-total-score">{{ user.answers_total_score }}</span>
+            </div>
+            <div class="col-md-7">
+              <span id="boxplot-answers-total-score"></span>
+            </div>
+           </div>
+           <div class="row">
+            <div class="col-md-3">
+              Comments Total Score:
+            </div>
+            <div class="col-md-2">
+              <span id="comments-total-score">{{ user.comments_total_score }}</span>
+            </div>
+            <div class="col-md-7">
+              <span id="boxplot-comments-total-score"></span>
+            </div>
+           </div>
+          </div>
+        <!--
+        <ul>
+          <li>Number of Questions Submitted: {{ user.questions_count }}</li>
+          <li>Number of Answers Submitted: {{ user.answers_count }}</li>
+          <li>Number of Comments Submitted: {{ user.comments_count }}</li>
+          <li>Questions Total Score: {{ user.questions_total_score }}</li>
+          <li>Answers Total Score: {{ user.answers_total_score }}</li>
+
+          <li>Comments Total Score: {{ user.comments_total_score }}</li>
+          <!--
+          <li>Actual Reputation Quantile: {{ user.user_reputation_quantile }}</li>
+          <li>Predicted Reputation Quantile: {{ user.prediction }}</li>
+          -->
+        </ul>
+        <input type="hidden" id="userID" name="userID" value="{{ user.user_id }}">
+        <input type="hidden" id="correctAnswer" name="correctAnswer" value="{{ user.user_reputation_quantile }}">
+        <input type="hidden" id="prediction" name="prediction" value="{{ user.prediction }}">
+        <div class="container">
+          <div id="slider-row" class="row">
+            <div class="col-md-12">
+                 <input id="reputationSlider" type="text" data-slider-min="1" data-slider-max="5" data-slider-step="1" data-slider-value="3"
+                        data-slider-tooltip="always" data-slider-natural-arrow-keys="true" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-1">
+                 <h3>1</h3>
+            </div>
+            <div class="col-md-2">
+            </div>
+            <div class="col-md-6">
+               <button id="predictButton" type="button" class="btn btn-lg btn-success btn-block"
+                  data-toggle="modal"
+                  data-user-selection="1"
+                  data-target="#myModal">Predict</a>
+            </div>
+            <div class="col-md-2">
+            </div>
+            <div class="col-md-1">
+                 <h3>5</h3>
+            </div>
+          </div>
+        </div>
+    </div>
+    <div id="myModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="outcome"><span id="outcome-icon" class="glyphicon glyphicon-resize-horizontal"></span>&nbsp;DEFAULTOUTCOME</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="isCheating" class="hidden">Displaying results of original attempt again. You only have one chance to answer each question.</div>
+                    <div><span>You predicted: </span><span id="user-selection">DEFAULT</span></div>
+                    <div><span>The machine predicted: </span><span id="model-prediction">DEFAULT</span></div>
+                    <div><span>The actual outcome:</span><span id="correct-answer">{{ user.user_reputation_quantile }}</span></div>
+                    <!--
+                    <p>Maybe some explanation could go here.</p>
+                    <div><span>Outcome:</span><span id="outcome">DEFAULT</span></div>
+                    <p class="text-warning"><small>Some smaller text could go here.</small></p>
+                    <input type="text" name="userAnswer" value="" />
+                    -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-dismiss="modal">Close</button>
+                    <a role="button" class="btn btn-default" href="https://stackoverflow.com/users/{{ user.user_id }}/" target="_blank">View original on Stack Overflow</a>
+                    <a role="button" class="btn btn-primary" href="{{ url_for('next_user', user_id=user.user_id)  }}">Next user</a>
+                    <a role="button" class="btn btn-primary" href="{{ url_for('users') }}">Try more users</a>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+{%- endblock %}

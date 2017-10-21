@@ -1,0 +1,59 @@
+{%- extends "base.html" %}
+
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+      <!-- Messages could go here. -->
+      </div>
+    </div>
+
+    <div class="jumbotron">
+      <h1>{{ app_name }}</h1>
+      <h2>{{ tagline_name }}</h2>
+      <!--
+      <p>
+        <a class="btn btn-lg btn-default" role="button"
+           href="http://pythonhosted.org/Flask-Bootstrap" >Show docs</a>
+      </p>
+      -->
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="panel panel-primary panel-homepage">
+           <div class="panel-heading">What is Stack Overflow?</div>
+           <div class="panel-body">
+                <p>One of the world's leading question and answer websites, Stack Overflow generates massive amounts of data each day
+                as its millions of users submit questions, comments, and answers on programming and other topics.</p>
+           </div>
+           <div class="panel-footer">
+                <a class="btn btn-default" role="button" href="{{ url_for('about_stack_overflow') }}" >Learn more</a>
+           </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-primary panel-homepage">
+           <div class="panel-heading">Challenge the Machine!</div>
+           <div class="panel-body">
+                <p>Can you beat a machine learning model at predicting which questions Stack Overflow users favorite or which users they reward 
+                with reputation points?</p> 
+           </div>
+           <div class="panel-footer">
+                <a class="btn btn-primary" role="button" href="{{ url_for('compete') }}" >Compete</a>
+           </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-primary panel-homepage">
+           <div class="panel-heading">Learn about the Project</div>
+           <div class="panel-body">
+                <p>Understand the types of data and the technologies that made this project possible.</p> 
+           </div>
+           <div class="panel-footer">
+                <a class="btn btn-default" role="button" href="{{ url_for('about_project') }}" >Find out more</a>
+           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endblock %}

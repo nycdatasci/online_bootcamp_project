@@ -1,0 +1,186 @@
+{%- extends "base.html" %}
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('.static', filename='jquery.sparkline.min.js') }}"></script>
+<script src="{{ url_for('.static', filename='game.js') }}"></script>
+<script src="{{ url_for('.static', filename='question.js') }}"></script>
+<script>
+var questionData = {{ question|tojson|safe }};
+var quants = {{ quantiles|tojson|safe }};
+</script>
+{% endblock %}
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h1>{{ app_name }}</h1>
+          <div class="container">
+           <div class="row">
+            <div class="col-md-2">
+              <h2>Human</h2>
+              <h3 id="humanPoints">0</h3>
+            </div>
+            <div id="levelBox" class="col-md-8"><h2 id="levelName"></h2>
+            </div>
+            <div class="col-md-2">
+              <h2 class="text-right">Machine</h2>
+              <h3 id="machinePoints" class="text-right">0</h3>
+            </div>
+           </div>
+          </div>
+      </div>
+    </div>
+    <div class="jumbotron">
+        <h2>Question: {{ question.question_title }}</h2>
+          <div class="container question">
+           <div class="row">
+            <div class="col-md-3">
+              Length of Question Body:
+            </div>
+            <div class="col-md-2">
+              <span id="question-body-length">{{ question.question_body_length }}</span> characters
+            </div>
+            <div class="col-md-7">
+              <span id="boxplot-question-body-length"></span>
+            </div>
+           </div>
+           <div class="row">
+            <div class="col-md-3">
+              Number of Code Blocks:
+            </div>
+            <div class="col-md-2">
+              <span id="question-codeblock-count">{{ question.question_codeblock_count }}</span>
+            </div>
+            <div class="col-md-7">
+              <span id="boxplot-question-codeblock-count"></span>
+            </div>
+           </div>
+           <div class="row">
+            <div class="col-md-3">
+              Number of Comments:
+            </div>
+            <div class="col-md-2">
+              <span id="question-comment-count">{{ question.question_comment_count }}</span>
+            </div>
+            <div class="col-md-7">
+              <span id="boxplot-question-comment-count"></span>
+            </div>
+           </div>
+           <div class="row">
+            <div class="col-md-3">
+              Question Score:
+            </div>
+            <div class="col-md-2">
+              <span id="question-score">{{ question.question_score }}</span>
+            </div>
+            <div class="col-md-7">
+              <span id="boxplot-question-score"></span>
+            </div>
+           </div>
+           <div class="row">
+            <div class="col-md-3">
+              Number of Views:
+            </div>
+            <div class="col-md-2">
+              <span id="question-view-count">{{ question.question_view_count }}</span>
+            </div>
+            <div class="col-md-7">
+              <span id="boxplot-question-view-count"></span>
+            </div>
+           </div>
+           <div class="row">
+            <div class="col-md-3">
+              Number of Answers:
+            </div>
+            <div class="col-md-2">
+              <span id="question-answer-count">{{ question.answer_count }}</span>
+            </div>
+            <div class="col-md-7">
+              <span id="boxplot-answer-count"></span>
+            </div>
+           </div>
+           <div class="row">
+            <div class="col-md-3">
+              Question Tags:
+            </div>
+            <div class="col-md-9">
+              <span id="questionTags">{{ question.question_tags }}</span>
+            </div>
+           </div>
+          </div>
+<!--
+          <li>Length of Question Body: <span id="question-body-length">{{ question.question_body_length }}</span> characters</li>
+          <li>Number of Code Blocks: <span id="question-codeblock-count">{{ question.question_codeblock_count }}</span></li>
+          <li>Number of Comments: <span id="question-comment-count">{{ question.question_comment_count }}</span></li>
+          <li>Question Score: <span id="question-score">{{ question.question_score }}</span></li>
+          <li>Number of Views: <span id="question-view-count">{{ question.question_view_count }}</span></li>
+          <li>Number of Answers: <span id="question-answer-count">{{ question.answer_count }}</span></li>
+-->
+          <!--
+          <li>Prediction LR: {{ question.prediction_lr }}</span></li>
+          <li>Prediction RF: {{ question.prediction_rf }}</span></li>
+          <li>Prediction GBM: {{ question.prediction_gbm }}</span></li>
+          <li>Favorited: {{ question.question_favorited }}</span></li>
+          <li>Question Tags: <span id="questionTags">{{ question.question_tags }}</span></li>
+        </ul>
+<p>Bar chart with inline data: <span class="inlinebar">1,3,4,5,3,5</span></p>
+<p>Number of Code Blocks Box Plot: <span id="boxplot-question-codeblock-count"></span></p>
+<p>Number of Comments Box Plot: <span id="boxplot-question-comment-count"></span></p>-->
+        <input type="hidden" id="questionID" name="questionID" value="{{ question.question_id }}">
+        <input type="hidden" id="correctAnswer" name="correctAnswer" value="{{ question.question_favorited }}">
+        <input type="hidden" id="prediction_lr" name="predictionLR" value="{{ question.prediction_lr }}">
+        <input type="hidden" id="prediction_rf" name="predictionRF" value="{{ question.prediction_rf }}">
+        <input type="hidden" id="prediction_gbm" name="predictionGBM" value="{{ question.prediction_gbm }}">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-6">
+               <button type="button" class="btn btn-lg btn-success btn-block"
+                  data-toggle="modal"
+                  data-user-selection="1"
+                  data-target="#myModal">Favorited</a>
+            </div>
+            <div class="col-md-6">
+               <button type="button" class="btn btn-lg btn-danger btn-block"
+                  data-toggle="modal"
+                  data-user-selection="0"
+                  data-target="#myModal">Not Favorited</a>
+            </div>
+          </div>
+        </div>
+      <!--<p>
+        <a class="btn btn-lg btn-default" role="button"
+           href="{{ url_for('questions') }}" >View more questions</a>
+      </p>-->
+    </div>
+    <div id="myModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="outcome"><span id="outcome-icon" class="glyphicon glyphicon-resize-horizontal"></span>&nbsp;DEFAULTOUTCOME</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="isCheating" class="hidden">Displaying results of original attempt again. You only have one chance to answer each question.</div>
+                    <div><span>You predicted: </span><span id="user-selection">DEFAULT</span></div>
+                    <div><span>The machine predicted: </span><span id="model-prediction">DEFAULT</span></div>
+                    <div><span>The actual outcome:</span><span id="correct-answer">{{ question.question_favorited }}</span></div>
+                    <!--
+                    <p>Maybe some explanation could go here.</p>
+                    <div><span>Outcome:</span><span id="outcome">DEFAULT</span></div>
+                    <p class="text-warning"><small>Some smaller text could go here.</small></p>
+                    <input type="text" name="userAnswer" value="" />
+                    -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-dismiss="modal">Close</button>
+                    <a role="button" class="btn btn-default" href="https://stackoverflow.com/questions/{{ question.question_id }}/" target="_blank">View original on Stack Overflow</a>
+                    <a role="button" id="next-question" class="btn btn-primary" href="{{ url_for('next_question', question_id=question.question_id)  }}">Next question</a>
+                    <a role="button" id="more-questions" class="btn btn-primary" href="{{ url_for('questions', tag='' ) }}">Try more questions</a>
+
+                    <!--<a role="button" class="btn btn-primary" href="{{ url_for('questions') }}">Try more questions</a>-->
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+{%- endblock %}

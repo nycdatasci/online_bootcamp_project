@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <title>{{ app_name }} | Request Information</title>
+        <style type="text/css">
+            h1 {
+                color: red;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>{{ app_name }}</h1>
+        <h2>Request Information</h2>
+        <ul>
+          <li><strong>IP Address:</strong> {{ request.remote_addr }}</li>
+          <li><strong>Location:</strong> {{ client_location.city }} - {{ client_location.region_name }} {{ client_location.country }}</li>
+          <li><strong>Path:</strong> {{ request.path }}</li>
+          <li><strong>Query Params:</strong> {{ request.args }}</li>
+          <li><strong>HTTP Method:</strong> {{ request.method }}</li>
+        </ul>
+    </body>
+</html>

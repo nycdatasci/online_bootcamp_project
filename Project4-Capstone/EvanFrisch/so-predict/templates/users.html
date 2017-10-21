@@ -1,0 +1,26 @@
+{%- extends "base.html" %}
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('.static', filename='game.js') }}"></script>
+<script src="{{ url_for('.static', filename='users.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h1>{{ app_name }}</h1>
+        <h2>Users</h2>
+      </div>
+    </div>
+    <div class="jumbotron">
+          <h3>Explore Stack Overflow users</h3>
+          <ul>
+            {% for dict_item in users %}
+              <li id="{{ users[dict_item]['user_id'] }}" class="item"><a href="{{ url_for('user', user_id=dict_item) }}"><span class="image-small-container"><img src="{{ users[dict_item]['user_profile_image_url'] }}" class="image-small" /></span>{{ users[dict_item]['user_display_name'] }}</a></li>
+            {% endfor %}
+          </ul>
+          <!-- <p><em>{{ users_json }}</em></p> -->
+    </div>
+  </div>
+{%- endblock %}
