@@ -9,7 +9,7 @@ which contain the web application, to your preferred development
 environment. Your environment should have Python 3.6.2 installed.
 
 Install Boto, a library that enables Python to interact with Amazon
-Web Services:
+Web Services: 
 pip install boto
 
 Create an AWS account or login to an existing one. In IAM, create a
@@ -24,11 +24,11 @@ Examples of the format of the credentials and config files
 are found in the [AWS Command Line Interface documentation](http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html).
 
 Use virtualenv to create an isolated environment for the development
-of the web application. It can be installed using:
+of the web application. It can be installed using: 
 pip install virtualenv
 
 After activating the virtual environment, install [Zappa](https://github.com/Miserlou/Zappa), a library 
-that facilitates building Python applications for AWS Lambda.
+that facilitates building Python applications for AWS Lambda: 
 pip install zappa
 
 Also install Flask, Flask Bootstrap, and Flask Nav using pip.
@@ -38,7 +38,7 @@ Open the zappa-settings.json file and enter the name of the app
 s3_bucket).
 
 To deploy the web application to AWS Lambda in development, use the
-command:
+command: 
 zappa deploy dev
 
 Go to the URL found in the response from Zappa to visit the web
