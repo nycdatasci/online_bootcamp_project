@@ -40,4 +40,5 @@ in so_pipeline.sh.
 Set the name of the S3 bucket to use in upload_results_to_s3.py.
 
 Run the pipeline from the command line:
+
 ./so_pipeline.sh
