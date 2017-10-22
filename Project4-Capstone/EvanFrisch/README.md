@@ -17,17 +17,17 @@ presents results in a web application that takes the form of a game called
 Stack Overlord, which challenges people to compete with machine learning
 models by making predictions of their own.
 
-* Pipeline (found in so-pipeline folder)
-..* Extraction of relevant data from Stack Overflow public dataset
-..* Preprocessing of data using Apache Spark
-..* Building and application of predictive models using H2O machine learning 
+* **Pipeline** (found in so-pipeline folder)
+  * **Extraction** of relevant data from Stack Overflow public dataset
+  * **Preprocessing** of data using Apache Spark
+  * **Prediction** of outcomes on Stack Overflow using H2O machine learning 
 library
-..* Export of results to Amazon Web Services S3 cloud storage.
-* Web Application (found in so-predict folder)
-..* Acquisition of results of pipeline from S3.
-..* Presentation of selected data (on Stack Overflow questions and users) as 
+  * Export of results to Amazon Web Services S3 cloud storage.
+* **Web Application** (found in so-predict folder)
+  * **Acquisition** of results of pipeline from S3.
+  * **Presentation** of selected data (on Stack Overflow questions and users) as 
 challenges to visitors to make predictions
-..* Evaluation and scoring of visitors' predictions in comparison with those 
+  * **Evaluation and scoring** of visitors' predictions in comparison with those 
 of machine learning models.
 
 Please see the blog post (coming soon to https://blog.nycdatascience.com) for
