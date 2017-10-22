@@ -22,7 +22,7 @@ models by making predictions of their own.
   * **Preprocessing** of data using Apache Spark
   * **Prediction** of outcomes on Stack Overflow using H2O machine learning 
 library
-  * Export of results to Amazon Web Services S3 cloud storage.
+  * **Loading** of results to Amazon Web Services S3 cloud storage.
 * **Web Application** (found in so-predict folder)
   * **Acquisition** of results of pipeline from S3.
   * **Presentation** of selected data (on Stack Overflow questions and users) as 
