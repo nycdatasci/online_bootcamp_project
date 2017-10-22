@@ -2,10 +2,6 @@
   margin-top: 1em;
 }
 
-h1 {
-  color: red;
-}
-
 @media (min-width: 768px) {
   .navbar > .container-fluid {
     width: 750px;
