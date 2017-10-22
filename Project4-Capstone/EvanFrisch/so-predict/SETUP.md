@@ -21,7 +21,7 @@ have an AWS config file already, save a file called config in the
 same .aws folder to specify, at a minimum, the AWS region to use.
 
 Examples of the format of the credentials and config files
-are found in the [AWS Command Line Interface documentation](http://doc.aws.amazon.com/cli/latest/userguide/cli-config-files.html).
+are found in the [AWS Command Line Interface documentation](http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html).
 
 Use virtualenv to create an isolated environment for the development
 of the web application. It can be installed using:
@@ -45,6 +45,5 @@ Go to the URL found in the response from Zappa to visit the web
 application in your web browser.
 
 More information about using Flask with AWS Lambda can be found in 
-this [blog post](https://bitsvsbytes.com/creating-a-microservice-with-flask-zappa-amazonwebservices),
+this [blog post](https://bitsvsbytes.com/creating-a-microservice-with-flask-zappa-amazon-webservices),
 which informed these setup notes.
-
